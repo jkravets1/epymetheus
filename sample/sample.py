@@ -6,7 +6,7 @@ import epymetheus as ep
 
 class SimpleMeanReversion(ep.TradeStrategy):
     """
-    A simple trend-following strategy that buys stocks for a month with
+    A simple Mean Reversion strategy that buys stocks for a month with
     the lowest percentile one month returns and sells the highest percentile returns.
 
     Parameters
@@ -56,7 +56,7 @@ class SimpleMeanReversion(ep.TradeStrategy):
 
 def main():
     universe = ep.Universe.read_directory(
-        directory='data/hist/JP Equity/',
+        directory='data/JP Equity/',
         begin_date=datetime.date(2000, 1, 1),
         end_date=datetime.date(2018, 12, 31),
     )

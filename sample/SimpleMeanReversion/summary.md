@@ -1,5 +1,5 @@
 # SimpleMeanReversion
-A simple trend-following strategy that buys stocks for a month with
+A simple Mean Reversion strategy that buys stocks for a month with
 the lowest percentile one month returns and sells the highest percentile returns.
 
 Parameters
@@ -20,10 +20,10 @@ Parameters
 |![wealth](wealth.png "")|![record](record.png "")|
 
 ## Overview
-- **fin wealth** : 6.20427
-- **max drop** : -1.34007
-- **avg gain** : 0.01228
-- **med gain** : 0.00987
+- **fin wealth** : 4.45202
+- **max drop** : -2.49837
+- **avg gain** : 0.01899
+- **med gain** : 0.01899
 
 ## Trade statistics
 - **num trade** : 452
@@ -35,10 +35,10 @@ Parameters
 ## Win and lose
 |        |   win   |  lose   |
 |--------|--------:|--------:|
-|num     |242.00000|210.00000|
-|avg gain|  0.11188| -0.10249|
-|med gain|  0.08612| -0.08101|
-|max gain|  0.44157| -0.00016|
-|min gain|  0.00008| -0.59948|
+|num     |153.00000|133.00000|
+|avg gain|  0.17061| -0.15543|
+|med gain|  0.11824| -0.12503|
+|max gain|  0.93417| -0.00028|
+|min gain|  0.00193| -0.85377|
 
-Backtest runtime : 2.5 sec
+Backtest runtime : 3.4 sec
