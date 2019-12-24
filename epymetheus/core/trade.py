@@ -294,6 +294,7 @@ class TradeStrategy(metaclass=ABCMeta):
 
     @property
     def name(self) -> str:
+        """Name of the strategy."""
         return self.__class__.__name__
 
     @property
@@ -435,13 +436,13 @@ class TradeResult():
         self._overview = {
             'fin wealth':       round(wealth[-1], ndigits),
             'max drop':         round(wealth.drop().min(), ndigits),
-            'avg gain':         round(np.mean(array_gain), ndigits),
-            'med gain':         round(np.median(array_gain), ndigits),
+            'avg gain':         round(np.nanmean(array_gain), ndigits),
+            'med gain':         round(np.nanmedian(array_gain), ndigits),
         }
         self._tradestat = {
             'num trade':        len(list_trade),
-            'avg duration':     str(int(np.mean(_array_duration))) + ' days',
-            'med duration':     str(int(np.median(_array_duration))) + ' days',
+            'avg duration':     str(int(np.nanmean(_array_duration))) + ' days',
+            'med duration':     str(int(np.nanmedian(_array_duration))) + ' days',
             'max duration':     str(int(np.max(_array_duration))) + ' days',
             'min duration':     str(int(np.min(_array_duration))) + ' days',
         }
@@ -449,12 +450,12 @@ class TradeResult():
         self._winlose = {
             'num win':          len(_array_gain_win),
             'num lose':         len(_array_gain_lose),
-            'avg gain win':     round(np.mean(_array_gain_win), ndigits),
+            'avg gain win':     round(np.nanmean(_array_gain_win), ndigits),
             'med gain win':     round(np.median(_array_gain_win), ndigits),
             'max gain win':     round(np.max(_array_gain_win), ndigits),
             'min gain win':     round(np.min(_array_gain_win), ndigits),
-            'avg gain lose':    round(np.mean(_array_gain_lose), ndigits),
-            'med gain lose':    round(np.median(_array_gain_lose), ndigits),
+            'avg gain lose':    round(np.nanmean(_array_gain_lose), ndigits),
+            'med gain lose':    round(np.nanmedian(_array_gain_lose), ndigits),
             'max gain lose':    round(np.max(_array_gain_lose), ndigits),
             'min gain lose':    round(np.min(_array_gain_lose), ndigits),
         }
