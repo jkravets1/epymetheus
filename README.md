@@ -1,5 +1,9 @@
 # Epymetheus
 
+[![version](https://img.shields.io/pypi/v/epymetheus.svg)](https://pypi.org/project/epymetheus/)
+[![Build Status](https://travis-ci.com/simaki/epymetheus.svg?branch=master)](https://travis-ci.com/simaki/epymetheus)
+[![LICENSE](https://img.shields.io/github/license/simaki/epymetheus)](LICENSE)
+
 Python framework for multi-asset backtesting.
 
 ## Installation
