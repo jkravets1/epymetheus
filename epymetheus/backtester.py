@@ -20,8 +20,8 @@ class Backtester:
     >>> backtester = BackTester()
     >>> backtest.run()
     """
-    def __init__(self):
-        pass  # TODO
+    def __init__(self, benchmark=None):
+        self.benchmark = benchmark
 
     def run(self, strategy, universe, verbose=False):
         begin_time = time()
@@ -42,5 +42,5 @@ class Backtester:
 
         if verbose:
             print('Done.')
-            print(f'Runtime : {self.runtime_:.1}sec')
+            print(f'Runtime : {self.runtime_:.1f}sec')
         return self

@@ -136,7 +136,7 @@ class Transaction:
         -----
         It is faster to make buysell first and cumsum it.
         """
-        def trade_to_tr(trade):
+        def trade_to_transaction(trade):
             return trade.lot * pd.DataFrame(
                 {trade.asset: [1.0, -1.0]},
                 index=[trade.begin_date, trade.end_date]
@@ -146,7 +146,7 @@ class Transaction:
             add_fillz = lambda df1, df2: df1.add(df2, fill_value=0.0)
             return reduce(add_fillz, dfs).fillna(0.0)
 
-        data = sum_fillz(map(trade_to_tr, trades))
+        data = sum_fillz(map(trade_to_transaction, trades))
         return cls(data=data)
 
 
@@ -157,6 +157,8 @@ class Wealth:
 
     @classmethod
     def from_transaction(cls, transaction, universe):
-        position = transaction.data.shift().cumsum()
+        position = transaction.data.cumsum()
+        position = position.reindex(universe.data.index).fillna(method='ffill').fillna(0.0)
+        # TODO shift
         data = (position * universe.data.diff()).sum(axis=1).cumsum()
         return cls(data=data)
