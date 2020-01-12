@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from inspect import cleandoc
 
+
 class TradeStrategy(metaclass=ABCMeta):
     """
     Represents a strategy to trade.

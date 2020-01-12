@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
 
@@ -91,7 +90,7 @@ class Universe:
 
     @classmethod
     def read_csv(cls, csv, name=None, begin_bar=None, end_bar=None, **kwargs):
-        name = name or Path(filepath_or_buffer).stem
+        name = name or Path(csv).stem
         data = pd.read_csv(csv, **kwargs)
 
         data = data.loc[begin_bar or data.index[0]:
@@ -106,9 +105,7 @@ class Universe:
                   end_bar=None,
                   assets=None,
                   **kwargs):
-        data = pd.concat([
-            pd.read_csv(csv, **kwargs)
-        ], axis=1)
+        data = pd.concat([pd.read_csv(csv, **kwargs) for csv in csvs], axis=1)
 
         data = data.loc[begin_bar or data.index[0]:
                         end_bar or data.index[-1]]

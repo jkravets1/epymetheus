@@ -1,6 +1,6 @@
-import pandas as pd
+import numpy as np
+
 from sklearn.linear_model import LinearRegression
-from abc import ABC, abstractmethod
 
 
 class ThreeFactorAnalizer:
@@ -50,4 +50,4 @@ class ThreeFactorAnalizer:
     def transform(self, price, asframe=False):
         if asframe:
             pass  # return as pd.Series / pd.DataFrame
-        return (1 + alpha_).cumprod()
+        return (1 + self.alpha_).cumprod()

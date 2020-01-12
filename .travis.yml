@@ -11,7 +11,7 @@ install:
 script:
   - echo "script start"
   - sh tests/pytest.sh
-  - flake8 fracdiff
+  - flake8 epymetheus
   - echo "script end"
 after_success:
   - codecov

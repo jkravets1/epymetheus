@@ -1,3 +1,6 @@
+# flake8: noqa
+
+
 class TradeResult():
     """
     Represent backtest result of ``TradeStrategy``.

@@ -1,8 +1,6 @@
 from sklearn.base import TransformerMixin
 import numpy as np
 
-from collections import namedtuple
-
 
 class Cross(TransformerMixin):
 
@@ -55,12 +53,12 @@ class SignalToTrades:
     - long_after_long : {'ignore', 'add', 'replace'}
         How to deal with the long-signal when opening a long position.
         If 'ignore', just ignore the long-signal.
-        If 'add', open a new buying position, keeping the existing position untouched.
+        If 'add', open a new position, keeping the existing position untouched.
         If 'replace', close the existing position and open a new position.
     - short_after_long : {'ignore', 'add', 'replace', 'cut'}
         How to deal with the long-signal when opening a long position.
         If 'ignore', just ignore the long-signal.
-        If 'add', open a new buying position, keeping the existing position untouched.
+        If 'add', open a new position, keeping the existing position untouched.
         If 'replace', close the existing position and open a new position.
         If 'cut',
     - short_after_short :{'ignore', 'add', 'replace'}
@@ -75,42 +73,43 @@ class SignalToTrades:
     def __init__(self):
         pass
 
-    def yields(self, X):
-        """
-        Parameters
-        ----------
-        - X : array-like, shape (n_samples, n_features)
-            1 means signal to open, -1 means close
-        """
-        for x in X:  # column
-            signal_open = compress(range(x.shape[0]), x == 1)
-            signal_close_long \
-                = compress(range(x.shape[0]), x == self.signal_close_long)
-            signal_close_short \
-                = compress(range(x.shape[0]), x == self.signal_close_short)
+    # TODO halfway
 
-            # TODO XXX
+    # def yields(self, X):
+    #     """
+    #     Parameters
+    #     ----------
+    #     - X : array-like, shape (n_samples, n_features)
+    #         1 means signal to open, -1 means close
+    #     """
+    #     for x in X:  # column
+    #         signal_open = compress(range(x.shape[0]), x == 1)
+    #         signal_close_long \
+    #             = compress(range(x.shape[0]), x == self.signal_close_long)
+    #         signal_close_short \
+    #             = compress(range(x.shape[0]), x == self.signal_close_short)
 
-            now = next(opens, -1)  # -1 is sentinel
-            opening = False
+    #         # TODO XXX
 
-            timing = []
-            while True:
-                if opening:
-                    next_ = next(close, -1)
-                    if next_ > now:
-                        timing.append((now, next_))
-                        now = next_
-                        opening = False
-                else:
-                    next_ = next(opens, -1)
-                    if next_ > now:
-                        now = next_
-                        opening = True
+    #         now = next(opens, -1)  # -1 is sentinel
+    #         opening = False
 
-                if date_next == -1:
-                    return timing
-        # TODO halfway.
+    #         timing = []
+    #         while True:
+    #             if opening:
+    #                 next_ = next(close, -1)
+    #                 if next_ > now:
+    #                     timing.append((now, next_))
+    #                     now = next_
+    #                     opening = False
+    #             else:
+    #                 next_ = next(opens, -1)
+    #                 if next_ > now:
+    #                     now = next_
+    #                     opening = True
+
+    #             if date_next == -1:
+    #                 return timing
 
 
 class IterativeTransformer():
