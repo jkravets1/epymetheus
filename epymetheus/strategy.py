@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from inspect import cleandoc
 
 class TradeStrategy(metaclass=ABCMeta):
     """
@@ -7,27 +8,32 @@ class TradeStrategy(metaclass=ABCMeta):
     Paramters
     ---------
     - name : str, optional
-        The name.
+        Name of the strategy.
     - description : str, optional
-        The detailed description.
-
-    Abstract method
-    ---------------
-    - logic : function (Universe -> list of trade)
-        Algorithm that receives ``Universe`` and returns
-        an iterable of ``trade``.
+        Description of the strategy.
+        If None, docstring.
 
     Examples
     --------
-
-    >>> class MyTradeStrategy(epymetheus.TradeStrategy):
+    Defining:
+    >>> class MyTradeStrategy(TradeStrategy):
     >>>     '''This is my favorite strategy.'''
     >>>
     >>>     def logic(universe, my_parameter):
     >>>         ...
     >>>         yield epymetheus.Trade(...)
-    >>>
+
+    Initializing:
     >>> my_strategy = MyTradeStrategy(my_parameter=0.01)
+    >>> my_strategy.name
+    'MyTradeStrategy'
+    >>> my_strategy.description
+    'This is my favorite strategy.'
+
+    Running:
+    >>> universe = Universe(...)
+    >>> backtester = Backtester(...)
+    >>> backtester.run(strategy, universe)
     """
     def __init__(self, **kwargs):
         self.params = kwargs
@@ -41,11 +47,6 @@ class TradeStrategy(metaclass=ABCMeta):
     def description(self):
         """Detailed description of the strategy."""
         return cleandoc(self.__class__.__doc__)
-
-    @property
-    def parameters(self):
-        """Parameters of strategy as ``dict``."""
-        return self._parameters
 
     @abstractmethod
     def logic(self, universe, **kwargs):

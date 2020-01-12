@@ -1,11 +1,14 @@
-from .trade import TradeHistory, Transaction, Wealth
 from time import time
+
+from .tradehistory import TradeHistory
+from .transaction import Transaction
+from .wealth import Wealth
+
 
 class Backtester:
     """
     Parameters
     ----------
-    - benchmark : pandas.Series
 
     Attributes
     ----------
@@ -20,27 +23,28 @@ class Backtester:
     >>> backtester = BackTester()
     >>> backtest.run()
     """
-    def __init__(self, benchmark=None):
-        self.benchmark = benchmark
+    def __init__(self):
+        pass
+        # TODO initial_wealth, slippage, benchmark, ...
 
     def run(self, strategy, universe, verbose=False):
         begin_time = time()
 
-        self.strategy_ = strategy
-        self.universe_ = universe
-
-        if verbose:
-            print('Generating trades ...')
-        trades = list(strategy.logic(universe, **strategy.params))
+        self.strategy = strategy
+        self.universe = universe
 
         if verbose:
             print('Evaluating wealth ...')
-        self.history_ = TradeHistory.from_trades(trades, universe)
-        self.transaction_ = Transaction.from_trades(trades, universe)
-        self.wealth_ = Wealth.from_transaction(self.transaction_, universe)
+
+        self.history_ = TradeHistory._from_backtester(self)
+        self.transaction_ = Transaction._from_backtester(self)
+        self.wealth_ = Wealth._from_backtester(self)
+        # self.wealth_ = Wealth.from_transaction(self.transaction_, universe)
+
         self.runtime_ = time() - begin_time
 
         if verbose:
             print('Done.')
             print(f'Runtime : {self.runtime_:.1f}sec')
+
         return self
