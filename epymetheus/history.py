@@ -5,9 +5,8 @@ import numpy as np
 from ._bunch import Bunch
 
 
-class TradeHistory(Bunch):
+class History(Bunch):
     """
-
     Attributes
     ----------
     - assets
@@ -25,21 +24,16 @@ class TradeHistory(Bunch):
     >>> history
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     @classmethod
-    def _from_backtester(cls, backtester):
+    def _from_strategy(cls, strategy):
         """
-        Initialize self from backtester.
+        Initialize self from strategy.
         """
-        if not hasattr(backtester, 'strategy'):
-            raise ValueError
-        if not hasattr(backtester, 'universe'):
-            raise ValueError
-
-        trades = np.array(list(backtester.strategy.logic(
-            backtester.universe, **backtester.strategy.params
+        trades = np.array(list(strategy.logic(
+            strategy.universe, **strategy.params
         )))
 
         history = cls(
@@ -52,8 +46,8 @@ class TradeHistory(Bunch):
         history.durations = history.close_dates - history.open_dates
 
         # TODO can be rewritten using np.vectorize.
-        history.open_prices = history.__open_prices(backtester.universe)
-        history.gains = history.__gains(backtester.universe)
+        history.open_prices = history.__open_prices(strategy.universe)
+        history.gains = history.__gains(strategy.universe)
 
         return history
 

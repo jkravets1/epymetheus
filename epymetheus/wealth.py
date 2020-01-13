@@ -1,26 +1,25 @@
 import pandas as pd
 
+from ._bunch import Bunch
 
-class Wealth:
+# Bunch? pd.Series?
+
+class Wealth(Bunch):  # Bunch?
     """
     Represent time-series of wealth.
     """
-    def __init__(self, data, bars):
-        self.data = data
-        self.bars = bars
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     @classmethod
-    def _from_backtester(cls, backtester):
-        if not hasattr(backtester, 'transaction_'):
-            raise ValueError
-
-        transaction = backtester.transaction_.to_frame()
+    def _from_strategy(cls, strategy):
+        transaction = strategy.transaction.to_frame()
         position = transaction.cumsum().shift().fillna(0.0)
-        prices = backtester.universe.data
+        prices = strategy.universe.data
 
-        data = (position * prices.diff()).sum(axis=1).cumsum()
+        wealth = (position * prices.diff()).sum(axis=1).cumsum()
 
-        return cls(data=data, bars=backtester.universe.bars)
+        return cls(wealth=wealth)
 
-    def to_series(self):
-        return pd.Series(data=self.data, index=self.bars)
+    # def to_series(self):
+    #     return pd.Series(data=self.data, index=self.bars)

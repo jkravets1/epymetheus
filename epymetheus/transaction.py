@@ -3,22 +3,18 @@ from functools import reduce
 import numpy as np
 import pandas as pd
 
+from ._bunch import Bunch
 
-class Transaction:
+
+class Transaction(Bunch):
     """
     Represent transaction history.
 
-    Parameters
-    ----------
-    - data
-    - index
-    - columns
-
     Examples
     --------
-    >>> transaction.data
-    { 'AAPL': np.array([1.0,  0.0, -1.0, ...],
-      'MSFT': np.array([2.0, -2.0,  0.0, ...], ... }
+    >>> transaction
+    {'AAPL': np.array([1.0,  0.0, -1.0, ...],
+     'MSFT': np.array([2.0, -2.0,  0.0, ...], ... }
     >>> transaction.bars
     np.array(['2000-01-01', ...])
     >>> transaction.assets
@@ -31,18 +27,14 @@ class Transaction:
     2000-01-03 -1.0  0.0 ....
     .......... .... .... ....
     """
-    # transaction is sparser and lighter than position
-    # TODO is name appropriate?
-    # TODO one-day delay?
-
-    def __init__(self, data, bars, assets):
-        self.data = data  # dict
-        self.bars = bars
-        self.assets = assets
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     @classmethod
-    def _from_backtester(cls, backtester):
-
+    def _from_strategy(cls, strategy):
+        """
+        Initialize self from strategy.
+        """
         def to_series(lot, open_date, close_date):
             """
             >>> lot = 2.0
@@ -61,25 +53,25 @@ class Transaction:
             return reduce(add_fillzero, list_series)
 
         def to_data(asset):
-            idx = backtester.history_.assets == asset
+            idx = (strategy.history.assets == asset)
 
-            lots = backtester.history_.lots[idx]
-            open_dates = backtester.history_.open_dates[idx]
-            close_dates = backtester.history_.close_dates[idx]
+            lots = strategy.history.lots[idx]
+            open_dates = strategy.history.open_dates[idx]
+            close_dates = strategy.history.close_dates[idx]
 
             list_series = np.frompyfunc(to_series, 3, 1)(
                 lots, open_dates, close_dates
             )
             return sum_fillzero(list_series)
 
-        assets = backtester.universe.assets
+        assets = strategy.universe.assets
         data = {asset: to_data(asset) for asset in assets}
 
-        return cls(
-            data=data,
-            bars=backtester.universe.bars,
-            assets=assets,
-        )
+        transaction = cls()
+        for key, value in data.items():
+            setattr(transaction, key, value)
+
+        return transaction
 
     def to_frame(self):
         return pd.DataFrame(

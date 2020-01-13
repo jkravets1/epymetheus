@@ -1,22 +1,36 @@
 from abc import ABCMeta, abstractmethod
 from inspect import cleandoc
 
+from .history import History
+from .transaction import Transaction
+from .wealth import Wealth
+
+
+class NotRunError(Exception):
+    pass
 
 class TradeStrategy(metaclass=ABCMeta):
     """
     Represents a strategy to trade.
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     - name : str, optional
         Name of the strategy.
     - description : str, optional
         Description of the strategy.
         If None, docstring.
 
+    Attributes
+    ----------
+    - universe_
+    - history_
+    - transaction_
+    - wealth_
+
     Examples
     --------
-    Defining:
+    Define strategy by subclassing:
     >>> class MyTradeStrategy(TradeStrategy):
     >>>     '''This is my favorite strategy.'''
     >>>
@@ -24,20 +38,29 @@ class TradeStrategy(metaclass=ABCMeta):
     >>>         ...
     >>>         yield epymetheus.Trade(...)
 
-    Initializing:
-    >>> my_strategy = MyTradeStrategy(my_parameter=0.01)
+    Initialize:
+    >>> my_strategy = MyTradeStrategy(my_parameter=0.1)
     >>> my_strategy.name
     'MyTradeStrategy'
     >>> my_strategy.description
     'This is my favorite strategy.'
+    >>> my_strategy.params
+    {'my_parameter': 0.1}
 
-    Running:
+    Set context (optional):
+    >>> spx = ...  # Fetch S&P 500 historical prices
+    >>> my_strategy.context(
+    ...     slippage=0.001,
+    ...     benchmark=spx,
+    ... )
+
+    Run:
     >>> universe = Universe(...)
-    >>> backtester = Backtester(...)
-    >>> backtester.run(strategy, universe)
+    >>> my_strategy.run(universe)
     """
     def __init__(self, **kwargs):
         self.params = kwargs
+        self.is_runned = False
 
     @property
     def name(self):
@@ -62,3 +85,25 @@ class TradeStrategy(metaclass=ABCMeta):
             Parameters of the trade strategy.
         """
         pass
+
+    def context(self):
+        pass  # TODO
+
+    def run(self, universe, verbose=False):
+        self.universe = universe
+
+        if verbose:
+            begin_time = time()
+            print('Evaluating wealth ...')
+
+        self.history = History._from_strategy(self)
+        self.transaction = Transaction._from_strategy(self)
+        self.wealth = Wealth._from_strategy(self)
+
+        if verbose:
+            print('Done.')
+            print(f'Runtime : {time() - begin_time:.1f}sec')
+
+        self.is_runned = True
+
+        return self
