@@ -61,3 +61,5 @@ pd.DataFrame(strategy.transaction)
 pd.DataFrame(strategy.history)
 # ...
 ```
+
+Sample result is provided [here](sample/howto/)
