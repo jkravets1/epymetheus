@@ -10,6 +10,7 @@ from .wealth import Wealth
 class NotRunnedError(Exception):
     pass
 
+
 class TradeStrategy(metaclass=ABCMeta):
     """
     Represents a strategy to trade.
@@ -106,7 +107,8 @@ class TradeStrategy(metaclass=ABCMeta):
 
         if verbose:
             print('Done.')
-            print(f'Runtime : {time() - begin_time:.1f}sec')
+            runtime = time() - begin_time
+            print(f'Runtime : {runtime:.1f}sec')
 
         self.is_runned = True
 

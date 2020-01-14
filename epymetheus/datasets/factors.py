@@ -26,7 +26,10 @@ def make_factormodeled(n_bars=3000,
     factor_returns[0, :] = 0.0
     alphas[0] = 0.0
 
-    returns = np.dot(factor_returns, b) + np.broadcast_to(alphas, (n_assets, n_bars)).T
+    syst_returns = np.dot(factor_returns, b)
+    nonsyst_returns = np.broadcast_to(alphas, (n_assets, n_bars)).T
+    returns = syst_returns + nonsyst_returns
+
     prices = 100 * (1 + returns).cumprod(axis=0)
     data = pd.DataFrame(prices)
 
