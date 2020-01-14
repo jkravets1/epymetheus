@@ -1,5 +1,3 @@
-from operator import attrgetter
-
 import numpy as np
 
 from .utils import Bunch
@@ -43,10 +41,14 @@ class History(Bunch):
         # TODO avoid comprehension notation
         history = cls(
             index=index,
-            assets=np.concatenate([trade.as_array.asset for trade in trades]),
-            lots=np.concatenate([trade.as_array.lot for trade in trades]),
-            open_dates=np.concatenate([trade.as_array.open_date for trade in trades]),
-            close_dates=np.concatenate([trade.as_array.close_date for trade in trades]),
+            assets=np.concatenate([
+                trade.as_array.asset for trade in trades]),
+            lots=np.concatenate([
+                trade.as_array.lot for trade in trades]),
+            open_dates=np.concatenate([
+                trade.as_array.open_date for trade in trades]),
+            close_dates=np.concatenate([
+                trade.as_array.close_date for trade in trades]),
         )
 
         history.durations = history.close_dates - history.open_dates

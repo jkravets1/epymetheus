@@ -103,8 +103,9 @@ class Universe:
                   end_bar=None,
                   assets=None,
                   **kwargs):
-        prices = pd.concat([pd.read_csv(csv, **kwargs) for csv in csvs], axis=1)
-
+        prices = pd.concat([
+            pd.read_csv(csv, **kwargs) for csv in csvs
+        ], axis=1)
         prices = prices.loc[begin_bar or prices.index[0]:
                             end_bar or prices.index[-1]]
         if assets is not None:

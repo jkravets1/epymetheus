@@ -1,12 +1,11 @@
 import pandas as pd
 from pandas.tseries.offsets import DateOffset
-from pandas_datareader.data import DataReader
 import matplotlib.pyplot as plt
 import seaborn
 
 from pandas.plotting import register_matplotlib_converters
 
-from epymetheus import Universe, Trade, TradeStrategy
+from epymetheus import Trade, TradeStrategy
 from epymetheus.datasets import fetch_usstock
 
 register_matplotlib_converters()
@@ -42,14 +41,21 @@ class SimpleTrendFollower(TradeStrategy):
             e = open_date - DateOffset(months=1)
             return universe.prices.loc[e, :] / universe.prices.loc[b, :]
 
-        for open_date in trade_open_dates(universe, watch_period, trade_period):
+        for open_date in trade_open_dates(
+                universe, watch_period, trade_period):
             close_date = open_date + trade_period
             r = tot_returns(open_date)
-            assets_sorted = sorted(universe.assets, key=lambda asset: r[asset])
+            assets_sorted = sorted(universe.assets,
+                                   key=lambda asset: r[asset])
 
             for asset in assets_sorted[-n_trade:]:
                 lot = bet / universe.prices.at[open_date, asset]
-                yield Trade(asset=asset, lot=lot, open_date=open_date, close_date=close_date)
+                yield Trade(
+                    asset=asset,
+                    lot=lot,
+                    open_date=open_date,
+                    close_date=close_date,
+                )
 
 
 def plot(strategy):
@@ -92,4 +98,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
