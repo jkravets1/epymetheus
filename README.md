@@ -32,7 +32,7 @@ class MyTradeStrategy(TradeStrategy):
     """
     def logic(self, universe, my_parameter):
         ...  # your logic
-        yield Trade(asset=..., lot=, open_date=..., close_date=...)
+        yield Trade(asset=..., lot=..., open_date=..., close_date=...)
 ```
 
 The strategy can be readily applied to any universe.
@@ -44,6 +44,7 @@ from epymetheus import Universe
 prices = pd.DataFrame(...)  # Historical prices of assets
 universe = Universe(prices, name='US Equity')
 
+strategy = MyTradeStrategy(my_parameter=42)
 strategy.run(universe)
 # Generating trades...
 # Evaluating wealth...
