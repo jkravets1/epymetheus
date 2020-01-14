@@ -1,50 +1,16 @@
 import pandas as pd
-from pandas_datareader.data import DataReader
 from pandas.tseries.offsets import DateOffset
+from pandas_datareader.data import DataReader
 import matplotlib.pyplot as plt
 import seaborn
 
 from pandas.plotting import register_matplotlib_converters
 
 from epymetheus import Universe, Trade, TradeStrategy
+from epymetheus.datasets import fetch_usstock
 
 register_matplotlib_converters()
 seaborn.set_style('ticks')
-
-tickers = [
-    'AAPL',
-    'MSFT',
-    'AMZN',
-    'BRK-A',
-    'JPM',
-    'JNJ',
-    'WMT',
-    'BAC',
-    'PG',
-    'XOM',
-]  # N/A: GOOG, FB, V, MA
-date_range = pd.date_range('2000-01-01', '2019-12-31')
-
-
-def fetch_equity(ticker, begin, end):
-    return DataReader(
-        ticker, 'yahoo', begin, end,
-    )['Adj Close'].rename(ticker)
-
-
-def fetch_equities(tickers, date_range):
-    # return pd.read_csv('US Equity.csv', index_col=0, parse_dates=True)
-    b = date_range[0] - pd.tseries.offsets.Day(10)
-    e = date_range[-1]
-
-    prices = pd.concat([
-        fetch_equity(ticker, b, e) for ticker in tickers
-    ], axis=1)
-
-    prices = prices.reindex(pd.date_range(b, e)).ffill()
-    prices = prices.reindex(date_range)
-
-    return prices
 
 
 class SimpleTrendFollower(TradeStrategy):
@@ -59,7 +25,6 @@ class SimpleTrendFollower(TradeStrategy):
         E.g. If 0.1, buy stocks with returns of highest 10%.
     """
     def logic(self, universe, percentile, bet):
-
         watch_period = DateOffset(months=1)
         trade_period = DateOffset(months=1)
         n_trade = int(universe.n_assets * percentile)
@@ -75,7 +40,7 @@ class SimpleTrendFollower(TradeStrategy):
             """Return 1 month return of assets as Series."""
             b = open_date - DateOffset(days=1)
             e = open_date - DateOffset(months=1)
-            return universe.prices.iloc[e, :] / universe.prices.loc[b, :]
+            return universe.prices.loc[e, :] / universe.prices.loc[b, :]
 
         for open_date in trade_open_dates(universe, watch_period, trade_period):
             close_date = open_date + trade_period
@@ -96,7 +61,7 @@ def plot(strategy):
     plt.ylabel('wealth / dollars')
     plt.savefig('wealth.png', bbox_inches="tight", pad_inches=0.1)
 
-    plt.figure(figsize=(8, 8))
+    plt.figure(figsize=(8, 4))
     plt.hist(strategy.history.gains, bins=100)
     plt.axvline(0, ls='--', color='red')
     plt.title('Gains')
@@ -115,11 +80,10 @@ def plot(strategy):
 
 
 def main():
-    prices = fetch_equities(tickers, date_range)
-    universe = Universe(prices, name='US Equity')
+    universe = fetch_usstock()
 
     strategy = SimpleTrendFollower(percentile=0.2, bet=10000)
-    strategy.run(universe, verbose=True)
+    strategy.run(universe)
 
     plot(strategy)
 

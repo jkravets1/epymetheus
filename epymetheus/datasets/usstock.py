@@ -6,6 +6,7 @@ try:
 except ImportError as e:
     print(e)
 
+from ..universe import Universe
 
 
 tickers = [
@@ -31,7 +32,6 @@ def fetch_one(ticker, begin, end):
 
 
 def fetch_usstock(tickers=tickers, date_range=date_range):
-
     b = date_range[0] - pd.tseries.offsets.Day(10)
     e = date_range[-1]
 
@@ -42,4 +42,4 @@ def fetch_usstock(tickers=tickers, date_range=date_range):
     prices = prices.reindex(pd.date_range(b, e)).ffill()
     prices = prices.reindex(date_range)
 
-    return prices
+    return Universe(prices, name='US Stocks')
