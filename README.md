@@ -77,7 +77,7 @@ plt.hist(strategy.history.gains)
 
 ![wealth](sample/howto/gains.png)
 
-Detailed trade history
+Detailed trade history can be viewed as:
 
 ```python
 pd.DataFrame(strategy.history).head()
