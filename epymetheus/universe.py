@@ -3,9 +3,6 @@ from pathlib import Path
 import pandas as pd
 
 
-# TODO accept numpy.array as data
-
-
 class Universe:
     """
     Store historical prices of multiple assets.
@@ -59,18 +56,19 @@ class Universe:
     ...     index_col=0, parse_dates=True,
     ... )
     """
-    def __init__(self, data, name=None):
+    def __init__(self, prices, name=None):
         """Initialize self."""
-        self.data = data
+        # TODO accept data other than pandas.DataFrame
+        self.prices = prices
         self.name = name
 
     @property
     def bars(self):
-        return self.data.index
+        return self.prices.index
 
     @bars.setter
     def bars(self, value):
-        self.data.index = value
+        self.prices.index = value
 
     @property
     def n_bars(self):
@@ -78,11 +76,11 @@ class Universe:
 
     @property
     def assets(self):
-        return self.data.columns
+        return self.prices.columns
 
     @assets.setter
     def assets(self, value):
-        self.data.columns = value
+        self.prices.columns = value
 
     @property
     def n_assets(self):
@@ -91,12 +89,12 @@ class Universe:
     @classmethod
     def read_csv(cls, csv, name=None, begin_bar=None, end_bar=None, **kwargs):
         name = name or Path(csv).stem
-        data = pd.read_csv(csv, **kwargs)
+        prices = pd.read_csv(csv, **kwargs)
 
-        data = data.loc[begin_bar or data.index[0]:
-                        end_bar or data.index[-1]]
+        prices = prices.loc[begin_bar or prices.index[0]:
+                            end_bar or prices.index[-1]]
 
-        return cls(data=data, name=name)
+        return cls(prices, name=name)
 
     def read_csvs(cls,
                   csvs,
@@ -105,11 +103,12 @@ class Universe:
                   end_bar=None,
                   assets=None,
                   **kwargs):
-        data = pd.concat([pd.read_csv(csv, **kwargs) for csv in csvs], axis=1)
-
-        data = data.loc[begin_bar or data.index[0]:
-                        end_bar or data.index[-1]]
+        prices = pd.concat([
+            pd.read_csv(csv, **kwargs) for csv in csvs
+        ], axis=1)
+        prices = prices.loc[begin_bar or prices.index[0]:
+                            end_bar or prices.index[-1]]
         if assets is not None:
-            data.columns = assets
+            prices.columns = assets
 
-        return cls(data=data, name=name)
+        return cls(prices, name=name)

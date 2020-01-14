@@ -1,5 +1,8 @@
 from copy import copy
-from datetime import timedelta
+
+import numpy as np
+
+from .utils import Bunch
 
 
 class Trade:
@@ -17,10 +20,14 @@ class Trade:
     - close_date : datetime.date
         Date to close the trade.
 
+    Attributes
+    ----------
+    - n_bets : int
+        Number of assets to bet.
+
     Example
     -------
-    A long position of AAPL is given by:
-
+    Long position:
     >>> od = datetime.date(2018, 1, 1)
     >>> cd = datetime.date(2018, 2, 1)
     >>> trade = Trade(
@@ -28,10 +35,16 @@ class Trade:
     ...     open_date=od, close_date=cd,
     ... )
 
-    One can also make a short position.  In unit of price,
-
+    Short position:
     >>> trade = Trade(
     ...     asset='AAPL', lot=-45.6,
+    ...     open_date=od, close_date=cd,
+    ... )
+
+    Long-short position:
+    >>> trade = Trade(
+    ...     asset=['AAPL', 'MSFT'],
+    ...     lot=[12.3, -45.6],
     ...     open_date=od, close_date=cd,
     ... )
     """
@@ -41,9 +54,18 @@ class Trade:
         self.open_date = open_date
         self.close_date = close_date
 
+        self.n_bets = np.array(self.asset).size
+
+        self._as_array = Bunch(
+            asset=np.array(self.asset).reshape(-1),
+            lot=np.array(self.lot).reshape(-1),
+            open_date=np.tile(np.array(self.open_date), self.n_bets),
+            close_date=np.tile(np.array(self.close_date), self.n_bets),
+        )
+
     def __mul__(self, num):
         trade = copy(self)
-        trade.lot *= num
+        trade.lot *= num  # FIXME for multiple trades
         return trade
 
     def __rmul__(self, num):
@@ -52,19 +74,6 @@ class Trade:
     def __neg__(self):
         return self.__mul__(-1.0)
 
-    def shift(self, delta):
-        """
-        Return trade of which begin_date and end_date are shifted.
-        """
-        if isinstance(delta, int):
-            delta = timedelta(days=delta)
-        trade = copy(self)
-        trade.open_date += delta
-        trade.close_date += delta
-        return trade
-
-    # def __str__(self):
-    #     return (
-    #         f'Trade: {self.asset} * {self.lot}'
-    #         f' {self.open_date} - {self.close_date}'
-    #     )
+    @property
+    def as_array(self):
+        return self._as_array

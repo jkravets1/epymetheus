@@ -51,15 +51,44 @@ strategy.run(universe)
 # Runtime: ***sec
 ```
 
-Now you can access the result as the attributes of strategy.
+The result is stored as the attributes of `strategy`.
+you can plot the wealth right away:
 
 ```python
-pd.DataFrame(strategy.wealth)
-# ...
-pd.DataFrame(strategy.transaction)
-# ...
-pd.DataFrame(strategy.history)
-# ...
+pd.DataFrame(strategy.wealth).plot()
 ```
 
-Sample result is provided [here](sample/howto/).
+![wealth](sample/howto/wealth.png)
+
+You can also inspect the exposure as:
+
+```python
+exposure = pd.DataFrame(strategy.transaction).cumsum().sum(axis=1)
+exposure.plot()
+```
+
+![wealth](sample/howto/exposure.png)
+
+Profit-loss distribution of each trades can be accessed by:
+
+```python
+plt.hist(strategy.history.gains)
+```
+
+![wealth](sample/howto/gains.png)
+
+Detailed trade history
+
+```python
+pd.DataFrame(strategy.history).head()
+```
+
+index|assets|lots|open_dates|close_dates|durations|open_prices|gains
+-----|------|----|----------|-----------|---------|-----------|-----
+0|MSFT|301.99|2000-02-01|2000-03-01|29 days|33.11|-1177.90
+1|WMT|245.40|2000-02-01|2000-03-01|29 days|40.74|-1650.68
+2|BRK-A|0.22|2000-03-01|2000-04-01|31 days|44700|0,2796.42
+3|WMT|293.91|2000-03-01|2000-04-01|31 days|34.02|1545.11
+4|JNJ|480.09|2000-04-01|2000-05-01|30 days|20.82|1770.46
+
+Other examples are provided [here](sample/examples/).
