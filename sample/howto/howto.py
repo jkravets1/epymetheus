@@ -1,12 +1,13 @@
 import datetime
 
+import numpy as np
 import pandas as pd
 from pandas_datareader.data import DataReader
 from pandas.tseries.offsets import DateOffset
 import matplotlib.pyplot as plt
 import seaborn
 
-from epymetheus import Universe, Trade, TradeStrategy, Backtester
+from epymetheus import Universe, Trade, TradeStrategy
 
 
 tickers = [
@@ -92,17 +93,29 @@ class SimpleTrendFollower(TradeStrategy):
                 lot = -1.0 / universe.data.at[open_date, asset]
                 yield Trade(asset=asset, lot=lot, open_date=open_date, close_date=close_date)
 
-def plot(backtester):
+def plot(strategy):
     seaborn.set_style('ticks')
 
     plt.figure(figsize=(16, 4))
-    plt.plot(backtester.wealth_.to_series())
+    df_wealth = pd.DataFrame(strategy.wealth)
+    df_wealth.index = strategy.universe.bars
+    plt.plot(df_wealth)
     plt.savefig('wealth.png', linewidth=0.6)
 
     plt.figure(figsize=(8, 8))
-    plt.hist(backtester.history_.gains, bins=100)
+    plt.hist(strategy.history.gains, bins=100)
     plt.axvline(0, ls='--', color='red')
     plt.savefig('gains.png')
+
+    plt.figure(figsize=(16, 4))
+    exposure_lot = pd.DataFrame(strategy.transaction).cumsum(axis=0).values
+    exposure_price = exposure_lot * strategy.universe.data.values
+    exposure = exposure_price.sum(axis=1)
+    df_exposure = pd.Series(exposure, index=strategy.universe.bars)
+    plt.figure(figsize=(8, 8))
+    plt.plot(df_exposure)
+    plt.axhline(0, ls='--', color='gray')
+    plt.savefig('exposure.png')
 
 
 def main():
@@ -112,11 +125,9 @@ def main():
     )
 
     strategy = SimpleTrendFollower(percentile=0.1)
+    strategy.run(universe, verbose=True)
 
-    backtester = Backtester()
-    backtester.run(strategy, universe, verbose=True)
-
-    plot(backtester)
+    plot(strategy)
 
 
 if __name__ == '__main__':

@@ -1,12 +1,13 @@
 from abc import ABCMeta, abstractmethod
 from inspect import cleandoc
+from time import time
 
 from .history import History
 from .transaction import Transaction
 from .wealth import Wealth
 
 
-class NotRunError(Exception):
+class NotRunnedError(Exception):
     pass
 
 class TradeStrategy(metaclass=ABCMeta):
@@ -23,10 +24,10 @@ class TradeStrategy(metaclass=ABCMeta):
 
     Attributes
     ----------
-    - universe_
-    - history_
-    - transaction_
-    - wealth_
+    - universe
+    - history
+    - transaction
+    - wealth
 
     Examples
     --------
@@ -84,12 +85,15 @@ class TradeStrategy(metaclass=ABCMeta):
         - kwargs
             Parameters of the trade strategy.
         """
-        pass
+        raise NotImplementedError(
+            'Logic must be implemented in a subclass.'
+        )
 
-    def context(self):
+    def context(self,
+                metrics=['fin_wealth']):
         pass  # TODO
 
-    def run(self, universe, verbose=False):
+    def run(self, universe, verbose=True):
         self.universe = universe
 
         if verbose:

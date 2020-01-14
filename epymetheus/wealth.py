@@ -1,10 +1,10 @@
+import numpy as np
 import pandas as pd
 
 from ._bunch import Bunch
 
-# Bunch? pd.Series?
 
-class Wealth(Bunch):  # Bunch?
+class Wealth(Bunch):
     """
     Represent time-series of wealth.
     """
@@ -13,12 +13,11 @@ class Wealth(Bunch):  # Bunch?
 
     @classmethod
     def _from_strategy(cls, strategy):
-        transaction = strategy.transaction.to_frame()
-        position = transaction.cumsum().shift().fillna(0.0)
-        prices = strategy.universe.data
+        transaction = pd.DataFrame(strategy.transaction)
+        position = transaction.cumsum(axis=0).shift().fillna(0.0).values
+        price_changes = np.diff(strategy.universe.data.values, axis=0, prepend=0.0)
 
-        wealth = (position * prices.diff()).sum(axis=1).cumsum()
-
+        wealth = (position * price_changes).sum(axis=1).cumsum()
         return cls(wealth=wealth)
 
     # def to_series(self):

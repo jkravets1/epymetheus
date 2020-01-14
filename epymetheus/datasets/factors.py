@@ -1,5 +1,4 @@
 import numpy as np
-import sys
 
 from .. import Universe
 import pandas as pd
