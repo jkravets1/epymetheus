@@ -1,4 +1,5 @@
 language: python
+<<<<<<< HEAD
 python:
   - 3.6
   - 3.7
@@ -16,3 +17,19 @@ script:
   - echo "script end"
 after_success:
   - codecov
+=======
+python: 3.8
+install:
+  - echo "install start"
+  - pip install -r requirements.txt
+  - echo "install end"
+before_script:
+  - pip install flake8
+script:
+  - echo "pytest start"
+  - sh tests/pytest.sh
+  - echo "pytest end"
+  - echo "flake8 start"
+  - flake8 ./epymetheus/
+  - echo "flake8 end"
+>>>>>>> master
