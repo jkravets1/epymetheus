@@ -78,6 +78,8 @@ def plot(strategy):
     plt.title('Exposure')
     plt.savefig('exposure.png', bbox_inches="tight", pad_inches=0.1)
 
+    pd.DataFrame(strategy.history).to_csv('history.csv')
+
 
 def main():
     universe = fetch_usstock()
