@@ -64,7 +64,7 @@ exposure.plot()
 
 ![wealth](sample/howto/exposure.png)
 
-Profit-loss distribution of each trades can be accessed by:
+Profit-loss distribution can be accessed by:
 
 ```python
 plt.hist(strategy.history.gains)
