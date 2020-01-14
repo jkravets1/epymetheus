@@ -32,18 +32,18 @@ def fetch_equity(ticker, begin, end):
 
 
 def fetch_equities(tickers, date_range):
-    return pd.read_csv('US Equity.csv', index_col=0, parse_dates=True)
-    # b = date_range[0] - pd.tseries.offsets.Day(10)
-    # e = date_range[-1]
+    # return pd.read_csv('US Equity.csv', index_col=0, parse_dates=True)
+    b = date_range[0] - pd.tseries.offsets.Day(10)
+    e = date_range[-1]
 
-    # prices = pd.concat([
-    #     fetch_equity(ticker, b, e) for ticker in tickers
-    # ], axis=1)
+    prices = pd.concat([
+        fetch_equity(ticker, b, e) for ticker in tickers
+    ], axis=1)
 
-    # prices = prices.reindex(pd.date_range(b, e)).ffill()
-    # prices = prices.reindex(date_range)
+    prices = prices.reindex(pd.date_range(b, e)).ffill()
+    prices = prices.reindex(date_range)
 
-    # return prices
+    return prices
 
 
 class SimpleTrendFollower(TradeStrategy):
