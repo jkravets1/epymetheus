@@ -83,13 +83,12 @@ Detailed trade history
 pd.DataFrame(strategy.history).head()
 ```
 
-```csv
-,index,assets,lots,open_dates,close_dates,durations,open_prices,gains
-0,0,MSFT,301.99,2000-02-01,2000-03-01,29 days,33.11,-1177.90
-1,1,WMT,245.40,2000-02-01,2000-03-01,29 days,40.74,-1650.68
-2,2,BRK-A,0.22,2000-03-01,2000-04-01,31 days,44700.0,2796.42
-3,3,WMT,293.91,2000-03-01,2000-04-01,31 days,34.02,1545.11
-4,4,JNJ,480.09,2000-04-01,2000-05-01,30 days,20.82,1770.46
-```
+ |index|assets|lots|open_dates|close_dates|durations|open_prices|gains
+-|-----|------|----|----------|-----------|---------|-----------|-----
+0|0|MSFT|301.99|2000-02-01|2000-03-01|29 days|33.11|-1177.90
+1|1|WMT|245.40|2000-02-01|2000-03-01|29 days|40.74|-1650.68
+2|2|BRK-A|0.22|2000-03-01|2000-04-01|31 days|44700|0,2796.42
+3|3|WMT|293.91|2000-03-01|2000-04-01|31 days|34.02|1545.11
+4|4|JNJ|480.09|2000-04-01|2000-05-01|30 days|20.82|1770.46
 
 Other examples are provided [here](sample/examples/).
