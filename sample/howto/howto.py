@@ -61,21 +61,21 @@ def plot(strategy):
     plt.ylabel('wealth / dollars')
     plt.savefig('wealth.png', bbox_inches="tight", pad_inches=0.1)
 
-    plt.figure(figsize=(8, 4))
+    plt.figure(figsize=(16, 4))
     plt.hist(strategy.history.gains, bins=100)
     plt.axvline(0, ls='--', color='red')
     plt.title('Gains')
     plt.savefig('gains.png', bbox_inches="tight", pad_inches=0.1)
 
-    plt.figure(figsize=(16, 4))
     exposure_lot = pd.DataFrame(strategy.transaction).cumsum(axis=0).values
     exposure_price = exposure_lot * strategy.universe.prices.values
     exposure = exposure_price.sum(axis=1)
     df_exposure = pd.Series(exposure, index=strategy.universe.bars)
-    plt.figure(figsize=(8, 8))
+
+    plt.figure(figsize=(16, 4))
     plt.plot(df_exposure)
     plt.axhline(0, ls='--', color='gray')
-    plt.title('Exposure')
+    plt.title('Net exposure')
     plt.savefig('exposure.png', bbox_inches="tight", pad_inches=0.1)
 
     pd.DataFrame(strategy.history).to_csv('history.csv')
