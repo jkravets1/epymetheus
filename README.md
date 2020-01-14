@@ -26,12 +26,10 @@ Let's construct your own strategy by subclassing `TradeStrategy`.
 from epymetheus import TradeStrategy
 
 class MyTradeStrategy(TradeStrategy):
-    """
-    This is my favorite trade strategy.
-    """
+
     def logic(self, universe, my_parameter):
-        ...  # your logic
-        yield Trade(asset=..., lot=..., open_date=..., close_date=...)
+        ...
+        yield Trade(...)
 ```
 
 The strategy can be readily applied to any `Universe`.
@@ -45,14 +43,10 @@ universe = Universe(prices, name='US Equity')
 
 strategy = MyTradeStrategy(my_parameter=42)
 strategy.run(universe)
-# Generating trades...
-# Evaluating wealth...
-# Done.
-# Runtime: ***sec
 ```
 
-The result is stored as the attributes of `strategy`.
-you can plot the wealth right away:
+Now the result is stored as the attributes of `strategy`.
+You can plot the wealth right away:
 
 ```python
 pd.DataFrame(strategy.wealth).plot()
