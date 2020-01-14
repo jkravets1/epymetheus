@@ -17,7 +17,6 @@ $ pip install epymetheus
 ## Features
 
 - Multi-asset backtesting
-- Financial data scraping
 
 ## How to use
 
@@ -35,7 +34,7 @@ class MyTradeStrategy(TradeStrategy):
         yield Trade(asset=..., lot=..., open_date=..., close_date=...)
 ```
 
-The strategy can be readily applied to any universe.
+The strategy can be readily applied to any `Universe`.
 
 ```python
 import pandas as pd
@@ -63,4 +62,4 @@ pd.DataFrame(strategy.history)
 # ...
 ```
 
-Sample result is provided [here](sample/howto/)
+Sample result is provided [here](sample/howto/).
