@@ -3,7 +3,7 @@ from functools import reduce
 import numpy as np
 import pandas as pd
 
-from ._bunch import Bunch
+from .utils import Bunch
 
 
 class Transaction(Bunch):
@@ -63,4 +63,4 @@ class Transaction(Bunch):
         return transaction
 
     # def to_frame(self):
-    #     frame = pd.DataFrame(self)
+    #     return pd.DataFrame(self)

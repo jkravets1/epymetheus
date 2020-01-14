@@ -1,12 +1,16 @@
 import numpy as np
 import pandas as pd
 
-from ._bunch import Bunch
+from .utils import Bunch
 
 
 class Wealth(Bunch):
     """
     Represent time-series of wealth.
+
+    Attributes
+    ----------
+    - wealth
     """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -20,6 +24,10 @@ class Wealth(Bunch):
 
         wealth = (position * price_changes).sum(axis=1).cumsum()
         return cls(wealth=wealth)
+
+    @property
+    def n_bars(self):
+        return len(self.wealth)
 
     # def to_series(self):
     #     return pd.Series(data=self.data, index=self.bars)

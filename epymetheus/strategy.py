@@ -2,13 +2,10 @@ from abc import ABCMeta, abstractmethod
 from inspect import cleandoc
 from time import time
 
+from .utils import Bunch
 from .history import History
 from .transaction import Transaction
 from .wealth import Wealth
-
-
-class NotRunnedError(Exception):
-    pass
 
 
 class TradeStrategy(metaclass=ABCMeta):
@@ -25,10 +22,10 @@ class TradeStrategy(metaclass=ABCMeta):
 
     Attributes
     ----------
-    - universe
-    - history
-    - transaction
-    - wealth
+    - universe : Universe
+    - history : History
+    - transaction : Transaction
+    - wealth : Wealth
 
     Examples
     --------
@@ -51,7 +48,7 @@ class TradeStrategy(metaclass=ABCMeta):
 
     Set context (optional):
     >>> spx = ...  # Fetch S&P 500 historical prices
-    >>> my_strategy.context(
+    >>> my_strategy.setup(
     ...     slippage=0.001,
     ...     benchmark=spx,
     ... )
@@ -90,11 +87,36 @@ class TradeStrategy(metaclass=ABCMeta):
             'Logic must be implemented in a subclass.'
         )
 
-    def context(self,
-                metrics=['fin_wealth']):
-        pass  # TODO
+    def setup(self,
+              metrics=['fin_wealth'],
+              slippage=0.0,
+              benchmark=None,
+              ):
+        """
+        Configure the context of backtesting.
+
+        Parameters
+        ----------
+        - metrics
+        - slippage
+        - benchmark
+        """
+        self.context = Bunch({
+            metrics=metrics,
+            slippage=slippage,
+            benchmark=benchmark,
+        })
 
     def run(self, universe, verbose=True):
+        """
+        Run a backtesting of strategy.
+        Set attributes `history`, `transaction` and `wealth`.
+
+        Parameters
+        ----------
+        - universe : Universe
+        - verbose : bool
+        """
         self.universe = universe
 
         if verbose:

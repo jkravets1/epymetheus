@@ -2,7 +2,7 @@ from operator import attrgetter
 
 import numpy as np
 
-from ._bunch import Bunch
+from .utils import Bunch
 
 
 class History(Bunch):
@@ -14,16 +14,15 @@ class History(Bunch):
     - open_dates
     - close_dates
     - durations
+    - open_prices
     - gains
 
     Examples
     --------
-    >>> history = ...
-    >>> history.asset
-    ['AAPL', 'MSFT', ...]
-    >>> history
+    >>> history.assets
+    array(['AAPL', 'MSFT', ...])
+    >>> history.lots
     """
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 

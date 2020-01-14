@@ -3,9 +3,6 @@ from pathlib import Path
 import pandas as pd
 
 
-# TODO accept numpy.array as data
-
-
 class Universe:
     """
     Store historical prices of multiple assets.
@@ -61,6 +58,7 @@ class Universe:
     """
     def __init__(self, data, name=None):
         """Initialize self."""
+        # TODO accept data other than pandas.DataFrame
         self.data = data
         self.name = name
 
