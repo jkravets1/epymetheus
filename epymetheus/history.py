@@ -35,11 +35,18 @@ class History(Bunch):
             strategy.universe, **strategy.params
         )))
 
+        index = np.concatenate([
+            np.repeat(i, trade.n_bets)
+            for i, trade in enumerate(trades)
+        ])
+
+        # TODO avoid comprehension notation
         history = cls(
-            assets=np.vectorize(attrgetter('asset'))(trades),
-            lots=np.vectorize(attrgetter('lot'))(trades),
-            open_dates=np.vectorize(attrgetter('open_date'))(trades),
-            close_dates=np.vectorize(attrgetter('close_date'))(trades),
+            index=index,
+            assets=np.concatenate([trade.as_array.asset for trade in trades]),
+            lots=np.concatenate([trade.as_array.lot for trade in trades]),
+            open_dates=np.concatenate([trade.as_array.open_date for trade in trades]),
+            close_dates=np.concatenate([trade.as_array.close_date for trade in trades]),
         )
 
         history.durations = history.close_dates - history.open_dates
@@ -52,7 +59,7 @@ class History(Bunch):
 
     def __open_prices(self, universe):
         def get_price(date, asset):
-            return universe.data.at[date, asset]
+            return universe.prices.at[date, asset]
 
         get_prices = np.frompyfunc(get_price, 2, 1)
 
@@ -60,7 +67,7 @@ class History(Bunch):
 
     def __gains(self, universe):
         def get_price(date, asset):
-            return universe.data.at[date, asset]
+            return universe.prices.at[date, asset]
 
         get_prices = np.frompyfunc(get_price, 2, 1)
 

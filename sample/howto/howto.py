@@ -75,7 +75,7 @@ class SimpleTrendFollower(TradeStrategy):
             """Return 1 month return of assets as Series."""
             b = open_date - DateOffset(days=1)
             e = open_date - DateOffset(months=1)
-            return universe.data.loc[e, :] / universe.data.loc[b, :]
+            return universe.prices.iloc[e, :] / universe.prices.loc[b, :]
 
         for open_date in trade_open_dates(universe, watch_period, trade_period):
             close_date = open_date + trade_period
@@ -83,7 +83,7 @@ class SimpleTrendFollower(TradeStrategy):
             assets_sorted = sorted(universe.assets, key=lambda asset: r[asset])
 
             for asset in assets_sorted[-n_trade:]:
-                lot = bet / universe.data.at[open_date, asset]
+                lot = bet / universe.prices.at[open_date, asset]
                 yield Trade(asset=asset, lot=lot, open_date=open_date, close_date=close_date)
 
 
@@ -104,7 +104,7 @@ def plot(strategy):
 
     plt.figure(figsize=(16, 4))
     exposure_lot = pd.DataFrame(strategy.transaction).cumsum(axis=0).values
-    exposure_price = exposure_lot * strategy.universe.data.values
+    exposure_price = exposure_lot * strategy.universe.prices.values
     exposure = exposure_price.sum(axis=1)
     df_exposure = pd.Series(exposure, index=strategy.universe.bars)
     plt.figure(figsize=(8, 8))

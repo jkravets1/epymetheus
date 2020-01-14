@@ -101,11 +101,11 @@ class TradeStrategy(metaclass=ABCMeta):
         - slippage
         - benchmark
         """
-        self.context = Bunch({
+        self.context = Bunch(
             metrics=metrics,
             slippage=slippage,
             benchmark=benchmark,
-        })
+        )
 
     def run(self, universe, verbose=True):
         """
