@@ -74,7 +74,7 @@ class Universe:
 
     @property
     def n_bars(self):
-        return self.bars.shape[0]
+        return len(self.bars)
 
     @property
     def assets(self):
@@ -86,7 +86,7 @@ class Universe:
 
     @property
     def n_assets(self):
-        return self.assets.shape[0]
+        return len(self.assets)
 
     @classmethod
     def read_csv(cls, csv, name=None, begin_bar=None, end_bar=None, **kwargs):

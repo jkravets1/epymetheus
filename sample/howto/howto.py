@@ -1,14 +1,15 @@
-import datetime
-
-import numpy as np
 import pandas as pd
 from pandas_datareader.data import DataReader
 from pandas.tseries.offsets import DateOffset
 import matplotlib.pyplot as plt
 import seaborn
 
+from pandas.plotting import register_matplotlib_converters
+
 from epymetheus import Universe, Trade, TradeStrategy
 
+register_matplotlib_converters()
+seaborn.set_style('ticks')
 
 tickers = [
     'AAPL',
@@ -49,16 +50,15 @@ def fetch_equities(tickers, date_range):
 class SimpleTrendFollower(TradeStrategy):
     """
     A simple trend-following strategy.
-    Buys stocks for a month with the highest percentile one month returns
-    and sells the lowest percentile returns.
+    Buys stocks for a month with the highest percentile of one month returns.
 
     Parameters
     ----------
     - percentile : float
         The threshold to buy or sell.
-        E.g. If 0.1, buy/sell stocks with returns of highest/lowest 10%.
+        E.g. If 0.1, buy stocks with returns of highest 10%.
     """
-    def logic(self, universe, percentile):
+    def logic(self, universe, percentile, bet):
 
         watch_period = DateOffset(months=1)
         trade_period = DateOffset(months=1)
@@ -82,29 +82,24 @@ class SimpleTrendFollower(TradeStrategy):
             r = tot_returns(open_date)
             assets_sorted = sorted(universe.assets, key=lambda asset: r[asset])
 
-            long = assets_sorted[-n_trade:]
-            short = assets_sorted[:n_trade]
-
-            for asset in long:
-                lot = 1.0 / universe.data.at[open_date, asset]
+            for asset in assets_sorted[-n_trade:]:
+                lot = bet / universe.data.at[open_date, asset]
                 yield Trade(asset=asset, lot=lot, open_date=open_date, close_date=close_date)
 
-            for asset in short:
-                lot = -1.0 / universe.data.at[open_date, asset]
-                yield Trade(asset=asset, lot=lot, open_date=open_date, close_date=close_date)
 
 def plot(strategy):
-    seaborn.set_style('ticks')
-
     plt.figure(figsize=(16, 4))
     df_wealth = pd.DataFrame(strategy.wealth)
     df_wealth.index = strategy.universe.bars
     plt.plot(df_wealth)
+    plt.title('Wealth')
+    plt.ylabel('wealth / dollars')
     plt.savefig('wealth.png', linewidth=0.6)
 
     plt.figure(figsize=(8, 8))
     plt.hist(strategy.history.gains, bins=100)
     plt.axvline(0, ls='--', color='red')
+    plt.title('Gains')
     plt.savefig('gains.png')
 
     plt.figure(figsize=(16, 4))
@@ -115,16 +110,15 @@ def plot(strategy):
     plt.figure(figsize=(8, 8))
     plt.plot(df_exposure)
     plt.axhline(0, ls='--', color='gray')
+    plt.title('Exposure')
     plt.savefig('exposure.png')
 
 
 def main():
-    universe = Universe(
-        data=fetch_equities(tickers, date_range),
-        name='US Equity',
-    )
+    prices = fetch_equities(tickers, date_range)
+    universe = Universe(prices, name='US Equity')
 
-    strategy = SimpleTrendFollower(percentile=0.1)
+    strategy = SimpleTrendFollower(percentile=0.2, bet=10000)
     strategy.run(universe, verbose=True)
 
     plot(strategy)
