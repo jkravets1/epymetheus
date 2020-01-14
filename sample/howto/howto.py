@@ -91,16 +91,16 @@ def plot(strategy):
     plt.figure(figsize=(16, 4))
     df_wealth = pd.DataFrame(strategy.wealth)
     df_wealth.index = strategy.universe.bars
-    plt.plot(df_wealth)
+    plt.plot(df_wealth, linewidth=1)
     plt.title('Wealth')
     plt.ylabel('wealth / dollars')
-    plt.savefig('wealth.png', linewidth=0.6)
+    plt.savefig('wealth.png', bbox_inches="tight", pad_inches=0.1)
 
     plt.figure(figsize=(8, 8))
     plt.hist(strategy.history.gains, bins=100)
     plt.axvline(0, ls='--', color='red')
     plt.title('Gains')
-    plt.savefig('gains.png')
+    plt.savefig('gains.png', bbox_inches="tight", pad_inches=0.1)
 
     plt.figure(figsize=(16, 4))
     exposure_lot = pd.DataFrame(strategy.transaction).cumsum(axis=0).values
@@ -111,7 +111,7 @@ def plot(strategy):
     plt.plot(df_exposure)
     plt.axhline(0, ls='--', color='gray')
     plt.title('Exposure')
-    plt.savefig('exposure.png')
+    plt.savefig('exposure.png', bbox_inches="tight", pad_inches=0.1)
 
 
 def main():
