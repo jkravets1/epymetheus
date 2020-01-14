@@ -25,11 +25,13 @@ Let's construct your own strategy by subclassing `TradeStrategy`.
 ```python
 from epymetheus import TradeStrategy
 
-class MyTradeStrategy(TradeStrategy):
+class MyStrategy(TradeStrategy):
 
     def logic(self, universe, my_parameter):
         ...
         yield Trade(...)
+
+strategy = MyStrategy(my_parameter=0.1)
 ```
 
 The strategy can be readily applied to any `Universe`.
@@ -41,7 +43,6 @@ from epymetheus import Universe
 prices = pd.DataFrame(...)  # Historical prices of assets
 universe = Universe(prices, name='US Equity')
 
-strategy = MyTradeStrategy(my_parameter=42)
 strategy.run(universe)
 ```
 
