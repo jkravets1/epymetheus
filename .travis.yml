@@ -1,4 +1,23 @@
 language: python
+<<<<<<< HEAD
+python:
+  - 3.6
+  - 3.7
+  - 3.8
+install:
+  - echo "install start"
+  - pip install poetry
+  - poetry install
+  - echo "install end"
+script:
+  - echo "script start"
+  - sh tests/pytest.sh
+  - sh tests/sample.sh
+  - flake8 epymetheus
+  - echo "script end"
+after_success:
+  - codecov
+=======
 python: 3.8
 install:
   - echo "install start"
@@ -13,3 +32,4 @@ script:
   - echo "flake8 start"
   - flake8 ./epymetheus/
   - echo "flake8 end"
+>>>>>>> master

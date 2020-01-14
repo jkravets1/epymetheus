@@ -32,7 +32,6 @@ def read_web(
         The begin date to fetch data.
     - end_date: datetime.date, default today
         The end date to fetch data.
-
     Examples
     --------
     >>> asset = epymetheus.Asset(ticker='VTI')
@@ -76,7 +75,6 @@ def renew_asset(
 ):
     """
     Renews the local data by fetching the data from the web.
-
     Parameters
     ----------
     - asset : Asset

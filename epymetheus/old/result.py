@@ -1,384 +1,15 @@
-from abc import ABCMeta, abstractmethod
-import datetime
-from functools import reduce
-from inspect import cleandoc
-import pathlib
-import time
-from typing import Iterable
-
-import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
-import numpy as np
-import pandas as pd
-from pandas.plotting import register_matplotlib_converters
-import seaborn
-
-from epymetheus.core.universe import Universe
-from epymetheus.core.wealth import Wealth
-from epymetheus._util import to_std, to_md
-
-seaborn.set()
-register_matplotlib_converters()
-
-
-class Trade():
-    """
-    Represent a single trade.
-
-    Paramters
-    ---------
-    - quote : dict
-        Asset and lots.
-        * key : Asset or str (ticker)
-            Asset to trade.
-        * value : float
-            Lot of asset in unit of ``self.unit``.
-    - begin_date : datetime.date
-        Date to open the trade.
-    - end_date : datetime.date
-        Date to close the trade.
-    - unit : {'price', 'share'}, default 'price'
-        Unit of lot.
-
-    Example
-    -------
-    A long-short position of 2000 USD and 1000 USD is given by:
-
-    >>> quote = {'VTI': 2000, 'VWO': -1000, unit='price'}
-    >>> bd = datetime.date(2018, 1, 1)
-    >>> ed = datetime.date(2018, 2, 1)
-    >>> trade = Trade(quote=quote, begin_date=bd, end_date=ed)
-
-    In unit of share,
-
-    >>> quote = {'VTI': 20, 'VWO': -10, unit='share'}
-    >>> bd = datetime.date(2018, 1, 1)
-    >>> ed = datetime.date(2018, 2, 1)
-    >>> trade = Trade(quote=quote, begin_date=bd, end_date=ed)
-    """
-    def __init__(
-        self,
-        quote: dict,
-        begin_date: datetime.date,
-        end_date: datetime.date,
-        unit='price',
-    ):
-        if unit not in ('price', 'share'):
-            raise ValueError(
-                "Given unit {} is not in {'price', 'share'}.".format(unit)
-            )
-        self.quote = quote
-        self.begin_date = begin_date
-        self.end_date = end_date
-        self.unit = unit
-
-    @property
-    def duration(self):
-        """Return duration to open the trade."""
-        return self.end_date - self.begin_date
-
-    def __str__(self):
-        bd = self.begin_date.strftime('%Y/%m/%d')
-        ed = self.end_date.strftime('%Y/%m/%d')
-        return '\n'.join([
-            '- {<:6}, {<:6} {<:6}, {}'.format(asset, lot, self.unit, bd, ed)
-            for asset, lot in self.quote.items()
-        ])
-
-    def __mul__(self, multiplier):
-        if isinstance(multiplier, (int, float)):
-            return Trade(
-                quote={k: v * multiplier for k, v in self.quote.items()},
-                begin_date=self.begin_date,
-                end_date=self.end_date,
-                unit=self.unit,
-            )
-        raise TypeError
-
-    def _to_dataframe(self, trade_index=None):
-        """
-        Return expression of self as ``pd.DataFrame``.
-
-        Examples
-        --------
-        >>> trade._to_dataframe(trade_index=0):
-        trade_index asset share  begin_date   end_date
-                  0   VTI   1.2  2019-01-01 2019-02-01
-        """  # TODO in unit of share
-        if trade_index is None:
-            data = {}
-        else:
-            data = {'trade_index': trade_index}
-        data.update({
-            'asset': list(self.quote.keys()),
-            'lot': list(self.quote.values()),
-            'begin_date': self.begin_date,
-            'end_date': self.end_date,
-            'unit': self.unit,
-        })
-        return pd.DataFrame(data=data)
-
-    def position(self, universe):
-        """
-        Return ``Position``.
-
-        Returns
-        -------
-        Position
-        """
-        # TODO case self.end_date > universe.end_date
-        if self.unit == 'share':
-            data = {asset: lot
-                    for asset, lot in self.quote.items()},
-        if self.unit == 'price':
-            data = {asset: lot / universe.at[self.begin_date, asset]
-                    for asset, lot in self.quote.items()}
-        return pd.DataFrame(
-            data=data,
-            index=pd.date_range(self.begin_date, self.end_date)
-        )
-
-    def gain(self, universe: Universe):
-        if self.unit == 'share':
-            return sum((
-                share * (universe.at[self.end_date, asset]
-                         - universe.at[self.begin_date, asset])
-                for asset, share in self.quote.items()
-            ))
-        if self.unit == 'price':
-            return sum((
-                price * (universe.at[self.end_date, asset]
-                         / universe.at[self.begin_date, asset] - 1)
-                for asset, price in self.quote.items()
-            ))
-
-
-class Position(pd.DataFrame):
-    """
-    Represent time-series of position in unit of share.
-
-    Inheriting ``pandas.DataFrame``.
-    """
-    def __init__(
-        self,
-        data=None,
-        index=None,
-        columns=None,
-        **kwargs,
-    ):
-        """Initialize self."""
-        # check if index is datetime.date
-        super(Position, self).__init__(
-            data=data,
-            index=index,
-            columns=columns,
-            **kwargs,
-        )
-
-    def __add__(self, other):
-        # for functional expression of sum of Position
-        return self.add(other, fill_value=.0)
-
-    # @staticmethod
-    # def add_positions(first, second):
-    #     # for functional expression of sum of Position
-    #     return first.add(second, fill_value=.0)
-
-    @classmethod
-    def from_trades(cls, trades: Iterable, universe):
-        """
-        Return merged Position from Iterable of Trade.
-
-        Returns
-        -------
-        Position
-        """
-        return cls(reduce(
-            cls.__add__,
-            [trade.position(universe) for trade in trades]
-        ))
-
-    def wealth(self, universe: Universe):
-        """
-        Return time-series of gain and loss.
-
-        Parameters
-        ----------
-        - universe : Universe
-            Universe to evaluate wealth with.
-
-        Notes
-        -----
-        - It is additive, in contrast to multiplicative ``Allocation.pnl``.
-        - It is not cumulative gain and loss.
-
-        Returns
-        -------
-        pandas.Series
-        """
-        data = (self * universe.diff()).sum(axis=1).cumsum()
-        return Wealth(data=data)
-
-    def net_exposure(self, universe: Universe):
-        """
-        Return time-series of net exposure.
-
-        Returns
-        -------
-        pandas.Series
-        """
-        return (self * universe).sum(axis=1)
-
-    def abs_exposure(self, universe: Universe):
-        """
-        Return time-series of absolute exposure.
-
-        Returns
-        -------
-        pandas.Series
-        """
-        return (self * universe).applymap(abs).sum(axis=1)
-
-    def volume(self, universe: Universe):
-        """
-        Return time-series of transaction volumes.
-
-        Returns
-        -------
-        pandas.Series
-        """
-        return (self.diff() * universe).applymap(abs).sum(axis=1)
-
-    def commission(self, universe: Universe, commission_rate: float):
-        """
-        Return time-series of commission with negative values.
-
-        Returns
-        -------
-        pandas.Series
-        """
-        return (self.volume(universe) * commission_rate).sum(axis=1)
-
-
-class TradeStrategy(metaclass=ABCMeta):
-    """
-    Represents a strategy to trade.
-
-    Paramters
-    ---------
-    - name : str, optional
-        The name.
-    - description : str, optional
-        The detailed description.
-
-    Abstract method
-    ---------------
-    - logic : function (Universe -> list of trade)
-        Algorithm that receives ``Universe`` and returns
-        an iterable of ``trade``.
-
-    Examples
-    --------
-
-    >>> class MyTradeStrategy(epymetheus.TradeStrategy):
-    >>>     '''This is my favorite strategy.'''
-    >>>
-    >>>     def logic(universe, my_parameter):
-    >>>         ...
-    >>>         yield epymetheus.Trade(...)
-    >>>
-    >>> my_strategy = MyTradeStrategy(my_parameter=0.01)
-    """
-    def __init__(self, **kwargs):
-        self._parameters = kwargs
-
-    @property
-    def name(self) -> str:
-        return self.__class__.__name__
-
-    @property
-    def description(self) -> str:
-        """Detailed description of the strategy."""
-        return cleandoc(self.__class__.__doc__)
-
-    @property
-    def parameters(self) -> dict:
-        """Parameters of strategy as ``dict``."""
-        return self._parameters
-
-    @abstractmethod
-    def logic(
-        self,
-        universe: Universe,
-        **kwargs
-    ) -> Iterable[Trade]:
-        """
-        Logic to return iterable of ``Trade`` from ``Universe``.
-
-        Parameters
-        ----------
-        - universe : Universe
-            Universe to apply the logic.
-        - kwargs
-            Parameters of the trade strategy.
-        """
-        pass
-
-    def run(
-        self,
-        universe: Universe,
-        path=None,
-        # initial_wealth: Union[int, float] = None,
-        # commission_rate: float = .0,
-    ):
-        """
-        Run backtest of self. Export and return the result.
-
-        Parameters
-        ----------
-        - universe : Universe
-            Universe to run a backtesting with.
-        - path : str, path object or file-like object, default ``self.name``
-            Directory to export the result.
-            If ``path`` does not yet exist, it is created.
-            While ``path`` already exists, overwriting is avoided by
-            ``path = path + '_'``.
-        - initial_wealth : int or float, default None
-            Wealth before investing.
-            If None, results that need it will not be evaluated.
-
-        Outputs
-        -------
-        XXX cf. TradeResult.export
-        - 'summary.md' : Summary of backtesting.
-        - 'trades.csv' : Csv of trades.
-        - 'wealth.csv' : Csv of historical cumulative wealth.
-        - 'record.csv' : Csv of return of each trade.
-        - 'wealth.png' : Line graph of historical cumulative wealth.
-        - 'record.png' : Histogram of return of each trade.
-
-        They will be exported as ``path/summary.md`` etc.
-
-        Returns
-        -------
-        TradeResult
-        """
-        result = TradeResult(strategy=self, universe=universe)
-        result.export(path=path or str(self.name))
-        return result
+# flake8: noqa
 
 
 class TradeResult():
     """
     Represent backtest result of ``TradeStrategy``.
-
     Parameters
     ----------
     - strategy : TradeStrategy
         ``TradeStrategy`` to run backtesting.
     - universe : Universe
         ``Universe`` to run backtesting with.
-
     Attributes
     ----------
     - strategy : TradeStrategy
@@ -435,13 +66,13 @@ class TradeResult():
         self._overview = {
             'fin wealth':       round(wealth[-1], ndigits),
             'max drop':         round(wealth.drop().min(), ndigits),
-            'avg gain':         round(np.mean(array_gain), ndigits),
-            'med gain':         round(np.median(array_gain), ndigits),
+            'avg gain':         round(np.nanmean(array_gain), ndigits),
+            'med gain':         round(np.nanmedian(array_gain), ndigits),
         }
         self._tradestat = {
             'num trade':        len(list_trade),
-            'avg duration':     str(int(np.mean(_array_duration))) + ' days',
-            'med duration':     str(int(np.median(_array_duration))) + ' days',
+            'avg duration':     str(int(np.nanmean(_array_duration))) + ' days',
+            'med duration':     str(int(np.nanmedian(_array_duration))) + ' days',
             'max duration':     str(int(np.max(_array_duration))) + ' days',
             'min duration':     str(int(np.min(_array_duration))) + ' days',
         }
@@ -449,12 +80,12 @@ class TradeResult():
         self._winlose = {
             'num win':          len(_array_gain_win),
             'num lose':         len(_array_gain_lose),
-            'avg gain win':     round(np.mean(_array_gain_win), ndigits),
+            'avg gain win':     round(np.nanmean(_array_gain_win), ndigits),
             'med gain win':     round(np.median(_array_gain_win), ndigits),
             'max gain win':     round(np.max(_array_gain_win), ndigits),
             'min gain win':     round(np.min(_array_gain_win), ndigits),
-            'avg gain lose':    round(np.mean(_array_gain_lose), ndigits),
-            'med gain lose':    round(np.median(_array_gain_lose), ndigits),
+            'avg gain lose':    round(np.nanmean(_array_gain_lose), ndigits),
+            'med gain lose':    round(np.nanmedian(_array_gain_lose), ndigits),
             'max gain lose':    round(np.max(_array_gain_lose), ndigits),
             'min gain lose':    round(np.min(_array_gain_lose), ndigits),
         }
@@ -505,7 +136,6 @@ class TradeResult():
     def overview(self):
         """
         Return overview of result as ``dict``.
-
         Keys
         ----
         - 'fin wealth'
@@ -518,7 +148,6 @@ class TradeResult():
     def tradestat(self):
         """
         Return trade statistics in ``dict``.
-
         Keys
         ----
         - 'num trade' : int
@@ -530,7 +159,6 @@ class TradeResult():
     def winlose(self):
         """
         Return statistics of win/lose trades in ``dict``.
-
         Keys
         ----
         - 'num [win|lose]'
@@ -551,7 +179,6 @@ class TradeResult():
     ):
         """
         Returns summary of the result as ``str``.
-
         Parameters
         ----------
         - style : {'std', 'md'}

@@ -24,7 +24,6 @@ def cross(
 ):
     """
     True if the value crosses 0 upward or downward.
-
     Parameters
     ----------
     array : pandas.Series or pandas.DataFrame
@@ -52,19 +51,16 @@ def timing(
 ):
     """
     Return list of (begin date, end date) from open and close signals.
-
     Parameters
     ----------
     - series_open : pd.Series
         True if signal to open a trade is on, otherwise False.
     - series_close : pd.Series
         True if signal to close a trade is on, otherwise False.
-
     Returns
     -------
     List of (date_open, date_close)
     where date_open and date_close are dates to open and close each trade,
-
     Examples
     --------
     >>> series_open
@@ -116,7 +112,6 @@ def timing_flag(
 ):
     """
     Return timings and which signals were caught.
-
     Returns
     -------
     List of (begin_date, end_date, flag_open, flag_close)

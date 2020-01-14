@@ -1,10 +1,16 @@
 # Epymetheus
 
 [![version](https://img.shields.io/pypi/v/epymetheus.svg)](https://pypi.org/project/epymetheus/)
+<<<<<<< HEAD
+[![Build Status](https://travis-ci.org/simaki/epymetheus.svg?branch=master)](https://travis-ci.com/simaki/epymetheus)
+=======
 [![Build Status](https://travis-ci.com/simaki/epymetheus.svg?branch=master)](https://travis-ci.com/simaki/epymetheus)
+>>>>>>> master
 [![LICENSE](https://img.shields.io/github/license/simaki/epymetheus)](LICENSE)
 
 Python framework for multi-asset backtesting.
+
+![wealth](sample/howto/wealth.png)
 
 ## Installation
 
@@ -17,40 +23,48 @@ $ pip install epymetheus
 - Multi-asset backtesting
 - Financial data scraping
 
-## Usage
+## How to use
+
+Let's construct your own strategy by subclassing `TradeStrategy`.
 
 ```python
-import epymetheus as ep
+from epymetheus import TradeStrategy
 
-
-class MyTradeStrategy(ep.TradeStrategy):
-    """This is my favorite strategy."""
+class MyTradeStrategy(TradeStrategy):
+    """
+    This is my favorite trade strategy.
+    """
     def logic(self, universe, my_parameter):
-        ...
-        yield trade
-
-
-def main():
-    n225 = ep.Universe.read_directory('./Nikkei 225/')
-    my_strategy = MyTradeStrategy(my_parameter=0.01)
-    my_strategy.run(universe=n225)
-
-
-if __name__ == '__main__':
-    main()
+        ...  # your logic
+        yield Trade(asset=..., lot=..., open_date=..., close_date=...)
 ```
 
-- [Sample result](https://github.com/simaki/epymetheus/blob/master/sample/SimpleMeanReversion/summary.md)
+The strategy can be readily applied to any universe.
 
-## Todo
+```python
+import pandas as pd
+from epymetheus import Universe
 
-- commission
-- initial wealth
-- alpha, beta to benchmark
+prices = pd.DataFrame(...)  # Historical prices of assets
+universe = Universe(prices, name='US Equity')
 
-maybe...
-- pdf output
-- monthly report
-- user-defined measure evaluation
-- user-defined data export
-- prometest (look-forward tester)
+strategy = MyTradeStrategy(my_parameter=42)
+strategy.run(universe)
+# Generating trades...
+# Evaluating wealth...
+# Done.
+# Runtime: ***sec
+```
+
+Now you can access the result as the attributes of strategy.
+
+```python
+pd.DataFrame(strategy.wealth)
+# ...
+pd.DataFrame(strategy.transaction)
+# ...
+pd.DataFrame(strategy.history)
+# ...
+```
+
+Sample result is provided [here](sample/howto/)

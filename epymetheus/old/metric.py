@@ -1,15 +1,9 @@
-import pandas as pd
-import numpy as np
-
-
-DAY_PER_YEAR = 365
-WEEKDAY_PER_YEAR = 260
+# flake8: noqa
 
 
 class Wealth(pd.Series):
     """
     Represent time-series of wealth.
-
     Inheriting ``pd.Series``.
     """
     def __init__(
@@ -142,7 +136,6 @@ class Wealth(pd.Series):
     ):
         """
         Returns annual tracking error.
-
         Parameters
         ----------
         - benchmark : pd.Series
