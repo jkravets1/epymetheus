@@ -107,7 +107,7 @@ class TradeStrategy(metaclass=ABCMeta):
             benchmark=benchmark,
         )
 
-    def run(self, universe, verbose=True):
+    def run(self, universe, verbose=True, save={}):
         """
         Run a backtesting of strategy.
         Set attributes `history`, `transaction` and `wealth`.
@@ -116,6 +116,7 @@ class TradeStrategy(metaclass=ABCMeta):
         ----------
         - universe : Universe
         - verbose : bool
+        - save : dict
         """
         self.universe = universe
 
@@ -123,6 +124,7 @@ class TradeStrategy(metaclass=ABCMeta):
             begin_time = time()
             print('Evaluating wealth ...')
 
+        # TODO Pass verbose to each constructer
         self.history = History._from_strategy(self)
         self.transaction = Transaction._from_strategy(self)
         self.wealth = Wealth._from_strategy(self)
@@ -133,5 +135,11 @@ class TradeStrategy(metaclass=ABCMeta):
             print(f'Runtime : {runtime:.1f}sec')
 
         self.is_runned = True
+
+        # save result TODO: check valid input
+        if save:
+            for attr, path in save.items():
+                data = pd.DataFrame(getattr(self, attr))
+                data.to_csv(path)
 
         return self

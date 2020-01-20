@@ -36,9 +36,9 @@ class Transaction(Bunch):
             """Sum Series by filling 0."""
             def add_fillzero(s1, s2):
                 return s1.add(s2, fill_value=0.0)
-            return reduce(add_fillzero, list_series)
+            return reduce(add_fillzero, list_series, pd.Series())
 
-        def to_data(asset):
+        def to_data(asset):  # TODO rename clearly
             """Return transaction of an asset."""
             idx = (strategy.history.assets == asset)
 
