@@ -4,7 +4,7 @@
 [![Build Status](https://travis-ci.com/simaki/epymetheus.svg?branch=master)](https://travis-ci.com/simaki/epymetheus)
 [![LICENSE](https://img.shields.io/github/license/simaki/epymetheus)](LICENSE)
 
-Python framework for multi-asset backtesting.
+Python library for multi-asset backtesting.
 
 ![wealth](sample/howto/wealth.png)
 
@@ -23,7 +23,7 @@ $ pip install epymetheus
 Let's construct your own strategy by subclassing `TradeStrategy`.
 
 ```python
-from epymetheus import TradeStrategy
+from epymetheus import Trade, TradeStrategy
 
 class MyStrategy(TradeStrategy):
 
