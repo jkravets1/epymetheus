@@ -83,7 +83,7 @@ class History(Bunch):
         """
         def pick_price(date, asset):
             return universe.prices.at[date, asset]
-        return np.frompyfunc(pick_price, 2, 1)
+        return np.frompyfunc(pick_price, 2, 1)(dates, assets)
 
     def _get_open_prices(self, universe):
         """
