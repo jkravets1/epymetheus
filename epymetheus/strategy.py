@@ -2,6 +2,8 @@ from abc import ABCMeta, abstractmethod
 from inspect import cleandoc
 from time import time
 
+import pandas as pd
+
 from .utils import Bunch
 from .history import History
 from .transaction import Transaction

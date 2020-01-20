@@ -68,8 +68,6 @@ class History(Bunch):
                 trade.as_array.close_date for trade in trades]),
         )
 
-        history.assets = assets=np.concatenate([trade.as_array.asset for trade in trades])
-
         history.durations = history.close_dates - history.open_dates
         history.open_prices = history._get_open_prices(strategy.universe)
         history.close_prices = history._get_close_prices(strategy.universe)
@@ -83,7 +81,8 @@ class History(Bunch):
         Pick array of prices of given dates (array-like) and
         assets (array-like) from universe.
         """
-        pick_price = lambda date, asset: universe.prices.at[date, asset]
+        def pick_price(date, asset):
+            return universe.prices.at[date, asset]
         return np.frompyfunc(pick_price, 2, 1)
 
     def _get_open_prices(self, universe):
