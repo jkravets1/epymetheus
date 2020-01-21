@@ -72,7 +72,7 @@ def plot(strategy):
     plt.title('Gains')
     plt.savefig('gains.png', bbox_inches="tight", pad_inches=0.1)
 
-    df_transaction = pd.DataFrame(strategy.transaction).set_index(bars)
+    df_transaction = pd.DataFrame(strategy.transaction).set_index('bars')
     exposure_lot = df_transaction.cumsum(axis=0).values
     exposure_price = exposure_lot * strategy.universe.prices.values
     exposure = exposure_price.sum(axis=1)
