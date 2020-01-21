@@ -60,8 +60,7 @@ class SimpleTrendFollower(TradeStrategy):
 
 def plot(strategy):
     plt.figure(figsize=(16, 4))
-    df_wealth = pd.DataFrame(strategy.wealth)
-    df_wealth.index = strategy.universe.bars
+    df_wealth = pd.DataFrame(strategy.wealth).set_index('bars')
     plt.plot(df_wealth, linewidth=1)
     plt.title('Wealth')
     plt.ylabel('wealth / dollars')
@@ -73,7 +72,8 @@ def plot(strategy):
     plt.title('Gains')
     plt.savefig('gains.png', bbox_inches="tight", pad_inches=0.1)
 
-    exposure_lot = pd.DataFrame(strategy.transaction).cumsum(axis=0).values
+    df_transaction = pd.DataFrame(strategy.transaction).set_index(bars)
+    exposure_lot = df_transaction.cumsum(axis=0).values
     exposure_price = exposure_lot * strategy.universe.prices.values
     exposure = exposure_price.sum(axis=1)
     df_exposure = pd.Series(exposure, index=strategy.universe.bars)
