@@ -23,7 +23,7 @@ class Wealth(Bunch):
         price_changes = np.diff(prices, axis=0, prepend=0.0)
 
         wealth = (position * price_changes).sum(axis=1).cumsum()
-        return cls(wealth=wealth)
+        return cls(bars=strategy.universe.bars, wealth=wealth)
 
     @property
     def n_bars(self):

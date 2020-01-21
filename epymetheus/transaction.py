@@ -56,7 +56,7 @@ class Transaction(Bunch):
         assets = strategy.universe.assets
         data = {asset: to_data(asset) for asset in assets}
 
-        transaction = cls()
+        transaction = cls(bars=strategy.universe.bars)
         for key, value in data.items():
             setattr(transaction, key, value)
 
