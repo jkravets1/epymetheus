@@ -53,8 +53,8 @@ class SimpleTrendFollower(TradeStrategy):
                 yield Trade(
                     asset=asset,
                     lot=lot,
-                    open_date=open_date,
-                    close_date=close_date,
+                    open_bar=open_date,
+                    close_bar=close_date,
                 )
 
 
