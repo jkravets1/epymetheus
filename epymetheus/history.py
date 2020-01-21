@@ -15,8 +15,8 @@ class History(Bunch):
         will be assigned for these orders.
     - assets : numpy.array, shape (n_orders, )
     - lots : numpy.array, shape (n_orders, )
-    - open_dates : numpy.array, shape (n_orders, )
-    - close_dates : numpy.array, shape (n_orders, )
+    - open_bars : numpy.array, shape (n_orders, )
+    - close_bars : numpy.array, shape (n_orders, )
     - durations : numpy.array, shape (n_orders, )
     - open_prices : numpy.array, shape (n_orders, )
     - close_prices : numpy.array, shape (n_orders, )
@@ -44,8 +44,8 @@ class History(Bunch):
                 index=np.array([]),
                 assets=np.array([], dtype=str),
                 lots=np.array([]),
-                open_dates=np.array([]),
-                close_dates=np.array([]),
+                open_bars=np.array([]),
+                close_bars=np.array([]),
                 open_prices=np.array([]),
                 close_prices=np.array([]),
                 gains=np.array([]),
@@ -66,33 +66,33 @@ class History(Bunch):
                 trade.as_array.asset for trade in trades]),
             lots=np.concatenate([
                 trade.as_array.lot for trade in trades]),
-            open_dates=np.concatenate([
-                trade.as_array.open_date for trade in trades]),
-            close_dates=np.concatenate([
-                trade.as_array.close_date for trade in trades]),
+            open_bars=np.concatenate([
+                trade.as_array.open_bar for trade in trades]),
+            close_bars=np.concatenate([
+                trade.as_array.close_bar for trade in trades]),
         )
 
-        history.durations = history.close_dates - history.open_dates
+        history.durations = history.close_bars - history.open_bars
         history.open_prices = history._get_open_prices(strategy.universe)
         history.close_prices = history._get_close_prices(strategy.universe)
         history.gains = history._get_gains()
 
         return history
 
-    def _pick_prices(self, universe, dates, assets):
+    def _pick_prices(self, universe, bars, assets):
         """
-        Pick array of prices of given dates (array-like) and
+        Pick array of prices of given bars (array-like) and
         assets (array-like) from universe.
         """
-        def pick_price(date, asset):
-            return universe.prices.at[date, asset]
-        return np.frompyfunc(pick_price, 2, 1)(dates, assets)
+        def pick_price(bars, asset):
+            return universe.prices.at[bars, asset]
+        return np.frompyfunc(pick_price, 2, 1)(bars, assets)
 
     def _get_open_prices(self, universe):
-        return self._pick_prices(universe, self.open_dates, self.assets)
+        return self._pick_prices(universe, self.open_bars, self.assets)
 
     def _get_close_prices(self, universe):
-        return self._pick_prices(universe, self.close_dates, self.assets)
+        return self._pick_prices(universe, self.close_bars, self.assets)
 
     def _get_gains(self):
         return (self.close_prices - self.open_prices) * self.lots

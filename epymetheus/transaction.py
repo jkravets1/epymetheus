@@ -43,11 +43,11 @@ class Transaction(Bunch):
             idx = (strategy.history.assets == asset)
 
             lots = strategy.history.lots[idx]
-            open_dates = strategy.history.open_dates[idx]
-            close_dates = strategy.history.close_dates[idx]
+            open_bars = strategy.history.open_bars[idx]
+            close_bars = strategy.history.close_bars[idx]
 
             list_series = np.frompyfunc(to_transaction, 3, 1)(
-                lots, open_dates, close_dates
+                lots, open_bars, close_bars
             )
             data = sum_fillzero(list_series)
             data = data.reindex(strategy.universe.bars, fill_value=0.0)

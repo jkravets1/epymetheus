@@ -17,7 +17,7 @@ class Wealth(Bunch):
 
     @classmethod
     def _from_strategy(cls, strategy):
-        transaction = pd.DataFrame(strategy.transaction)
+        transaction = pd.DataFrame(strategy.transaction).set_index('bars')
         position = transaction.cumsum(axis=0).shift().fillna(0.0).values
         prices = strategy.universe.prices.values
         price_changes = np.diff(prices, axis=0, prepend=0.0)

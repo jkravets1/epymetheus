@@ -15,10 +15,10 @@ class Trade:
         Name of asset.
     - lot : float
         Lot to trade in unit of share.
-    - open_date : datetime.date
-        Date to open the trade.
-    - close_date : datetime.date
-        Date to close the trade.
+    - open_bar
+        Bar to open the trade.
+    - close_bar
+        Bar to close the trade.
 
     Attributes
     ----------
@@ -32,35 +32,35 @@ class Trade:
     >>> cd = datetime.date(2018, 2, 1)
     >>> trade = Trade(
     ...     asset='AAPL', lot=123.4,
-    ...     open_date=od, close_date=cd,
+    ...     open_bar=od, close_bar=cd,
     ... )
 
     Short position:
     >>> trade = Trade(
     ...     asset='AAPL', lot=-45.6,
-    ...     open_date=od, close_date=cd,
+    ...     open_bar=od, close_bar=cd,
     ... )
 
     Long-short position:
     >>> trade = Trade(
     ...     asset=['AAPL', 'MSFT'],
     ...     lot=[12.3, -45.6],
-    ...     open_date=od, close_date=cd,
+    ...     open_bar=od, close_bar=cd,
     ... )
     """
-    def __init__(self, asset, lot, open_date, close_date):
+    def __init__(self, asset, lot, open_bar, close_bar):
         self.asset = asset
         self.lot = lot
-        self.open_date = open_date
-        self.close_date = close_date
+        self.open_bar = open_bar
+        self.close_bar = close_bar
 
         self.n_bets = np.array(self.asset).size
 
         self._as_array = Bunch(
             asset=np.array(self.asset).reshape(-1),
             lot=np.array(self.lot).reshape(-1),
-            open_date=np.tile(np.array(self.open_date), self.n_bets),
-            close_date=np.tile(np.array(self.close_date), self.n_bets),
+            open_bar=np.tile(np.array(self.open_bar), self.n_bets),
+            close_bar=np.tile(np.array(self.close_bar), self.n_bets),
         )
 
     def __mul__(self, num):

@@ -22,8 +22,8 @@ def test_void():
     strategy.run(universe)
 
     frame_history = pd.DataFrame(strategy.history)
-    frame_transaction = pd.DataFrame(strategy.transaction)
-    frame_wealth = pd.DataFrame(strategy.wealth)
+    frame_transaction = pd.DataFrame(strategy.transaction).set_index('bars')
+    frame_wealth = pd.DataFrame(strategy.wealth).set_index('bars')
 
     assert len(frame_history.index) == 0
     assert (frame_transaction == 0).all(None)
