@@ -3,14 +3,16 @@ python:
   - 3.6
   - 3.7
   - 3.8
+sudo: false
 install:
   - echo "install start"
   - pip install poetry
   - poetry install
+  - pip install codecov
   - echo "install end"
 script:
   - echo "script start"
-  - sh tests/pytest.sh
+  - pytest --cov=epymetheus
   - sh tests/sample.sh
   - flake8 epymetheus
   - echo "script end"
