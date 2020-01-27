@@ -1,6 +1,3 @@
-"""
-Test for a case where no trade has been yielded.
-"""
 import pytest
 
 import pandas as pd

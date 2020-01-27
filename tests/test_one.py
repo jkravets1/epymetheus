@@ -11,7 +11,7 @@ from epymetheus import Trade, TradeStrategy, Universe
 list_seed = [42, 1, 2, 3]
 list_n_bars = [10, 1000]
 list_n_assets = [1, 100]
-list_lot = [0.0, 1, 1.23, -1.0, 123.4, -123.4]
+list_lot = [0.0, 1, 1.23, -1.23, 123.4, -123.4]
 
 
 class OneTradeStrategy(TradeStrategy):

@@ -16,7 +16,16 @@ def make_randomuniverse(n_bars, n_assets):
 
 
 def generate_trades(universe, lots, n_trades):
-    """Randomly generate params of trades `n_trades` times."""
+    """
+    Randomly generate params of trades `n_trades` times.
+
+    Yields
+    ------
+    - (asset, lot, open_bar, close_bar)
+        * asset is in universe.asset
+        * lot is in lots
+        * open_bar, close_bar are in universe.bars and open_bar < close_bar
+    """
     for _ in range(n_trades):
         asset = random.choice(universe.assets)
         lot = random.choice(lots)
