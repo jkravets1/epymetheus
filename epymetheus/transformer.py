@@ -52,15 +52,22 @@
 #         The signal to close an existing short-position.
 #     - long_after_long : {'ignore', 'add', 'replace'}
 #         How to deal with the long-signal when opening a long position.
-#         If 'ignore', just ignore the long-signal.
-#         If 'add', open a new position, keeping the existing position untouched.
-#         If 'replace', close the existing position and open a new position.
+#         If 'ignore':
+#             just ignore the long-signal.
+#         If 'add':
+#             open a new position keeping the existing position untouched.
+#         If 'replace':
+#             close the existing position and open a new position.
 #     - short_after_long : {'ignore', 'add', 'replace', 'cut'}
 #         How to deal with the long-signal when opening a long position.
-#         If 'ignore', just ignore the long-signal.
-#         If 'add', open a new position, keeping the existing position untouched.
-#         If 'replace', close the existing position and open a new position.
-#         If 'cut',
+#         If 'ignore':
+#             just ignore the long-signal.
+#         If 'add':
+#             open a new position, keeping the existing position untouched.
+#         If 'replace':
+#             close the existing position and open a new position.
+#         If 'cut':
+#             ...
 #     - short_after_short :{'ignore', 'add', 'replace'}
 #         How to deal with the short-signal when opening a short position.
 #     - long_after_short : {'ignore', 'add', 'replace', 'cut'}

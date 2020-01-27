@@ -89,10 +89,13 @@ class History(Bunch):
         return np.frompyfunc(pick_price, 2, 1)(bars, assets)
 
     def _get_open_prices(self, universe):
-        return self._pick_prices(universe, self.open_bars, self.assets).astype(np.float64)
+        prices = self._pick_prices(universe, self.open_bars, self.assets)
+        return prices.astype(np.float64)
 
     def _get_close_prices(self, universe):
-        return self._pick_prices(universe, self.close_bars, self.assets).astype(np.float64)
+        prices = self._pick_prices(universe, self.close_bars, self.assets)
+        return prices.astype(np.float64)
 
     def _get_gains(self):
-        return ((self.close_prices - self.open_prices) * self.lots).astype(np.float64)
+        gains = (self.close_prices - self.open_prices) * self.lots
+        return gains.astype(np.float64)
