@@ -36,6 +36,12 @@ def assert_trade_operation(trade0, trade1, operator):
 
 
 @pytest.mark.parametrize('n_orders', list_n_orders)
+def test_n_orders(n_orders):
+    trade0 = make_trade(n_orders)
+    assert trade0.n_orders == n_orders
+
+
+@pytest.mark.parametrize('n_orders', list_n_orders)
 @pytest.mark.parametrize('a', list_a)
 def test_mul(n_orders, a):
     trade0 = make_trade(n_orders)
