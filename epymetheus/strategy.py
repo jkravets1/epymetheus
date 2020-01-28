@@ -85,9 +85,6 @@ class TradeStrategy(metaclass=ABCMeta):
         - kwargs
             Parameters of the trade strategy.
         """
-        raise NotImplementedError(
-            'Logic must be implemented in a subclass.'
-        )
 
     def setup(self,
               metrics=['fin_wealth'],
