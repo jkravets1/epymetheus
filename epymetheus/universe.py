@@ -2,6 +2,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from .utils.check import check_prices
+
 
 class Universe:
     """
@@ -59,6 +61,7 @@ class Universe:
     def __init__(self, prices, name=None):
         """Initialize self."""
         # TODO accept data other than pandas.DataFrame
+        check_prices(prices)
         self.prices = prices
         self.name = name
 

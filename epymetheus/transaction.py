@@ -36,18 +36,18 @@ class Transaction(Bunch):
             """Sum Series by filling 0."""
             def add_fillzero(s1, s2):
                 return s1.add(s2, fill_value=0.0)
-            return reduce(add_fillzero, list_series)
+            return reduce(add_fillzero, list_series, pd.Series())
 
-        def to_data(asset):
+        def to_data(asset):  # TODO rename clearly
             """Return transaction of an asset."""
             idx = (strategy.history.assets == asset)
 
             lots = strategy.history.lots[idx]
-            open_dates = strategy.history.open_dates[idx]
-            close_dates = strategy.history.close_dates[idx]
+            open_bars = strategy.history.open_bars[idx]
+            close_bars = strategy.history.close_bars[idx]
 
             list_series = np.frompyfunc(to_transaction, 3, 1)(
-                lots, open_dates, close_dates
+                lots, open_bars, close_bars
             )
             data = sum_fillzero(list_series)
             data = data.reindex(strategy.universe.bars, fill_value=0.0)
@@ -56,7 +56,7 @@ class Transaction(Bunch):
         assets = strategy.universe.assets
         data = {asset: to_data(asset) for asset in assets}
 
-        transaction = cls()
+        transaction = cls(bars=strategy.universe.bars)
         for key, value in data.items():
             setattr(transaction, key, value)
 

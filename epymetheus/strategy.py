@@ -2,7 +2,8 @@ from abc import ABCMeta, abstractmethod
 from inspect import cleandoc
 from time import time
 
-from .utils import Bunch
+import pandas as pd
+
 from .history import History
 from .transaction import Transaction
 from .wealth import Wealth
@@ -83,31 +84,28 @@ class TradeStrategy(metaclass=ABCMeta):
         - kwargs
             Parameters of the trade strategy.
         """
-        raise NotImplementedError(
-            'Logic must be implemented in a subclass.'
-        )
 
-    def setup(self,
-              metrics=['fin_wealth'],
-              slippage=0.0,
-              benchmark=None,
-              ):
-        """
-        Configure the context of backtesting.
+    # def setup(self,
+    #           metrics=['fin_wealth'],
+    #           slippage=0.0,
+    #           benchmark=None,
+    #           ):
+    #     """
+    #     Configure the context of backtesting.
 
-        Parameters
-        ----------
-        - metrics
-        - slippage
-        - benchmark
-        """
-        self.context = Bunch(
-            metrics=metrics,
-            slippage=slippage,
-            benchmark=benchmark,
-        )
+    #     Parameters
+    #     ----------
+    #     - metrics
+    #     - slippage
+    #     - benchmark
+    #     """
+    #     self.context = Bunch(
+    #         metrics=metrics,
+    #         slippage=slippage,
+    #         benchmark=benchmark,
+    #     )
 
-    def run(self, universe, verbose=True):
+    def run(self, universe, verbose=True, save={}):
         """
         Run a backtesting of strategy.
         Set attributes `history`, `transaction` and `wealth`.
@@ -116,6 +114,7 @@ class TradeStrategy(metaclass=ABCMeta):
         ----------
         - universe : Universe
         - verbose : bool
+        - save : dict
         """
         self.universe = universe
 
@@ -123,6 +122,7 @@ class TradeStrategy(metaclass=ABCMeta):
             begin_time = time()
             print('Evaluating wealth ...')
 
+        # TODO Pass verbose to each constructer
         self.history = History._from_strategy(self)
         self.transaction = Transaction._from_strategy(self)
         self.wealth = Wealth._from_strategy(self)
@@ -133,5 +133,11 @@ class TradeStrategy(metaclass=ABCMeta):
             print(f'Runtime : {runtime:.1f}sec')
 
         self.is_runned = True
+
+        # save result TODO: check valid input
+        if save:
+            for attr, path in save.items():
+                data = pd.DataFrame(getattr(self, attr))
+                data.to_csv(path)
 
         return self

@@ -4,6 +4,11 @@ import numpy as np
 
 from .utils import Bunch
 
+try:
+    from functools import cached_property
+except ImportError:
+    cached_property = property
+
 
 class Trade:
     """
@@ -13,12 +18,12 @@ class Trade:
     ---------
     - asset : str
         Name of asset.
-    - lot : float
+    - open_bar
+        Bar to open the trade.
+    - close_bar
+        Bar to close the trade.
+    - lot : float, default 1.0
         Lot to trade in unit of share.
-    - open_date : datetime.date
-        Date to open the trade.
-    - close_date : datetime.date
-        Date to close the trade.
 
     Attributes
     ----------
@@ -31,41 +36,50 @@ class Trade:
     >>> od = datetime.date(2018, 1, 1)
     >>> cd = datetime.date(2018, 2, 1)
     >>> trade = Trade(
-    ...     asset='AAPL', lot=123.4,
-    ...     open_date=od, close_date=cd,
+    ...     asset='AAPL', lot=123.4, open_bar=od, close_bar=cd,
     ... )
 
     Short position:
-    >>> trade = Trade(
-    ...     asset='AAPL', lot=-45.6,
-    ...     open_date=od, close_date=cd,
+    >>> trade = -45.6 * Trade(
+    ...     asset='AAPL', open_bar=od, close_bar=cd,
     ... )
 
     Long-short position:
     >>> trade = Trade(
     ...     asset=['AAPL', 'MSFT'],
     ...     lot=[12.3, -45.6],
-    ...     open_date=od, close_date=cd,
+    ...     open_bar=od,
+    ...     close_bar=cd,
     ... )
     """
-    def __init__(self, asset, lot, open_date, close_date):
+    def __init__(self, asset, open_bar, close_bar, lot=1.0):
         self.asset = asset
+        self.open_bar = open_bar
+        self.close_bar = close_bar
         self.lot = lot
-        self.open_date = open_date
-        self.close_date = close_date
 
-        self.n_bets = np.array(self.asset).size
+    @property
+    def n_orders(self):
+        if hasattr(self.lot, '__iter__'):
+            return len(self.lot)
+        else:
+            return 1
 
-        self._as_array = Bunch(
+    @cached_property
+    def as_array(self):
+        return Bunch(
             asset=np.array(self.asset).reshape(-1),
             lot=np.array(self.lot).reshape(-1),
-            open_date=np.tile(np.array(self.open_date), self.n_bets),
-            close_date=np.tile(np.array(self.close_date), self.n_bets),
+            open_bar=np.tile(np.array(self.open_bar), self.n_orders),
+            close_bar=np.tile(np.array(self.close_bar), self.n_orders),
         )
 
     def __mul__(self, num):
         trade = copy(self)
-        trade.lot *= num  # FIXME for multiple trades
+        if hasattr(self.lot, '__iter__'):
+            trade.lot = [lot * num for lot in trade.lot]
+        else:
+            trade.lot *= num
         return trade
 
     def __rmul__(self, num):
@@ -74,6 +88,14 @@ class Trade:
     def __neg__(self):
         return self.__mul__(-1.0)
 
-    @property
-    def as_array(self):
-        return self._as_array
+    def __truediv__(self, num):
+        print(1.0 / num)
+        return self.__mul__(1.0 / num)
+
+    def __floordiv__(self, num):
+        trade = copy(self)
+        if hasattr(self.lot, '__iter__'):
+            trade.lot = [lot // num for lot in trade.lot]
+        else:
+            trade.lot //= num
+        return trade

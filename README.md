@@ -2,9 +2,10 @@
 
 [![version](https://img.shields.io/pypi/v/epymetheus.svg)](https://pypi.org/project/epymetheus/)
 [![Build Status](https://travis-ci.com/simaki/epymetheus.svg?branch=master)](https://travis-ci.com/simaki/epymetheus)
+[![codecov](https://codecov.io/gh/simaki/epymetheus/branch/master/graph/badge.svg)](https://codecov.io/gh/simaki/epymetheus)
 [![LICENSE](https://img.shields.io/github/license/simaki/epymetheus)](LICENSE)
 
-Python framework for multi-asset backtesting.
+Python library for multi-asset backtesting.
 
 ![wealth](sample/howto/wealth.png)
 
@@ -23,7 +24,7 @@ $ pip install epymetheus
 Let's construct your own strategy by subclassing `TradeStrategy`.
 
 ```python
-from epymetheus import TradeStrategy
+from epymetheus import Trade, TradeStrategy
 
 class MyStrategy(TradeStrategy):
 
@@ -40,8 +41,8 @@ The strategy can be readily applied to any `Universe`.
 import pandas as pd
 from epymetheus import Universe
 
-prices = pd.DataFrame(...)  # Historical prices of assets
-universe = Universe(prices, name='US Equity')
+prices = ...  # Fetch historical prices of US equities
+universe = Universe(prices, name='US Equities')
 
 strategy.run(universe)
 ```
@@ -75,7 +76,7 @@ plt.hist(strategy.history.gains)
 Detailed trade history can be viewed as:
 
 ```python
-pd.DataFrame(strategy.history).head()
+pd.DataFrame(strategy.history)
 ```
 
 index|assets|lots|open_dates|close_dates|durations|open_prices|gains
@@ -85,5 +86,6 @@ index|assets|lots|open_dates|close_dates|durations|open_prices|gains
 2|BRK-A|0.22|2000-03-01|2000-04-01|31 days|44700|0,2796.42
 3|WMT|293.91|2000-03-01|2000-04-01|31 days|34.02|1545.11
 4|JNJ|480.09|2000-04-01|2000-05-01|30 days|20.82|1770.46
+...|...|...|...|...|...|...|...
 
 Other examples are provided [here](sample/examples/).
