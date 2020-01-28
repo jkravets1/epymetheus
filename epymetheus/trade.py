@@ -9,6 +9,7 @@ try:
 except ImportError:
     cached_property = property
 
+
 class Trade:
     """
     Represent a single trade.
