@@ -4,6 +4,10 @@ import numpy as np
 
 from .utils import Bunch
 
+try:
+    from functools import cached_property
+except ImportError:
+    cached_property = property
 
 class Trade:
     """
@@ -49,18 +53,9 @@ class Trade:
     """
     def __init__(self, asset, open_bar, close_bar, lot=1.0):
         self.asset = asset
-        self.lot = lot
         self.open_bar = open_bar
         self.close_bar = close_bar
-
-        # TODO: implement them as (cached) properties
-        self.n_bets = np.array(self.asset).size
-        self._as_array = Bunch(
-            asset=np.array(self.asset).reshape(-1),
-            lot=np.array(self.lot).reshape(-1),
-            open_bar=np.tile(np.array(self.open_bar), self.n_bets),
-            close_bar=np.tile(np.array(self.close_bar), self.n_bets),
-        )
+        self.lot = lot
 
     @property
     def n_orders(self):
@@ -69,9 +64,14 @@ class Trade:
         else:
             return 1
 
-    @property
+    @cached_property
     def as_array(self):
-        return self._as_array
+        return Bunch(
+            asset=np.array(self.asset).reshape(-1),
+            lot=np.array(self.lot).reshape(-1),
+            open_bar=np.tile(np.array(self.open_bar), self.n_orders),
+            close_bar=np.tile(np.array(self.close_bar), self.n_orders),
+        )
 
     def __mul__(self, num):
         trade = copy(self)

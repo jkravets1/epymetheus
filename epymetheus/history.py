@@ -54,7 +54,7 @@ class History(Bunch):
         trades = np.array(list(gen_trades))
 
         trade_index = np.concatenate([
-            np.repeat(i, trade.n_bets) for i, trade in enumerate(trades)
+            np.repeat(i, trade.n_orders) for i, trade in enumerate(trades)
         ])
         order_index = np.arange(len(trade_index))
 
