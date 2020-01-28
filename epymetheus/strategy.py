@@ -86,25 +86,25 @@ class TradeStrategy(metaclass=ABCMeta):
             Parameters of the trade strategy.
         """
 
-    def setup(self,
-              metrics=['fin_wealth'],
-              slippage=0.0,
-              benchmark=None,
-              ):
-        """
-        Configure the context of backtesting.
+    # def setup(self,
+    #           metrics=['fin_wealth'],
+    #           slippage=0.0,
+    #           benchmark=None,
+    #           ):
+    #     """
+    #     Configure the context of backtesting.
 
-        Parameters
-        ----------
-        - metrics
-        - slippage
-        - benchmark
-        """
-        self.context = Bunch(
-            metrics=metrics,
-            slippage=slippage,
-            benchmark=benchmark,
-        )
+    #     Parameters
+    #     ----------
+    #     - metrics
+    #     - slippage
+    #     - benchmark
+    #     """
+    #     self.context = Bunch(
+    #         metrics=metrics,
+    #         slippage=slippage,
+    #         benchmark=benchmark,
+    #     )
 
     def run(self, universe, verbose=True, save={}):
         """
