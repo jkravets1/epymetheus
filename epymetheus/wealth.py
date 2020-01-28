@@ -25,9 +25,9 @@ class Wealth(Bunch):
         wealth = (position * price_changes).sum(axis=1).cumsum()
         return cls(bars=strategy.universe.bars, wealth=wealth)
 
-    @property
-    def n_bars(self):
-        return len(self.wealth)
+    # @property
+    # def n_bars(self):
+    #     return len(self.wealth)
 
     # def to_series(self):
     #     return pd.Series(data=self.data, index=self.bars)
