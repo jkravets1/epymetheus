@@ -18,16 +18,20 @@ class Trade:
     ---------
     - asset : str
         Name of asset.
-    - open_bar
+    - open_bar : object
         Bar to open the trade.
-    - close_bar
+    - close_bar : object or None, default None
         Bar to close the trade.
     - lot : float, default 1.0
         Lot to trade in unit of share.
+    - atake : float > 0 or None, default None
+    - rtake : float > 0 or None, default None
+    - acut : float < 0 or None, default None
+    - rcut : float < 0 or None, default None
 
     Attributes
     ----------
-    - n_bets : int
+    - n_orders : int
         Number of assets to bet.
 
     Example
@@ -52,7 +56,17 @@ class Trade:
     ...     close_bar=cd,
     ... )
     """
-    def __init__(self, asset, open_bar, close_bar, lot=1.0):
+    def __init__(
+        self,
+        asset,
+        open_bar,
+        close_bar=None,
+        lot=1.0,
+        atake=None,
+        rtake=None,
+        acut=None,
+        rcut=None,
+    ):
         self.asset = asset
         self.open_bar = open_bar
         self.close_bar = close_bar
@@ -75,6 +89,15 @@ class Trade:
         )
 
     def __mul__(self, num):
+        """
+        Multiply lot of self.
+
+        Examples
+        --------
+        >>> trade = -2.0 * Trade(..., lot=1.2)
+        >>> trade.lot
+        -2.4
+        """
         trade = copy(self)
         if hasattr(self.lot, '__iter__'):
             trade.lot = [lot * num for lot in trade.lot]
