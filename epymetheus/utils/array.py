@@ -31,7 +31,7 @@ def catch_first(X, fillnan=np.nan):
     return first
 
 
-def cutup(X, threshold=None):
+def cross_up(X, threshold=None):
     """
     Return array signaling if the series chop up the threshold.
 
@@ -50,22 +50,22 @@ def cutup(X, threshold=None):
     array([[ 1, -1],
            [ 0,  1],
            [ 1,  2]])
-    >>> cutup(X)
+    >>> cross_up(X)
     array([[False, False],
            [False,  True],
            [ True, False]])
-    >>> cutup(X, [0, 1])
+    >>> cross_up(X, [0, 1])
     array([[False, False],
            [False, False],
            [ True,  True]])
     """
     if threshold is not None:
-        return cutup(X - np.array(threshold))
+        return cross_up(X - np.array(threshold))
     return (X > 0) & (np.roll(X, axis=0) <= 0)
 
 
-def cutdown(X):
-    return cutup(-X)
+def cross_down(X):
+    return cross_up(-X)
 
 
 def true_since(index, n_samples):
@@ -97,3 +97,19 @@ def true_until(index, n_samples):
            [False, False,  True, False]])
     """
     return ~true_since(index + 1, n_samples)
+
+def true_at(index, n_samples):
+    """
+    Examples
+    --------
+    >>> index
+    array([  1,  0,  5, -1])
+    >>> true_since(index, 3)
+    array([[False,  True, False, False],
+           [ True, False, False, False],
+           [False, False, False, False]])
+    """
+    n_index = index.size
+    index_ = np.tile(index, (n_samples, 1))
+    row = np.tile(np.arange(n_samples)[:, np.newaxis], (1, n_index))
+    return index_ == row
