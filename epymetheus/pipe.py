@@ -44,10 +44,14 @@ def assets(strategy):
         with the following attributes:
         * trades
     """
+    if strategy.n_trades == 0:
+        return np.array([])
     return np.concatenate([trade.asset for trade in strategy.trades])
 
 
 def lots(strategy):
+    if strategy.n_trades == 0:
+        return np.array([])
     return np.concatenate([trade.lot for trade in strategy.trades])
 
 
@@ -81,8 +85,38 @@ def gains(strategy):
     return (strategy.close_prices - strategy.open_prices) * strategy.lots
 
 
+def _transaction_matrix(strategy):
+    """
+    Represent transaction at each bar and asset.
+
+    Returns
+    -------
+    transaction_matrix : array, shape (n_bars, n_assets)
+
+    Examples
+    --------
+    >>> strategy.trades = [
+    ...     Trade(asset='AAPL', open_bar='Bar1', lot=2),
+    ...     Trade(asset=['AAPL', 'MSFT'], open_bar='Bar1', lot=[3, 4]),
+    ... ]
+    """
+    # (n_orders, n_assets)
+    onehot_assets = strategy.universe._asset_onehot(strategy.assets)
+    # (n_orders, n_bars)
+    onehot_obars = strategy.universe._bar_onehot(strategy.open_bars)
+    onehot_cbars = strategy.universe._bar_onehot(strategy.close_bars)
+    diag_lots = np.diag(strategy.lots)  # (n_orders, n_orders)
+
+    transaction_o = np.dot(np.dot(onehot_obars.T, diag_lots), onehot_assets)
+    transaction_c = np.dot(np.dot(onehot_cbars.T, diag_lots), onehot_assets)
+
+    return transaction_o - transaction_c
+
+
 def _lot_matrix(strategy):
     """
+    Represent lot of each asset and trade.
+
     Parameters
     ----------
     - strategy : Tradestrategy

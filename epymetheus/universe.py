@@ -146,22 +146,21 @@ class Universe:
 
         Parameters
         ----------
-        - assets : array-like, shape (n_orders, )
+        - assets : array-like, shape (n, )
 
         Returns
         -------
-        asset_onehot : array, shape (n_orders, n_assets)
+        asset_onehot : array, shape (n, n_assets)
 
         Examples
         --------
         >>> universe.assets
         Index(['AAPL', 'MSFT', 'AMZN'], dtype='object')
         >>> universe._asset_onehot(['MSFT', 'AAPL'])
-        array([[0 1 0]
-               [1 0 0]])
+        array([[0., 1., 0.]
+               [1., 0., 0.]])
         """
-        eye_assets = np.eye(self.n_assets)
-        return eye_assets[self._asset_id(assets)]
+        return np.eye(self.n_assets)[self._asset_id(assets)]
 
     def _bar_id(self, bars):
         """
@@ -179,12 +178,34 @@ class Universe:
         --------
         >>> universe.bars
         Index(['2000-01-01', '2000-01-02', '2000-01-03'], dtype='object')
-        >>> universe._asset_id('2000-01-02')
+        >>> universe._bar_id('2000-01-02')
         array(1)
-        >>> universe._asset_id(['2000-01-02', '2000-01-0'])
+        >>> universe._bar_id(['2000-01-02', '2000-01-01'])
         array([1, 0])
         """
         return self.bars.get_indexer(bars)
+
+    def _bar_onehot(self, bars):
+        """
+        Return one-hot vectors from bar names.
+
+        Parameters
+        ----------
+        - bars : array-like, shape (n, )
+
+        Returns
+        -------
+        bar_ids : array, shape (n, n_bars)
+
+        Examples
+        --------
+        >>> universe.bars
+        Index(['2000-01-01', '2000-01-02', '2000-01-03'], dtype='object')
+        >>> universe._bar_onehot(['2000-01-02', '2000-01-01'])
+        array([[0., 1., 0.]
+               [1., 0., 0.]])
+        """
+        return np.eye(self.n_bars)[self._bar_id(bars)]
 
     def _pick_prices(self, bars, assets):
         """

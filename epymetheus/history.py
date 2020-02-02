@@ -3,7 +3,6 @@ from time import time
 import numpy as np
 
 from epymetheus.utils import Bunch
-from epymetheus.utils.array import catch_first, cross_up
 
 
 class History(Bunch):
@@ -33,8 +32,7 @@ class History(Bunch):
     """
     def __init__(self, strategy=None, verbose=True, **kwargs):
         if strategy is not None:
-            history = self.__from_strategy(strategy, verbose=verbose)
-            super().__init__(**history)
+            super().__init__(**self.__from_strategy(strategy, verbose=verbose))
         else:
             super().__init__(**kwargs)
 
@@ -58,7 +56,7 @@ class History(Bunch):
             print('Evaluating history ... ', end='')
 
         if strategy.n_trades == 0:
-            return cls._empty()
+            return cls.__empty()
 
         history = cls()
 
@@ -72,10 +70,6 @@ class History(Bunch):
         # TODO
         # history._get_close_bars(strategy)
 
-        # history.durations = history._get_durations(strategy)
-        # history.open_prices = history._get_open_prices(strategy)
-        # history.close_prices = history._get_close_prices(strategy)
-        # history.gains = history._get_gains(strategy)
         history.durations = strategy.durations
         history.open_prices = strategy.open_prices
         history.close_prices = strategy.close_prices
@@ -86,92 +80,8 @@ class History(Bunch):
 
         return history
 
-    def _get_durations(self, strategy=None):
-        """
-        Return durations of orders.
-
-        Parameters
-        ----------
-        - strategy : TradeStrategy
-            Ignored.
-
-        Returns
-        -------
-        durations : array, shape (n_orders, )
-            Duration of each trade.
-        """
-        return self.close_bars - self.open_bars
-
-    def _get_open_prices(self, strategy):
-        """
-        Return open_prices of orders.
-
-        Parameters
-        ----------
-        - strategy : TradeStrategy
-            Trade strategy with the following attributes:
-            * universe
-
-        Returns
-        -------
-        open_prices : array, shape (n_orders, )
-            Price at open_bar for each order.
-        """
-        return strategy.universe._pick_prices(self.open_bars, self.assets)
-
-    def _get_close_prices(self, strategy):
-        """
-        Return open_prices of orders.
-
-        Parameters
-        ----------
-        - strategy : TradeStrategy
-            Trade strategy with the following attributes:
-            * universe
-
-        Returns
-        -------
-        close_prices : array, shape (n_orders, )
-            Price at close_bar for each order.
-        """
-        return strategy.universe._pick_prices(self.close_bars, self.assets)
-
-    def _get_gains(self, strategy=None):
-        """
-        Return gains of orders.
-
-        Parameters
-        ----------
-        - strategy : TradeStrategy
-            Ignored.
-
-        Returns
-        -------
-        gains : array, shape (n_orders, )
-            Gain of each order.
-        """
-        gains = (self.close_prices - self.open_prices) * self.lots
-        return gains
-
-    def _get_close_bars(self, strategy):
-        """
-        Get close bars based on atakes.
-
-        Returns
-        -------
-        close_bars : shape (n_trades, )
-            Represent close bar of each trade.
-        """
-        acumpnl = strategy._acumpnl_matrix
-        atakes = [trade.atake or np.inf for trade in strategy.trades]
-
-        return catch_first(np.logical_or.reduce([
-            strategy._closebar_matrix,
-            cross_up(acumpnl, threshold=atakes),
-        ]))
-
     @classmethod
-    def _empty(cls):
+    def __empty(cls):
         """
         Return empty history.
 
@@ -180,11 +90,13 @@ class History(Bunch):
         empty_history : History
         """
         return cls(
-            index=np.zeros((0)),
+            trade_index=np.zeros((0)),
+            order_index=np.zeros((0)),
             assets=np.array([], dtype=str),
             lots=np.zeros((0)),
             open_bars=np.zeros((0)),
             close_bars=np.zeros((0)),
+            durations=np.zeros((0)),
             open_prices=np.zeros((0)),
             close_prices=np.zeros((0)),
             gains=np.zeros((0)),

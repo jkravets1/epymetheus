@@ -222,6 +222,10 @@ class TradeStrategy(metaclass=ABCMeta):
     def _acumpnl_matrix(self):
         return pipe._acumpnl_matrix(self)
 
+    @cached_property
+    def _transaction_matrix(self):
+        return pipe._transaction_matrix(self)
+
     def generate_trades(self, verbose=True):
         """
         Parameters
