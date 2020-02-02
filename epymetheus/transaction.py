@@ -1,4 +1,5 @@
 from functools import reduce
+from time import time
 
 import numpy as np
 import pandas as pd
@@ -57,12 +58,20 @@ class Transaction(Bunch):
             data = data.reindex(strategy.universe.bars, fill_value=0.0)
             return data.values
 
+        begin_time = time()
+
+        if verbose:
+            print('Evaluating transaction ... ', end='')
+
         assets = strategy.universe.assets
         data = {asset: to_data(asset) for asset in assets}
 
         transaction = cls(bars=strategy.universe.bars)
         for key, value in data.items():
             setattr(transaction, key, value)
+
+        if verbose:
+            print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
 
         return transaction
 

@@ -65,7 +65,23 @@ def close_bars(strategy):
     )
 
 
-def lot_matrix(strategy):
+def durations(strategy):
+    return strategy.close_bars - strategy.open_bars
+
+
+def open_prices(strategy):
+    return strategy.universe._pick_prices(strategy.open_bars, strategy.assets)
+
+
+def close_prices(strategy):
+    return strategy.universe._pick_prices(strategy.close_bars, strategy.assets)
+
+
+def gains(strategy):
+    return (strategy.close_prices - strategy.open_prices) * strategy.lots
+
+
+def _lot_matrix(strategy):
     """
     Parameters
     ----------
@@ -99,7 +115,7 @@ def lot_matrix(strategy):
     ], axis=-1)
 
 
-def value_matrix(strategy):
+def _value_matrix(strategy):
     """
     Returns
     -------
@@ -123,10 +139,10 @@ def value_matrix(strategy):
            [   -57,  1020],
            [   -76,  1360]])
     """
-    return np.dot(strategy.universe.prices, lot_matrix(strategy))
+    return np.dot(strategy.universe.prices, _lot_matrix(strategy))
 
 
-def opening_matrix(strategy):
+def _opening_matrix(strategy):
     """
     Parameters
     ----------
@@ -162,7 +178,7 @@ def opening_matrix(strategy):
         & true_until(close_ids, strategy.universe.n_bars)
 
 
-def closebar_matrix(strategy):
+def _closebar_matrix(strategy):
     """
     Examples
     --------
@@ -181,7 +197,7 @@ def closebar_matrix(strategy):
     return true_at(closebar_ids, strategy.n_trades)
 
 
-def acumpnl_matrix(strategy):
+def _acumpnl_matrix(strategy):
     """
     Return absolute cumulative profit and loss of each trade
 
@@ -189,8 +205,8 @@ def acumpnl_matrix(strategy):
     -------
     acumpnl : shape (n_nars, n_trades)
     """
-    value = value_matrix(strategy)
-    opening = opening_matrix(strategy)
+    value = _value_matrix(strategy)
+    opening = _opening_matrix(strategy)
     apnl = value.diff(axis=0, prepend=value[0, :])
     acumpnl = (apnl * opening).cumsum(axis=0)
     return acumpnl

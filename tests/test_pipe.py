@@ -7,9 +7,9 @@ from epymetheus import Universe, Trade, TradeStrategy
 from epymetheus.pipe import (
     trade_index,
     order_index,
-    lot_matrix,
-    value_matrix,
-    opening_matrix,
+    _lot_matrix,
+    _value_matrix,
+    _opening_matrix,
 )
 
 
@@ -83,10 +83,8 @@ def test_lot_matrix():
         [-2, 4],
         [0, 3],
     ])
-    print(lot_matrix(strategy).shape)
-    print(lot_expected.shape)
 
-    assert np.equal(lot_matrix(strategy), lot_expected).all()
+    assert np.equal(_lot_matrix(strategy), lot_expected).all()
 
 
 def test_value_matrix():
@@ -110,7 +108,7 @@ def test_value_matrix():
         [-76, 1360],
     ])
 
-    assert np.equal(value_matrix(strategy), value_expected).all()
+    assert np.equal(_value_matrix(strategy), value_expected).all()
 
 
 def test_opening_matrix():
@@ -137,4 +135,4 @@ def test_opening_matrix():
         [False, True],
     ])
 
-    assert np.equal(opening_matrix(strategy), opening_expected).all()
+    assert np.equal(_opening_matrix(strategy), opening_expected).all()

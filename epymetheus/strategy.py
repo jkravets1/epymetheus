@@ -7,6 +7,12 @@ import pandas as pd
 from .history import History
 from .transaction import Transaction
 from .wealth import Wealth
+from . import pipe
+
+try:
+    from functools import cached_property
+except ImportError:
+    cached_property = property
 
 
 class TradeStrategy(metaclass=ABCMeta):
@@ -108,14 +114,6 @@ class TradeStrategy(metaclass=ABCMeta):
     #         benchmark=benchmark,
     #     )
 
-    @property
-    def n_trades(self):
-        return len(self.trades)
-
-    @property
-    def n_orders(self):
-        return sum(trade.n_orders for trade in self.trades)
-
     def run(self, universe, verbose=True, save={}):
         """
         Run a backtesting of strategy.
@@ -133,7 +131,8 @@ class TradeStrategy(metaclass=ABCMeta):
             print('Running ... ')
 
         self.universe = universe
-        self.trades = self._get_trades(verbose=verbose)
+        self.trades = self.generate_trades(verbose=verbose)
+
         self.history = History(strategy=self, verbose=verbose)
         self.transaction = Transaction(strategy=self, verbose=verbose)
         self.wealth = Wealth(strategy=self, verbose=verbose)
@@ -153,7 +152,77 @@ class TradeStrategy(metaclass=ABCMeta):
 
         return self
 
-    def _get_trades(self, verbose):
+    # --------------------------------------------------------------------------------
+
+    @cached_property
+    def n_trades(self):
+        return len(self.trades)
+
+    @cached_property
+    def n_orders(self):
+        return sum(trade.n_orders for trade in self.trades)
+
+    @cached_property
+    def trade_index(self):
+        return pipe.trade_index(self)
+
+    @cached_property
+    def order_index(self):
+        return pipe.order_index(self)
+
+    @cached_property
+    def assets(self):
+        return pipe.assets(self)
+
+    @cached_property
+    def lots(self):
+        return pipe.lots(self)
+
+    @cached_property
+    def open_bars(self):
+        return pipe.open_bars(self)
+
+    @cached_property
+    def close_bars(self):
+        return pipe.close_bars(self)
+
+    @cached_property
+    def durations(self):
+        return pipe.durations(self)
+
+    @cached_property
+    def open_prices(self):
+        return pipe.open_prices(self)
+
+    @cached_property
+    def close_prices(self):
+        return pipe.close_prices(self)
+
+    @cached_property
+    def gains(self):
+        return pipe.gains(self)
+
+    @cached_property
+    def _lot_matrix(self):
+        return pipe._lot_matrix(self)
+
+    @cached_property
+    def _value_matrix(self):
+        return pipe._value_matrix(self)
+
+    @cached_property
+    def _opening_matrix(self):
+        return pipe._opening_matrix(self)
+
+    @cached_property
+    def _closebar_matrix(self):
+        return pipe._closebar_matrix(self)
+
+    @cached_property
+    def _acumpnl_matrix(self):
+        return pipe._acumpnl_matrix(self)
+
+    def generate_trades(self, verbose=True):
         """
         Parameters
         ----------

@@ -1,15 +1,7 @@
+from time import time
+
 import numpy as np
 
-from epymetheus.pipe import (
-    trade_index,
-    order_index,
-    assets,
-    lots,
-    open_bars,
-    close_bars,
-    acumpnl_matrix,
-    closebar_matrix,
-)
 from epymetheus.utils import Bunch
 from epymetheus.utils.array import catch_first, cross_up
 
@@ -41,13 +33,13 @@ class History(Bunch):
     """
     def __init__(self, strategy=None, verbose=True, **kwargs):
         if strategy is not None:
-            history = self._from_strategy(strategy, verbose=verbose)
+            history = self.__from_strategy(strategy, verbose=verbose)
             super().__init__(**history)
         else:
             super().__init__(**kwargs)
 
     @classmethod
-    def _from_strategy(cls, strategy, verbose=True):
+    def __from_strategy(cls, strategy, verbose=True):
         """
         Initialize self from strategy.
 
@@ -60,6 +52,8 @@ class History(Bunch):
         -------
         history : History
         """
+        begin_time = time()
+
         if verbose:
             print('Evaluating history ... ', end='')
 
@@ -68,23 +62,27 @@ class History(Bunch):
 
         history = cls()
 
-        history.trade_index = trade_index(strategy)
-        history.order_index = order_index(strategy)
-        history.assets = assets(strategy)
-        history.lots = lots(strategy)
-        history.open_bars = open_bars(strategy)
-        history.close_bars = close_bars(strategy)
+        history.trade_index = strategy.trade_index
+        history.order_index = strategy.order_index
+        history.assets = strategy.assets
+        history.lots = strategy.lots
+        history.open_bars = strategy.open_bars
+        history.close_bars = strategy.close_bars
 
         # TODO
         # history._get_close_bars(strategy)
 
-        history.durations = history._get_durations(strategy)
-        history.open_prices = history._get_open_prices(strategy)
-        history.close_prices = history._get_close_prices(strategy)
-        history.gains = history._get_gains(strategy)
+        # history.durations = history._get_durations(strategy)
+        # history.open_prices = history._get_open_prices(strategy)
+        # history.close_prices = history._get_close_prices(strategy)
+        # history.gains = history._get_gains(strategy)
+        history.durations = strategy.durations
+        history.open_prices = strategy.open_prices
+        history.close_prices = strategy.close_prices
+        history.gains = strategy.gains
 
         if verbose:
-            print('Done.')
+            print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
 
         return history
 
@@ -164,11 +162,11 @@ class History(Bunch):
         close_bars : shape (n_trades, )
             Represent close bar of each trade.
         """
-        acumpnl = acumpnl_matrix(strategy)
+        acumpnl = strategy._acumpnl_matrix
         atakes = [trade.atake or np.inf for trade in strategy.trades]
 
         return catch_first(np.logical_or.reduce([
-            closebar_matrix(strategy),
+            strategy._closebar_matrix,
             cross_up(acumpnl, threshold=atakes),
         ]))
 
