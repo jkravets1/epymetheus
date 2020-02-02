@@ -42,8 +42,6 @@ class History(Bunch):
         Parameters
         ----------
         - strategy : TradeStrategy
-            Trade strategy with the following attributes:
-            * universe
         - verbose : bool
 
         Returns
@@ -177,12 +175,12 @@ class History(Bunch):
         empty_history : History
         """
         return cls(
-            index=np.array([]),
+            index=np.zeros((0))
             assets=np.array([], dtype=str),
-            lots=np.array([]),
-            open_bars=np.array([]),
-            close_bars=np.array([]),
-            open_prices=np.array([]),
-            close_prices=np.array([]),
-            gains=np.array([]),
+            lots=np.zeros((0))
+            open_bars=np.zeros((0))
+            close_bars=np.zeros((0))
+            open_prices=np.zeros((0))
+            close_prices=np.zeros((0))
+            gains=np.zeros((0)),
         )
