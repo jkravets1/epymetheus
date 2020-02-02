@@ -1,9 +1,9 @@
 from time import time
 
-from .utils import Bunch
+from .utils import TradeResult
 
 
-class Transaction(Bunch):
+class Transaction(TradeResult):
     """
     Represent transaction history.
 
@@ -11,14 +11,8 @@ class Transaction(Bunch):
     - (name of assets) : array, (n_bars, )
         Transaction of each asset.
     """
-    def __init__(self, strategy=None, verbose=True, **kwargs):
-        if strategy is not None:
-            super().__init__(**self.__from_strategy(strategy, verbose=verbose))
-        else:
-            super().__init__(**kwargs)
-
     @classmethod
-    def __from_strategy(cls, strategy, verbose=True):
+    def from_strategy(cls, strategy, verbose=True):
         """
         Initialize self from strategy.
 

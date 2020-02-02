@@ -1,7 +1,7 @@
 import pytest
 
 
-from epymetheus.utils import Bunch
+from epymetheus.utils.bunch import Bunch
 
 
 def test_bunch():

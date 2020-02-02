@@ -85,25 +85,24 @@ class TradeStrategy(metaclass=ABCMeta):
         - universe : Universe
         - verbose : bool
         - save : dict
-        """
-        begin_time = time()
 
+        Returns
+        -------
+        self
+        """
         if verbose:
+            begin_time = time()
             print('Running ... ')
 
         self.universe = universe
         self.trades = self.__generate_trades(verbose=verbose)
-
         self.history = History(strategy=self, verbose=verbose)
         self.transaction = Transaction(strategy=self, verbose=verbose)
         self.wealth = Wealth(strategy=self, verbose=verbose)
+        self.is_runned = True
 
         if verbose:
-            print('Done.')
-            runtime = time() - begin_time
-            print(f'Runtime : {runtime:.1f}sec')
-
-        self.is_runned = True
+            print(f'Done. (Runtime : {time() - begin_time:.1f} sec)')
 
         return self
 

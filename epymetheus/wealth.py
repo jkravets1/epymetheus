@@ -1,9 +1,9 @@
 from time import time
 
-from .utils import Bunch
+from .utils import TradeResult
 
 
-class Wealth(Bunch):
+class Wealth(TradeResult):
     """
     Represent time-series of wealth.
 
@@ -11,14 +11,8 @@ class Wealth(Bunch):
     ----------
     - wealth
     """
-    def __init__(self, strategy=None, verbose=True, **kwargs):
-        if strategy is not None:
-            super().__init__(**self.__from_strategy(strategy, verbose=verbose))
-        else:
-            super().__init__(**kwargs)
-
     @classmethod
-    def __from_strategy(cls, strategy, verbose=True):
+    def from_strategy(cls, strategy, verbose=True):
         """
         Initialize wealth from strategy.
 

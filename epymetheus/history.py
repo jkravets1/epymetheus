@@ -2,10 +2,10 @@ from time import time
 
 import numpy as np
 
-from epymetheus.utils import Bunch
+from epymetheus.utils import TradeResult
 
 
-class History(Bunch):
+class History(TradeResult):
     """
     Represent trade history.
 
@@ -30,14 +30,8 @@ class History(Bunch):
     --------
     >>> ...
     """
-    def __init__(self, strategy=None, verbose=True, **kwargs):
-        if strategy is not None:
-            super().__init__(**self.__from_strategy(strategy, verbose=verbose))
-        else:
-            super().__init__(**kwargs)
-
     @classmethod
-    def __from_strategy(cls, strategy, verbose=True):
+    def from_strategy(cls, strategy, verbose=True):
         """
         Initialize self from strategy.
 
@@ -50,26 +44,17 @@ class History(Bunch):
         -------
         history : History
         """
-        begin_time = time()
-
         if verbose:
+            begin_time = time()
             print('Evaluating history ... ', end='')
 
-        if strategy.n_trades == 0:
-            return cls.__empty()
-
         history = cls()
-
         history.trade_index = strategy.trade_index
         history.order_index = strategy.order_index
         history.assets = strategy.assets
         history.lots = strategy.lots
         history.open_bars = strategy.open_bars
         history.close_bars = strategy.close_bars
-
-        # TODO
-        # history._get_close_bars(strategy)
-
         history.durations = strategy.durations
         history.open_prices = strategy.open_prices
         history.close_prices = strategy.close_prices
@@ -79,25 +64,3 @@ class History(Bunch):
             print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
 
         return history
-
-    @classmethod
-    def __empty(cls):
-        """
-        Return empty history.
-
-        Returns
-        -------
-        empty_history : History
-        """
-        return cls(
-            trade_index=np.zeros((0)),
-            order_index=np.zeros((0)),
-            assets=np.array([], dtype=str),
-            lots=np.zeros((0)),
-            open_bars=np.zeros((0)),
-            close_bars=np.zeros((0)),
-            durations=np.zeros((0)),
-            open_prices=np.zeros((0)),
-            close_prices=np.zeros((0)),
-            gains=np.zeros((0)),
-        )

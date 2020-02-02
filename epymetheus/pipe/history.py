@@ -66,6 +66,9 @@ def close_bars(strategy):
         [trade.n_orders for trade in strategy.trades]
     )
 
+def close_bars_bysignal(strategy):
+    pass
+
 
 def durations(strategy):
     return strategy.close_bars - strategy.open_bars
