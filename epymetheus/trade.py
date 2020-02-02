@@ -2,8 +2,6 @@ from copy import deepcopy
 
 import numpy as np
 
-from .utils import Bunch
-
 try:
     from functools import cached_property
 except ImportError:

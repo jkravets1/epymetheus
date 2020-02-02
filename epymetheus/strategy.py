@@ -114,7 +114,7 @@ class TradeStrategy(metaclass=ABCMeta):
 
     @property
     def n_orders(self):
-        return sum(trade.n_orders for trade in trades)
+        return sum(trade.n_orders for trade in self.trades)
 
     def run(self, universe, verbose=True, save={}):
         """
