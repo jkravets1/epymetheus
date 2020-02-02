@@ -98,6 +98,7 @@ def true_until(index, n_samples):
     """
     return ~true_since(index + 1, n_samples)
 
+
 def true_at(index, n_samples):
     """
     Examples

@@ -7,7 +7,8 @@ from epymetheus.pipe import (
     lots,
     open_bars,
     close_bars,
-    acumpnl_matrix
+    acumpnl_matrix,
+    catch_first,
 )
 from epymetheus.utils import Bunch
 
