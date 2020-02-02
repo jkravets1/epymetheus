@@ -1,10 +1,15 @@
 import numpy as np
 
-from .utils import Bunch
+from epymetheus.pipe import (
+    trade_index, order_index, assets, lots, open_bars, close_bars
+)
+from epymetheus.utils import Bunch
 
 
 class History(Bunch):
     """
+    Represent trade history.
+
     Attributes
     ----------
     - order_index : numpy.array, shape (n_orders, )
@@ -24,78 +29,160 @@ class History(Bunch):
 
     Examples
     --------
-    >>> history.assets
-    array(['AAPL', 'MSFT', ...])
-    >>> history.lots
+    >>> ...
     """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     @classmethod
-    def _from_strategy(cls, strategy):
+    def _from_strategy(cls, strategy, verbose=True):
         """
         Initialize self from strategy.
+
+        Parameters
+        ----------
+        - strategy : TradeStrategy
+            Trade strategy with the following attributes:
+            * universe
+        - verbose : bool
+
+        Returns
+        -------
+        history : History
         """
-        # Generator or iterator of trades
-        gen_trades = strategy.logic(strategy.universe, **strategy.params)
+        if verbose:
+            print('Evaluating history ... ', end='')
 
-        if gen_trades is None:  # If no trade has been yielded
-            return cls(
-                index=np.array([]),
-                assets=np.array([], dtype=str),
-                lots=np.array([]),
-                open_bars=np.array([]),
-                close_bars=np.array([]),
-                open_prices=np.array([]),
-                close_prices=np.array([]),
-                gains=np.array([]),
-            )
+        if strategy.n_trades == 0:
+            return cls._empty()
 
-        trades = np.array(list(gen_trades))
+        history = cls()
 
-        trade_index = np.concatenate([
-            np.repeat(i, trade.n_orders) for i, trade in enumerate(trades)
-        ])
-        order_index = np.arange(len(trade_index))
+        history.trade_index = trade_index(strategy)
+        history.order_index = order_index(strategy)
+        history.assets = assets(strategy)
+        history.lots = lots(strategy)
+        history.open_bars = open_bars(strategy)
+        history.close_bars = close_bars(strategy)
 
-        # TODO not beautiful; avoid comprehension notation
-        history = cls(
-            order_index=order_index,
-            trade_index=trade_index,
-            assets=np.concatenate([
-                trade.as_array.asset for trade in trades]),
-            lots=np.concatenate([
-                trade.as_array.lot for trade in trades]),
-            open_bars=np.concatenate([
-                trade.as_array.open_bar for trade in trades]),
-            close_bars=np.concatenate([
-                trade.as_array.close_bar for trade in trades]),
-        )
+        # TODO
+        # history._get_close_bars(strategy)
 
-        history.durations = history.close_bars - history.open_bars
-        history.open_prices = history._get_open_prices(strategy.universe)
-        history.close_prices = history._get_close_prices(strategy.universe)
-        history.gains = history._get_gains()
+        history.durations = history._get_durations(strategy)
+        history.open_prices = history._get_open_prices(strategy)
+        history.close_prices = history._get_close_prices(strategy)
+        history.gains = history._get_gains(strategy)
+
+        if verbose:
+            print('Done.')
 
         return history
 
-    def _pick_prices(self, universe, bars, assets):
+    def _get_durations(self, strategy=None):
         """
-        Pick array of prices of given bars (array-like) and
-        assets (array-like) from universe.
+        Return durations of orders.
+
+        Parameters
+        ----------
+        - strategy : TradeStrategy
+            Ignored.
+
+        Returns
+        -------
+        durations : array, shape (n_orders, )
+            Duration of each trade.
         """
-        def pick_price(bars, asset):
-            return universe.prices.at[bars, asset]
-        return np.frompyfunc(pick_price, 2, 1)(bars, assets)
+        return self.close_bars - self.open_bars
 
-    def _get_open_prices(self, universe):
-        prices = self._pick_prices(universe, self.open_bars, self.assets)
-        return prices.astype(np.float64)
+    def _get_open_prices(self, strategy):
+        """
+        Return open_prices of orders.
 
-    def _get_close_prices(self, universe):
-        prices = self._pick_prices(universe, self.close_bars, self.assets)
-        return prices.astype(np.float64)
+        Parameters
+        ----------
+        - strategy : TradeStrategy
+            Trade strategy with the following attributes:
+            * universe
 
-    def _get_gains(self):
+        Returns
+        -------
+        open_prices : array, shape (n_orders, )
+            Price at open_bar for each order.
+        """
+        return strategy.universe._pick_prices(self.open_bars, self.assets)
+
+    def _get_close_prices(self, strategy):
+        """
+        Return open_prices of orders.
+
+        Parameters
+        ----------
+        - strategy : TradeStrategy
+            Trade strategy with the following attributes:
+            * universe
+
+        Returns
+        -------
+        close_prices : array, shape (n_orders, )
+            Price at close_bar for each order.
+        """
+        return strategy.universe._pick_prices(self.close_bars, self.assets)
+
+    def _get_gains(self, strategy=None):
+        """
+        Return gains of orders.
+
+        Parameters
+        ----------
+        - strategy : TradeStrategy
+            Ignored.
+
+        Returns
+        -------
+        gains : array, shape (n_orders, )
+            Gain of each order.
+        """
         gains = (self.close_prices - self.open_prices) * self.lots
-        return gains.astype(np.float64)
+        return gains
+
+    # def _get_close_bars(self, strategy):
+    #     """
+    #     Get close bars based on atakes.
+
+    #     Returns
+    #     -------
+    #     close_bars : shape (n_trades, )
+    #         Represent close bar of each trade.
+    #     """
+    #     value = value_matrix(strategy)
+    #     opening = opening_matrix(strategy)
+    #     atakes = [trade.atake for trade in strategy.trades]
+
+    #     gain = value.diff(axis=0, prepend=value[0])
+    #     apnl = (gain * opening).cumsum(axis=0)
+    #     signal = cutup(apnl, threshold=atakes)
+
+    #     close_ids = catch_first(signal)
+    #     close_bars = np.array(strategy.assets[close_ids])
+
+    #     return close_bars
+
+    @classmethod
+    def _empty(cls):
+        """
+        Return empty history.
+
+        Returns
+        -------
+        empty_history : History
+        """
+        return cls(
+            index=np.array([]),
+            assets=np.array([], dtype=str),
+            lots=np.array([]),
+            open_bars=np.array([]),
+            close_bars=np.array([]),
+            open_prices=np.array([]),
+            close_prices=np.array([]),
+            gains=np.array([]),
+        )

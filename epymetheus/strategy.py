@@ -23,6 +23,9 @@ class TradeStrategy(metaclass=ABCMeta):
 
     Attributes
     ----------
+    - trades : array of Trade, shape (n_trades, )
+    - n_trades : int
+    - n_orders : int
     - universe : Universe
     - history : History
     - transaction : Transaction
@@ -105,6 +108,14 @@ class TradeStrategy(metaclass=ABCMeta):
     #         benchmark=benchmark,
     #     )
 
+    @property
+    def n_trades(self):
+        return len(self.trades)
+
+    @property
+    def n_orders(self):
+        return sum(trade.n_orders for trade in trades)
+
     def run(self, universe, verbose=True, save={}):
         """
         Run a backtesting of strategy.
@@ -116,12 +127,13 @@ class TradeStrategy(metaclass=ABCMeta):
         - verbose : bool
         - save : dict
         """
-        self.universe = universe
+        begin_time = time()
 
         if verbose:
-            begin_time = time()
-            print('Evaluating wealth ...')
+            print('Running ... ')
 
+        self.universe = universe
+        self.trades = self._get_trades(verbose=verbose)
         self.history = History._from_strategy(self, verbose=verbose)
         self.transaction = Transaction._from_strategy(self, verbose=verbose)
         self.wealth = Wealth._from_strategy(self, verbose=verbose)
@@ -140,3 +152,29 @@ class TradeStrategy(metaclass=ABCMeta):
                 data.to_csv(path)
 
         return self
+
+    def _get_trades(self, verbose):
+        """
+        Parameters
+        ----------
+        - self
+            TradeStrategy; necessary attributes:
+            * universe
+        - verbose : bool
+
+        Returns
+        -------
+        - list of Trade
+        """
+        if verbose:
+            def generate_trades():
+                trades = self.logic(self.universe, **self.params)
+                if not trades:
+                    return []
+                for i, trade in enumerate(trades):
+                    print(f'\rGenerating {i + 1} trades ... ', end='')
+                    yield trade
+                print('Done.')
+            return list(generate_trades())
+        else:
+            return list(self.logic(self.universe, **self.params))
