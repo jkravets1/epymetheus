@@ -25,10 +25,9 @@ class Transaction(TradeResult):
         -------
         transaction : Transaction
         """
-        begin_time = time()
-
         if verbose:
             print('Evaluating history ... ', end='')
+            begin_time = time()
 
         transaction = cls()
         transaction.bars = strategy.universe.bars

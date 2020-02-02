@@ -22,8 +22,8 @@ class Wealth(TradeResult):
         - verbose : bool
         """
         if verbose:
-            begin_time = time()
             print('Evaluating wealth ... ', end='')
+            begin_time = time()
 
         wealth = cls()
         wealth.bars = strategy.universe.bars

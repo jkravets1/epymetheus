@@ -43,8 +43,8 @@ class History(TradeResult):
         history : History
         """
         if verbose:
-            begin_time = time()
             print('Evaluating history ... ', end='')
+            begin_time = time()
 
         history = cls()
         history.trade_index = strategy.trade_index
