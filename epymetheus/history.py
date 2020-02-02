@@ -1,7 +1,5 @@
 from time import time
 
-import numpy as np
-
 from epymetheus.utils import TradeResult
 
 
