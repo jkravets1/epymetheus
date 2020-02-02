@@ -10,8 +10,12 @@ class Transaction(Bunch):
     """
     Represent transaction history.
     """
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, strategy=None, verbose=True, **kwargs):
+        if strategy is not None:
+            history = self._from_strategy(strategy, verbose=verbose)
+            super().__init__(**history)
+        else:
+            super().__init__(**kwargs)
 
     @classmethod
     def _from_strategy(cls, strategy, verbose=True):

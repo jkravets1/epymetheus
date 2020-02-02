@@ -134,9 +134,9 @@ class TradeStrategy(metaclass=ABCMeta):
 
         self.universe = universe
         self.trades = self._get_trades(verbose=verbose)
-        self.history = History._from_strategy(self, verbose=verbose)
-        self.transaction = Transaction._from_strategy(self, verbose=verbose)
-        self.wealth = Wealth._from_strategy(self, verbose=verbose)
+        self.history = History(strategy=self, verbose=verbose)
+        self.transaction = Transaction(strategy=self, verbose=verbose)
+        self.wealth = Wealth(strategy=self, verbose=verbose)
 
         if verbose:
             print('Done.')

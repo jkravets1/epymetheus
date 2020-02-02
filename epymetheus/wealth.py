@@ -12,8 +12,12 @@ class Wealth(Bunch):
     ----------
     - wealth
     """
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, strategy=None, verbose=True, **kwargs):
+        if strategy is not None:
+            history = self._from_strategy(strategy, verbose=verbose)
+            super().__init__(**history)
+        else:
+            super().__init__(**kwargs)
 
     @classmethod
     def _from_strategy(cls, strategy, verbose=True):
@@ -24,10 +28,3 @@ class Wealth(Bunch):
 
         wealth = (position * price_changes).sum(axis=1).cumsum()
         return cls(bars=strategy.universe.bars, wealth=wealth)
-
-    # @property
-    # def n_bars(self):
-    #     return len(self.wealth)
-
-    # def to_series(self):
-    #     return pd.Series(data=self.data, index=self.bars)
