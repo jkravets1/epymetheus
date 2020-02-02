@@ -1,5 +1,6 @@
 import pytest
 
+import numpy as np
 from random import choice, choices
 from epymetheus import Trade
 
@@ -23,13 +24,18 @@ def make_trade(n_orders):
 
 
 def assert_trade_operation(trade0, trade1, operator):
-    assert trade1.asset == trade0.asset
-    assert trade1.open_bar == trade0.open_bar
-    assert trade1.close_bar == trade0.close_bar
-    if hasattr(trade1.lot, '__iter__'):
-        assert trade1.lot == [operator(lot) for lot in trade0.lot]
-    else:
-        assert trade1.lot == operator(trade0.lot)
+    """
+    Examples
+    --------
+    >>> trade0 = Trade(..., lot=[1.0, -2.0], ...)
+    >>> trade1 = Trade(..., lot=[2.0, -4.0], ...)
+    >>> operator = lambda x: 2 * x
+    >>> assert_trade_operation(trade0, trade1, operator)
+    # True; no AssertionError
+    """
+    lot = np.array([operator(x) for x in trade0.lot])
+    trade0.lot = lot
+    assert trade0 == trade1
 
 
 # --------------------------------------------------------------------------------
@@ -46,6 +52,8 @@ def test_n_orders(n_orders):
 def test_mul(n_orders, a):
     trade0 = make_trade(n_orders)
     trade1 = a * trade0
+    print(type(trade0.lot))
+    print(type(trade1.lot))
     assert_trade_operation(trade0, trade1, lambda x: a * x)
 
 
@@ -77,14 +85,15 @@ def test_truediv(n_orders, a):
             trade1 = trade0 / a
 
 
-@pytest.mark.parametrize('n_orders', list_n_orders)
-@pytest.mark.parametrize('a', list_a)
-def test_floordiv(n_orders, a):
-    trade0 = make_trade(n_orders)
+# @pytest.mark.parametrize('n_orders', list_n_orders)
+# @pytest.mark.parametrize('a', list_a)
+# def test_floordiv(n_orders, a):
+#     trade0 = make_trade(n_orders)
 
-    if a != 0:
-        trade1 = trade0 // a
-        assert_trade_operation(trade0, trade1, lambda x: x // a)
-    else:
-        with pytest.raises(ZeroDivisionError):
-            trade1 = trade0 // a
+#     if a != 0:
+#         trade1 = trade0 // a
+#         assert_trade_operation(trade0, trade1, lambda x: x // a)
+#     else:
+#         print(trade0.lot)
+#         with pytest.raises(ZeroDivisionError):
+#             trade1 = trade0 // a

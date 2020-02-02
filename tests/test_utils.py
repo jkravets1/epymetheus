@@ -3,7 +3,7 @@ import pytest
 import numpy as np
 
 from epymetheus.utils import Bunch
-from epymetheus.utils import check_prices
+# from epymetheus.utils import check_prices
 
 
 
@@ -25,10 +25,10 @@ def test_bunch():
         d = bunch.d
 
 
-@pytest.mark.parametrize('invalid_value', [np.nan, np.inf])
-def test_check_prices(invalid_value):
-    prices = np.random.randn(100, 100)
-    prices[42, 24] = invalid_value
+# @pytest.mark.parametrize('invalid_value', [np.nan, np.inf])
+# def test_check_prices(invalid_value):
+#     prices = np.random.randn(100, 100)
+#     prices[42, 24] = invalid_value
 
-    with pytest.raises(ValueError):
-        check_prices(prices)
+#     with pytest.raises(ValueError):
+#         check_prices(prices)

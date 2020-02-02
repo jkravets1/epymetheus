@@ -9,7 +9,7 @@ class StrategyWithoutLogic(TradeStrategy):
     pass
 
 
-class TestStrategy(TradeStrategy):
+class SampleStrategy(TradeStrategy):
     """
     This is my favorite strategy.
     """
@@ -31,7 +31,7 @@ def test_abc():
 
 
 def test_name():
-    strategy = TestStrategy()
+    strategy = SampleStrategy()
 
-    assert strategy.name == 'TestStrategy'
+    assert strategy.name == 'SampleStrategy'
     assert strategy.description == 'This is my favorite strategy.'
