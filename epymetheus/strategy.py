@@ -210,7 +210,7 @@ class TradeStrategy(metaclass=ABCMeta):
         -------
         - list of Trade
         """
-        iter_trades = self.logic(self.universe, **self.params)
+        iter_trades = self.logic(self.universe, **self.params) or []
 
         def iter_trades_verbose():
             for i, trade in enumerate(iter_trades):
@@ -219,6 +219,6 @@ class TradeStrategy(metaclass=ABCMeta):
             print('Done.')
 
         if verbose:
-            return list(iter_trades_verbose() or [])
+            return list(iter_trades_verbose())
         else:
-            return list(iter_trades or [])
+            return list(iter_trades)

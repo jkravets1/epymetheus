@@ -32,8 +32,8 @@ class Wealth(Bunch):
             print('Evaluating wealth ... ', end='')
 
         wealth = cls()
-        wealth.bars = bars=strategy.universe.bars
-        wealth.wealth = wealth=strategy.wealth_
+        wealth.bars = strategy.universe.bars
+        wealth.wealth = strategy.wealth_
 
         if verbose:
             print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
