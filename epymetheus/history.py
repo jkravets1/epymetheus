@@ -1,7 +1,13 @@
 import numpy as np
 
 from epymetheus.pipe import (
-    trade_index, order_index, assets, lots, open_bars, close_bars
+    trade_index,
+    order_index,
+    assets,
+    lots,
+    open_bars,
+    close_bars,
+    acumpnl_matrix
 )
 from epymetheus.utils import Bunch
 
@@ -143,27 +149,22 @@ class History(Bunch):
         gains = (self.close_prices - self.open_prices) * self.lots
         return gains
 
-    # def _get_close_bars(self, strategy):
-    #     """
-    #     Get close bars based on atakes.
+    def _get_close_bars(self, strategy):
+        """
+        Get close bars based on atakes.
 
-    #     Returns
-    #     -------
-    #     close_bars : shape (n_trades, )
-    #         Represent close bar of each trade.
-    #     """
-    #     value = value_matrix(strategy)
-    #     opening = opening_matrix(strategy)
-    #     atakes = [trade.atake for trade in strategy.trades]
+        Returns
+        -------
+        close_bars : shape (n_trades, )
+            Represent close bar of each trade.
+        """
+        acumpnl = acumpnl_matrix(strategy)
+        atakes = [trade.atake or np.inf for trade in strategy.trades]
 
-    #     gain = value.diff(axis=0, prepend=value[0])
-    #     apnl = (gain * opening).cumsum(axis=0)
-    #     signal = cutup(apnl, threshold=atakes)
-
-    #     close_ids = catch_first(signal)
-    #     close_bars = np.array(strategy.assets[close_ids])
-
-    #     return close_bars
+        return catch_first(np.logical_or.reduce([
+            closebar_matrix(strategy),
+            cross_up(acumpnl, threshold=atakes),
+        ]))
 
     @classmethod
     def _empty(cls):
