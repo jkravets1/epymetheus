@@ -8,9 +8,9 @@ from epymetheus.pipe import (
     open_bars,
     close_bars,
     acumpnl_matrix,
-    catch_first,
 )
 from epymetheus.utils import Bunch
+from epymetheus.utils.array import catch_first
 
 
 class History(Bunch):
