@@ -35,11 +35,15 @@ class Universe:
     --------
     >>> ...
     """
-    def __init__(self, prices, name=None):
+    def __init__(self, prices, name=None, bars=None, assets=None):
         self.__check_prices(prices)
 
         self.prices = prices
         self.name = name
+        if bars:
+            self.bars = bars
+        if assets:
+            self.assets = assets
 
     @property
     def bars(self):
@@ -51,7 +55,7 @@ class Universe:
 
     @property
     def n_bars(self):
-        return len(self.bars)
+        return self.bars.size
 
     @property
     def assets(self):
@@ -63,7 +67,7 @@ class Universe:
 
     @property
     def n_assets(self):
-        return len(self.assets)
+        return self.assets.size
 
     @classmethod
     def read_csv(
@@ -72,15 +76,16 @@ class Universe:
         name=None,
         begin_bar=None,
         end_bar=None,
+        bars=None,
+        assets=None,
         **kwargs
     ):
         name = name or Path(csv).stem
         prices = pd.read_csv(csv, **kwargs)
-
-        prices = prices.loc[begin_bar or prices.index[0]:
-                            end_bar or prices.index[-1]]
-
-        return cls(prices, name=name)
+        prices = prices.loc[
+            begin_bar or prices.index[0]: end_bar or prices.index[-1]
+        ]
+        return cls(prices, name=name, bars=bars, assets=assets)
 
     def read_csvs(
         cls,
@@ -88,18 +93,17 @@ class Universe:
         name=None,
         begin_bar=None,
         end_bar=None,
+        bars=None,
         assets=None,
         **kwargs
     ):
         prices = pd.concat([
             pd.read_csv(csv, **kwargs) for csv in csvs
         ], axis=1)
-        prices = prices.loc[begin_bar or prices.index[0]:
-                            end_bar or prices.index[-1]]
-        if assets is not None:
-            prices.columns = assets
-
-        return cls(prices, name=name)
+        prices = prices.loc[
+            begin_bar or prices.index[0]: end_bar or prices.index[-1]
+        ]
+        return cls(prices, name=name, bars=bars, assets=assets)
 
     # ------------------------------------------------------------
 
@@ -108,6 +112,10 @@ class Universe:
             raise ValueError('Price has NA.')
         if np.isinf(prices).any(None):
             raise ValueError('Price has INF.')
+        if not prices.index.is_unique:
+            raise ValueError('Bars are not unique.')
+        if not prices.columns.is_unique:
+            raise ValueError('Assets are not unique.')
 
     def _asset_id(self, assets):
         """
