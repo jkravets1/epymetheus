@@ -1,4 +1,4 @@
-import pytest
+import pytest  # noqa
 
 import numpy as np
 import pandas as pd
@@ -44,7 +44,7 @@ def make_strategy(universe=None, trades=None):
 # --------------------------------------------------------------------------------
 
 
-def test_trade_index():
+def test_trade_trade_index():
     universe = make_universe(100, 3)
     trades = [
         Trade(asset=['Asset0', 'Asset1'], lot=[1, -2], open_bar='Bar0'),
@@ -57,7 +57,7 @@ def test_trade_index():
     assert np.equal(trade_index(strategy), trade_index_expected).all()
 
 
-def test_trade_index():
+def test_trade_order_index():
     universe = make_universe(100, 3)
     trades = [
         Trade(asset=['Asset0', 'Asset1'], lot=[1, -2], open_bar='Bar0'),
@@ -79,9 +79,9 @@ def test_lot_matrix():
     strategy = make_strategy(universe=universe, trades=trades)
 
     lot_expected = np.array([
-        [ 1, 0],
+        [1, 0],
         [-2, 4],
-        [ 0, 3],
+        [0, 3],
     ])
     print(lot_matrix(strategy).shape)
     print(lot_expected.shape)
@@ -116,8 +116,18 @@ def test_value_matrix():
 def test_opening_matrix():
     universe = make_universe(3, 3)
     trades = [
-        Trade(asset=['Asset0', 'Asset1'], lot=[1, 1], open_bar='Bar0', close_bar='Bar1'),
-        Trade(asset=['Asset2', 'Asset1'], lot=[1, 1], open_bar='Bar0', close_bar='Bar2'),
+        Trade(
+            asset=['Asset0', 'Asset1'],
+            lot=[1, 1],
+            open_bar='Bar0',
+            close_bar='Bar1'
+        ),
+        Trade(
+            asset=['Asset2', 'Asset1'],
+            lot=[1, 1],
+            open_bar='Bar0',
+            close_bar='Bar2'
+        ),
     ]
     strategy = make_strategy(universe=universe, trades=trades)
 

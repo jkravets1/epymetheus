@@ -2,10 +2,9 @@ import pytest
 from ._utils import make_randomuniverse, generate_trades
 
 import random
-import pandas as pd
 import numpy as np
 
-from epymetheus import Trade, TradeStrategy, Universe
+from epymetheus import Trade, TradeStrategy
 
 
 list_seed = [42, 1, 2, 3]
@@ -19,7 +18,12 @@ class OneTradeStrategy(TradeStrategy):
     Yield a single trade.
     """
     def logic(self, universe, asset, lot, open_bar, close_bar):
-        yield Trade(asset=asset, lot=lot, open_bar=open_bar, close_bar=close_bar)
+        yield Trade(
+            asset=asset,
+            lot=lot,
+            open_bar=open_bar,
+            close_bar=close_bar,
+        )
 
 
 # --------------------------------------------------------------------------------
@@ -30,7 +34,8 @@ class OneTradeStrategy(TradeStrategy):
 @pytest.mark.parametrize('n_assets', list_n_assets)
 @pytest.mark.parametrize('lot', list_lot)
 def test_one(seed, n_bars, n_assets, lot):
-    np.random.seed(seed); random.seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
 
     universe = make_randomuniverse(n_bars, n_assets)
 
@@ -45,6 +50,7 @@ def test_one(seed, n_bars, n_assets, lot):
     open_price = universe.prices.at[open_bar, asset]
     close_price = universe.prices.at[close_bar, asset]
     gain = lot * (close_price - open_price)
+    duration = close_bar - open_bar
 
     assert strategy.history.order_index == np.array([0])
     assert strategy.history.trade_index == np.array([0])
@@ -53,7 +59,7 @@ def test_one(seed, n_bars, n_assets, lot):
     assert (strategy.history.lots == np.array([lot])).all()
     assert (strategy.history.open_bars == np.array([open_bar])).all()
     assert (strategy.history.close_bars == np.array([close_bar])).all()
-    assert (strategy.history.durations == np.array([close_bar - open_bar])).all()
+    assert (strategy.history.durations == np.array([duration])).all()
 
     assert (strategy.history.open_prices == np.array([open_price])).all()
     assert (strategy.history.close_prices == np.array([close_price])).all()

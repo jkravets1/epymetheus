@@ -1,11 +1,7 @@
 import pytest
 from ._utils import make_randomuniverse
 
-import pandas as pd
-import numpy as np
-
-from epymetheus import TradeStrategy, Universe
-from epymetheus.datasets import make_randomwalk
+from epymetheus import TradeStrategy
 
 
 list_seed = [42]

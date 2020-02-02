@@ -1,11 +1,8 @@
 import pytest
-from ._utils import make_randomuniverse, generate_trades
+from ._utils import make_randomuniverse
 
 import random
-import pandas as pd
 import numpy as np
-
-from epymetheus import Trade, TradeStrategy, Universe
 
 
 list_seed = [42]
@@ -20,7 +17,8 @@ list_n_assets = [1, 100]
 @pytest.mark.parametrize('n_bars', list_n_bars)
 @pytest.mark.parametrize('n_assets', list_n_assets)
 def test_assets(seed, n_bars, n_assets):
-    np.random.seed(seed); random.seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
 
     universe = make_randomuniverse(n_bars, n_assets)
 
@@ -35,7 +33,3 @@ def test_assets(seed, n_bars, n_assets):
 
     assert list(universe.bars) == new_bars
     assert list(universe.assets) == new_assets
-
-
-
-

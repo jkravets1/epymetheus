@@ -1,5 +1,4 @@
 import pytest
-from ._utils import make_randomuniverse
 
 from epymetheus import TradeStrategy
 
@@ -22,12 +21,12 @@ class SampleStrategy(TradeStrategy):
 
 def test_abc():
     with pytest.raises(TypeError):
-        # Can't instantiate abstract class TradeStrategy with abstract methods logic
         strategy = TradeStrategy()
+        print(strategy)
 
     with pytest.raises(TypeError):
-        # Can't instantiate abstract class TradeStrategy with abstract methods logic
         strategy = StrategyWithoutLogic()
+        print(strategy)
 
 
 def test_name():

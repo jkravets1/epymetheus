@@ -8,9 +8,10 @@ from epymetheus.pipe import (
     open_bars,
     close_bars,
     acumpnl_matrix,
+    closebar_matrix,
 )
 from epymetheus.utils import Bunch
-from epymetheus.utils.array import catch_first
+from epymetheus.utils.array import catch_first, cross_up
 
 
 class History(Bunch):
