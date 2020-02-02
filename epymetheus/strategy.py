@@ -122,10 +122,9 @@ class TradeStrategy(metaclass=ABCMeta):
             begin_time = time()
             print('Evaluating wealth ...')
 
-        # TODO Pass verbose to each constructer
-        self.history = History._from_strategy(self)
-        self.transaction = Transaction._from_strategy(self)
-        self.wealth = Wealth._from_strategy(self)
+        self.history = History._from_strategy(self, verbose=verbose)
+        self.transaction = Transaction._from_strategy(self, verbose=verbose)
+        self.wealth = Wealth._from_strategy(self, verbose=verbose)
 
         if verbose:
             print('Done.')
