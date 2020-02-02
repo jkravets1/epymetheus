@@ -1,6 +1,6 @@
 import numpy as np
 
-from epymetheus.utils.array import true_since, true_until
+from epymetheus.utils.array import true_since, true_until, true_at
 
 
 def trade_index(strategy):
@@ -33,11 +33,17 @@ def order_index(strategy):
     -------
     order_index : array, shape (n_orders, )
     """
-    n_orders = sum(trade.n_orders for trade in strategy.trades)
-    return np.arange(n_orders)
+    return np.arange(strategy.n_orders)
 
 
 def assets(strategy):
+    """
+    Parameters
+    ----------
+    strategy : TradeStrategy
+        with the following attributes:
+        * trades
+    """
     return np.concatenate([trade.asset for trade in strategy.trades])
 
 
@@ -111,8 +117,7 @@ def value_matrix(strategy):
            [  2,  20, 200],
            [  3,  30, 300],
            [  4,  40, 400]])
-    >>> history = ...
-    >>> history._value_matrix(...)
+    >>> value_matrix(...)
     array([[   -19,   340],
            [   -38,   680],
            [   -57,  1020],
@@ -142,8 +147,7 @@ def opening_matrix(strategy):
     >>> trade0 = Trade(..., open_bar='01-01', close_bar='01-02')
     >>> trade1 = Trade(..., open_bar='01-01', close_bar='01-03')
     >>> strategy.trades = [trade0, trade1]
-    >>> history = ...
-    >>> history._opening_matrix(strategy)
+    >>> opening_matrix(strategy)
     array([[False, False],
            [ True,  True],
            [False,  True]])
@@ -156,3 +160,37 @@ def opening_matrix(strategy):
 
     return true_since(open_ids + 1, strategy.universe.n_bars) \
         & true_until(close_ids, strategy.universe.n_bars)
+
+
+def closebar_matrix(strategy):
+    """
+    Examples
+    --------
+    >>> universe.assets
+    Index(['01-01', '01-02', '01-03'], dtype='object')
+    >>> trade0 = Trade(..., open_bar='01-01', close_bar='01-02')
+    >>> trade1 = Trade(..., open_bar='01-01', close_bar='01-03')
+    >>> strategy.trades = [trade0, trade1]
+    >>> opening_matrix(strategy)
+    array([[False, False],
+           [False,  True],
+           [ True, False]])
+    """
+    close_bars = [trade.close_bar for trade in strategy.trades]
+    closebar_ids = strategy.universe._bar_id(close_bars)
+    return true_at(closebar_ids, strategy.n_trades)
+
+
+def acumpnl_matrix(strategy):
+    """
+    Return absolute cumulative profit and loss of each trade
+
+    Returns
+    -------
+    acumpnl : shape (n_nars, n_trades)
+    """
+    value = value_matrix(strategy)
+    opening = opening_matrix(strategy)
+    apnl = value.diff(axis=0, prepend=value[0, :])
+    acumpnl = (apnl * opening).cumsum(axis=0)
+    return acumpnl
