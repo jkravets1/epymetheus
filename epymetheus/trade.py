@@ -1,4 +1,4 @@
-from copy import copy
+from copy import deepcopy
 
 import numpy as np
 
@@ -67,10 +67,14 @@ class Trade:
         acut=None,
         rcut=None,
     ):
-        self.asset = asset
+        self.asset = np.array(asset).reshape(-1)
         self.open_bar = open_bar
         self.close_bar = close_bar
-        self.lot = lot
+        self.lot = np.array(lot, dtype=np.float64).reshape(-1)
+        self.atake = atake
+        self.rtake = rtake
+        self.acut = acut
+        self.rcut = rcut
 
     @property
     def n_orders(self):
@@ -79,13 +83,44 @@ class Trade:
         else:
             return 1
 
-    @cached_property
-    def as_array(self):
-        return Bunch(
-            asset=np.array(self.asset).reshape(-1),
-            lot=np.array(self.lot).reshape(-1),
-            open_bar=np.tile(np.array(self.open_bar), self.n_orders),
-            close_bar=np.tile(np.array(self.close_bar), self.n_orders),
+    # @cached_property
+    # def _as_array(self):
+    #     return Bunch(
+    #         asset=np.array(self.asset).reshape(-1),
+    #         lot=np.array(self.lot).reshape(-1),
+    #         open_bar=np.tile(np.array(self.open_bar), self.n_orders),
+    #         close_bar=np.tile(np.array(self.close_bar), self.n_orders),
+    #         atake=np.tile(np.array(self.atake), self.n_orders),
+    #     )
+
+    def _lot_vector(self, universe):
+        """
+        Return 1d array of lot to trade each asset.
+
+        Returns
+        -------
+        lot_vector : array, shape (n_assets, )
+
+        Examples
+        --------
+        >>> universe.assets
+        Index(['AAPL', 'MSFT', 'AMZN'], dtype='object')
+        >>> trade = Trade(['AAPL', 'MSFT'], lot=[1, -2], ...)
+        >>> trade._lot_vector(universe)
+        array([1, -2,  0])
+        """
+        asset_onehot = universe._asset_onehot(self.asset)
+        return np.dot(self.lot, asset_onehot)
+
+    def __eq__(self, other):
+        return (
+            (self.asset == other.asset).all() and
+            self.open_bar == other.open_bar and
+            (self.lot == other.lot).all() and
+            self.atake == other.atake and
+            self.rtake == other.rtake and
+            self.acut == other.acut and
+            self.rcut == other.rcut
         )
 
     def __mul__(self, num):
@@ -98,11 +133,12 @@ class Trade:
         >>> trade.lot
         -2.4
         """
-        trade = copy(self)
-        if hasattr(self.lot, '__iter__'):
-            trade.lot = [lot * num for lot in trade.lot]
-        else:
-            trade.lot *= num
+        trade = deepcopy(self)
+        trade.lot *= num
+        # if hasattr(self.lot, '__iter__'):
+        #     trade.lot = np.array([lot * num for lot in trade.lot])
+        # else:
+        #     trade.lot *= num
         return trade
 
     def __rmul__(self, num):
@@ -115,10 +151,10 @@ class Trade:
         print(1.0 / num)
         return self.__mul__(1.0 / num)
 
-    def __floordiv__(self, num):
-        trade = copy(self)
-        if hasattr(self.lot, '__iter__'):
-            trade.lot = [lot // num for lot in trade.lot]
-        else:
-            trade.lot //= num
-        return trade
+    # def __floordiv__(self, num):
+    #     trade = deepcopy(self)
+    #     if hasattr(self.lot, '__iter__'):
+    #         trade.lot = np.array([lot // num for lot in trade.lot])
+    #     else:
+    #         trade.lot //= num
+    #     return trade
