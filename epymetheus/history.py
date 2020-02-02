@@ -175,12 +175,12 @@ class History(Bunch):
         empty_history : History
         """
         return cls(
-            index=np.zeros((0))
+            index=np.zeros((0)),
             assets=np.array([], dtype=str),
-            lots=np.zeros((0))
-            open_bars=np.zeros((0))
-            close_bars=np.zeros((0))
-            open_prices=np.zeros((0))
-            close_prices=np.zeros((0))
+            lots=np.zeros((0)),
+            open_bars=np.zeros((0)),
+            close_bars=np.zeros((0)),
+            open_prices=np.zeros((0)),
+            close_prices=np.zeros((0)),
             gains=np.zeros((0)),
         )
