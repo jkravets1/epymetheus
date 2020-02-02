@@ -203,6 +203,10 @@ class TradeStrategy(metaclass=ABCMeta):
         return pipe.gains(self)
 
     @cached_property
+    def wealth_(self):
+        return pipe.wealth(self)
+
+    @cached_property
     def _lot_matrix(self):
         return pipe._lot_matrix(self)
 
