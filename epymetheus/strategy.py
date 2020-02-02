@@ -2,10 +2,10 @@ from abc import ABCMeta, abstractmethod
 from inspect import cleandoc
 from time import time
 
-from .history import History
-from .transaction import Transaction
-from .wealth import Wealth
-from . import pipe
+from epymetheus.history import History
+from epymetheus.transaction import Transaction
+from epymetheus.wealth import Wealth
+from epymetheus import pipe
 
 try:
     from functools import cached_property

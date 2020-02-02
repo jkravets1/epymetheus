@@ -1,6 +1,6 @@
 from time import time
 
-from .utils import TradeResult
+from epymetheus.utils import TradeResult
 
 
 class Transaction(TradeResult):
@@ -8,6 +8,7 @@ class Transaction(TradeResult):
     Represent transaction history.
 
     Attributes
+    ----------
     - (name of assets) : array, (n_bars, )
         Transaction of each asset.
     """

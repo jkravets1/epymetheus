@@ -74,22 +74,11 @@ class Trade:
         self.acut = acut
         self.rcut = rcut
 
+        self.__check_params()
+
     @property
     def n_orders(self):
-        if hasattr(self.lot, '__iter__'):
-            return len(self.lot)
-        else:
-            return 1
-
-    # @cached_property
-    # def _as_array(self):
-    #     return Bunch(
-    #         asset=np.array(self.asset).reshape(-1),
-    #         lot=np.array(self.lot).reshape(-1),
-    #         open_bar=np.tile(np.array(self.open_bar), self.n_orders),
-    #         close_bar=np.tile(np.array(self.close_bar), self.n_orders),
-    #         atake=np.tile(np.array(self.atake), self.n_orders),
-    #     )
+        return self.lot.size
 
     def _lot_vector(self, universe):
         """
@@ -110,16 +99,20 @@ class Trade:
         asset_onehot = universe._asset_onehot(self.asset)
         return np.dot(self.lot, asset_onehot)
 
+    def __check_params(self):
+        if self.asset.size != self.lot.size:
+            raise ValueError('Numbers of asset and lot should be equal')
+
     def __eq__(self, other):
-        return (
-            (self.asset == other.asset).all() and
-            self.open_bar == other.open_bar and
-            (self.lot == other.lot).all() and
-            self.atake == other.atake and
-            self.rtake == other.rtake and
-            self.acut == other.acut and
-            self.rcut == other.rcut
-        )
+        return all([
+            (self.asset == other.asset).all(),
+            self.open_bar == other.open_bar,
+            (self.lot == other.lot).all(),
+            self.atake == other.atake,
+            self.rtake == other.rtake,
+            self.acut == other.acut,
+            self.rcut == other.rcut,
+        ])
 
     def __mul__(self, num):
         """
@@ -133,10 +126,6 @@ class Trade:
         """
         trade = deepcopy(self)
         trade.lot *= num
-        # if hasattr(self.lot, '__iter__'):
-        #     trade.lot = np.array([lot * num for lot in trade.lot])
-        # else:
-        #     trade.lot *= num
         return trade
 
     def __rmul__(self, num):
@@ -146,13 +135,4 @@ class Trade:
         return self.__mul__(-1.0)
 
     def __truediv__(self, num):
-        print(1.0 / num)
         return self.__mul__(1.0 / num)
-
-    # def __floordiv__(self, num):
-    #     trade = deepcopy(self)
-    #     if hasattr(self.lot, '__iter__'):
-    #         trade.lot = np.array([lot // num for lot in trade.lot])
-    #     else:
-    #         trade.lot //= num
-    #     return trade

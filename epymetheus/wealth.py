@@ -1,6 +1,6 @@
 from time import time
 
-from .utils import TradeResult
+from epymetheus.utils import TradeResult
 
 
 class Wealth(TradeResult):
