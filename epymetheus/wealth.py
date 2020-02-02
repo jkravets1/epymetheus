@@ -16,7 +16,7 @@ class Wealth(Bunch):
         super().__init__(**kwargs)
 
     @classmethod
-    def _from_strategy(cls, strategy):
+    def _from_strategy(cls, strategy, verbose=True):
         transaction = pd.DataFrame(strategy.transaction).set_index('bars')
         position = transaction.cumsum(axis=0).shift().fillna(0.0).values
         prices = strategy.universe.prices.values

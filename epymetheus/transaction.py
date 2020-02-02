@@ -14,7 +14,7 @@ class Transaction(Bunch):
         super().__init__(**kwargs)
 
     @classmethod
-    def _from_strategy(cls, strategy):
+    def _from_strategy(cls, strategy, verbose=True):
         """Initialize self from strategy."""
         def to_transaction(lot, open_date, close_date):
             """
@@ -36,7 +36,7 @@ class Transaction(Bunch):
             """Sum Series by filling 0."""
             def add_fillzero(s1, s2):
                 return s1.add(s2, fill_value=0.0)
-            return reduce(add_fillzero, list_series, pd.Series())
+            return reduce(add_fillzero, list_series, pd.Series(dtype=float))
 
         def to_data(asset):  # TODO rename clearly
             """Return transaction of an asset."""
