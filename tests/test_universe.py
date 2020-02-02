@@ -5,17 +5,17 @@ import random
 import numpy as np
 
 
-list_seed = [42]
-list_n_bars = [10, 1000]
-list_n_assets = [1, 100]
+params_seed = [42]
+params_n_bars = [10, 1000]
+params_n_assets = [1, 100]
 
 
 # --------------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize('seed', list_seed)
-@pytest.mark.parametrize('n_bars', list_n_bars)
-@pytest.mark.parametrize('n_assets', list_n_assets)
+@pytest.mark.parametrize('seed', params_seed)
+@pytest.mark.parametrize('n_bars', params_n_bars)
+@pytest.mark.parametrize('n_assets', params_n_assets)
 def test_assets(seed, n_bars, n_assets):
     np.random.seed(seed)
     random.seed(seed)

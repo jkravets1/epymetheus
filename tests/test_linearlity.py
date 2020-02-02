@@ -7,11 +7,11 @@ import numpy as np
 from epymetheus import Trade, TradeStrategy
 
 
-list_seed = [42, 1, 2, 3]
-list_n_bars = [10, 1000]
-list_n_assets = [1, 100]
-list_n_trades = [10]
-list_a = [1.23, -1.23]
+params_seed = [42, 1, 2, 3]
+params_n_bars = [10, 1000]
+params_n_assets = [1, 100]
+params_n_trades = [10]
+params_a = [1.23, -1.23]
 
 lots = [0.0, 1, 1.23, -1.23, 12345.678]
 
@@ -56,10 +56,10 @@ def assert_mul(history_1, history_a, attribute, a=None):
 # --------------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize('seed', list_seed)
-@pytest.mark.parametrize('n_bars', list_n_bars)
-@pytest.mark.parametrize('n_assets', list_n_assets)
-@pytest.mark.parametrize('n_trades', list_n_trades)
+@pytest.mark.parametrize('seed', params_seed)
+@pytest.mark.parametrize('n_bars', params_n_bars)
+@pytest.mark.parametrize('n_assets', params_n_assets)
+@pytest.mark.parametrize('n_trades', params_n_trades)
 def test_add(seed, n_bars, n_assets, n_trades):
     """
     Test additivity of strategies for the following strategies:
@@ -116,11 +116,11 @@ def test_add(seed, n_bars, n_assets, n_trades):
     assert_add(wealth_0, wealth_1, wealth_A, 'wealth')
 
 
-@pytest.mark.parametrize('seed', list_seed)
-@pytest.mark.parametrize('n_bars', list_n_bars)
-@pytest.mark.parametrize('n_assets', list_n_assets)
-@pytest.mark.parametrize('n_trades', list_n_trades)
-@pytest.mark.parametrize('a', list_a)
+@pytest.mark.parametrize('seed', params_seed)
+@pytest.mark.parametrize('n_bars', params_n_bars)
+@pytest.mark.parametrize('n_assets', params_n_assets)
+@pytest.mark.parametrize('n_trades', params_n_trades)
+@pytest.mark.parametrize('a', params_a)
 def test_mul(seed, n_bars, n_assets, n_trades, a):
     """
     Test additivity of strategies for the following strategies:
