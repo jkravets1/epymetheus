@@ -79,10 +79,8 @@ def true_since(index, n_samples):
            [ True,  True, False,  True],
            [ True,  True, False,  True]])
     """
-    n_index = index.size
-    index_ = np.tile(index, (n_samples, 1))
-    row = np.tile(np.arange(n_samples)[:, np.newaxis], (1, n_index))
-    return index_ <= row
+    n0, n1 = n_samples, index.size
+    return np.tile(index, (n0, 1)) <= row(shape=(n0, n1))
 
 
 def true_until(index, n_samples):
@@ -99,6 +97,19 @@ def true_until(index, n_samples):
     return ~true_since(index + 1, n_samples)
 
 
+def row(shape):
+    """
+    Examples
+    --------
+    >>> row(shape=(3, 4))
+    array([[ 0 0 0 0]
+           [ 1 1 1 1]
+           [ 2 2 2 2]])
+    """
+    n0, n1 = shape
+    return np.tile(np.arange(n0)[:, np.newaxis], (1, n1))
+
+
 def true_at(index, n_samples):
     """
     Examples
@@ -110,7 +121,5 @@ def true_at(index, n_samples):
            [ True, False, False, False],
            [False, False, False, False]])
     """
-    n_index = index.size
-    index_ = np.tile(index, (n_samples, 1))
-    row = np.tile(np.arange(n_samples)[:, np.newaxis], (1, n_index))
-    return index_ == row
+    n0, n1 = n_samples, index.size
+    return np.tile(index, (n0, 1)) == row(shape=(n0, n1))
