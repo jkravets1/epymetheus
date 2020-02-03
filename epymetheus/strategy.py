@@ -24,6 +24,8 @@ class TradeStrategy(metaclass=ABCMeta):
     - description : str, optional
         Description of the strategy.
         If None, docstring.
+    - params : dict
+        Parameters of the logic.
 
     Attributes
     ----------
@@ -39,11 +41,11 @@ class TradeStrategy(metaclass=ABCMeta):
     --------
     Define strategy by subclassing:
     >>> class MyTradeStrategy(TradeStrategy):
-    >>>     '''This is my favorite strategy.'''
-    >>>
-    >>>     def logic(universe, my_parameter):
-    >>>         ...
-    >>>         yield epymetheus.Trade(...)
+    ...     '''This is my favorite strategy.'''
+    ...
+    ...     def logic(universe, my_parameter):
+    ...         ...
+    ...         yield Trade(...)
 
     Initialize:
     >>> my_strategy = MyTradeStrategy(my_parameter=0.1)
@@ -58,8 +60,8 @@ class TradeStrategy(metaclass=ABCMeta):
     >>> universe = Universe(...)
     >>> my_strategy.run(universe)
     """
-    def __init__(self, **kwargs):
-        self.params = kwargs
+    def __init__(self, **params):
+        self.params = params
         self.is_runned = False
 
     @abstractmethod
@@ -105,8 +107,6 @@ class TradeStrategy(metaclass=ABCMeta):
             print(f'Done. (Runtime : {time() - begin_time:.1f} sec)')
 
         return self
-
-    # --------------------------------------------------------------------------------
 
     @property
     def name(self):
@@ -170,27 +170,27 @@ class TradeStrategy(metaclass=ABCMeta):
     def wealth_(self):
         return pipe.wealth(self)
 
-    @cached_property
+    @property
     def _lot_matrix(self):
         return pipe._lot_matrix(self)
 
-    @cached_property
+    @property
     def _value_matrix(self):
         return pipe._value_matrix(self)
 
-    @cached_property
+    @property
     def _opening_matrix(self):
         return pipe._opening_matrix(self)
 
-    @cached_property
+    @property
     def _closebar_matrix(self):
         return pipe._closebar_matrix(self)
 
-    @cached_property
+    @property
     def _acumpnl_matrix(self):
         return pipe._acumpnl_matrix(self)
 
-    @cached_property
+    @property
     def _transaction_matrix(self):
         return pipe._transaction_matrix(self)
 
