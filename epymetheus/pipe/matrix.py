@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.linalg import multi_dot
 
 from epymetheus.utils.array import true_since, true_until, true_at
 
@@ -18,17 +19,13 @@ def _transaction_matrix(strategy):
     ...     Trade(asset=['AAPL', 'MSFT'], open_bar='Bar1', lot=[3, 4]),
     ... ]
     """
-    # (n_orders, n_assets)
-    onehot_assets = strategy.universe._asset_onehot(strategy.assets)
-    # (n_orders, n_bars)
-    onehot_obars = strategy.universe._bar_onehot(strategy.open_bars)
-    onehot_cbars = strategy.universe._bar_onehot(strategy.close_bars)
-    diag_lots = np.diag(strategy.lots)  # (n_orders, n_orders)
-
-    transaction_o = np.dot(np.dot(onehot_obars.T, diag_lots), onehot_assets)
-    transaction_c = np.dot(np.dot(onehot_cbars.T, diag_lots), onehot_assets)
-
-    return transaction_o - transaction_c
+    # (n_bars, n_orders) . (n_orders, n_orders) . (n_orders, n_assets)
+    return multi_dot([
+        strategy.universe._bar_onehot(strategy.open_bars).T
+        - strategy.universe._bar_onehot(strategy.close_bars).T,
+        np.diag(strategy.lots),
+        strategy.universe._asset_onehot(strategy.assets),
+    ])
 
 
 def _lot_matrix(strategy):
@@ -49,7 +46,6 @@ def _lot_matrix(strategy):
 
     Examples
     --------
-    For the following setup,
     >>> universe.assets
     Index(['AAPL', 'MSFT', 'AMZN'], dtype='object')
     >>> trade0 = Trade(['AAPL', 'MSFT'], lot=[1, -2], ...)
@@ -62,8 +58,7 @@ def _lot_matrix(strategy):
            [ 0,  3]])
     """
     return np.stack([
-        trade._lot_vector(strategy.universe)
-        for trade in strategy.trades
+        trade._lot_vector(strategy.universe) for trade in strategy.trades
     ], axis=-1)
 
 
