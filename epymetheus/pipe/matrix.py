@@ -6,7 +6,7 @@ from epymetheus.utils.array import true_since, true_until, true_at
 
 def _transaction_matrix(strategy):
     """
-    Represent transaction at each bar and asset.
+    Return array representing transaction at each bar and asset.
 
     Returns
     -------
@@ -15,9 +15,22 @@ def _transaction_matrix(strategy):
     Examples
     --------
     >>> strategy.trades = [
-    ...     Trade(asset='AAPL', open_bar='Bar1', lot=2),
-    ...     Trade(asset=['AAPL', 'MSFT'], open_bar='Bar1', lot=[3, 4]),
+    ...     Trade(
+    ...         open_bar='01-01', close_bar='01-03',
+    ...         asset=['Asset0', 'Asset1'], lot=[1, -2], ...
+    ...     ),
+    ...     Trade(
+    ...         open_bar='01-02', close_bar='01-05',
+    ...         asset='Asset2', lot=3, ...
+    ...     ),
     ... ]
+    >>> strategy._transaction_matrix
+    #       Asset0  Asset1  Asset2
+    array([[     1      -2       0]    # 01-01
+           [     0       0       3]    # 01-02
+           [    -1       2       0]    # 01-03
+           [     0       0       0]    # 01-04
+           [     0       0      -3]])  # 01-05
     """
     # (n_bars, n_orders) . (n_orders, n_orders) . (n_orders, n_assets)
     return multi_dot([
@@ -30,7 +43,7 @@ def _transaction_matrix(strategy):
 
 def _lot_matrix(strategy):
     """
-    Represent lot of each asset and trade.
+    Return array representing lot of each asset and trade.
 
     Parameters
     ----------
@@ -46,16 +59,15 @@ def _lot_matrix(strategy):
 
     Examples
     --------
-    >>> universe.assets
-    Index(['AAPL', 'MSFT', 'AMZN'], dtype='object')
-    >>> trade0 = Trade(['AAPL', 'MSFT'], lot=[1, -2], ...)
-    >>> trade1 = Trade(['AMZN', 'MSFT'], lot=[3,  4], ...)
-    >>> strategy.universe = universe
-    >>> strategy.trades = [trade0, trade1]
-    >>> lot_matrix(strategy)
-    array([[ 1,  0],
-           [-2,  4],
-           [ 0,  3]])
+    >>> strategy.trades = [
+    ...     Trade(asset=['Asset0', 'Asset1'], lot=[1, -2], ...),
+    ...     Trade(asset='Asset2', lot=3, ...),
+    ... ]
+    >>> strategy._lot_matrix
+    #       Trade0  Trade1
+    array([[     1,      0]    # Asset0
+           [    -2,      0]    # Asset1
+           [     0,      3]])  # Asset2
     """
     return np.stack([
         trade._lot_vector(strategy.universe) for trade in strategy.trades
@@ -64,33 +76,45 @@ def _lot_matrix(strategy):
 
 def _value_matrix(strategy):
     """
+    Return array representing net value of each bar and trade.
+
     Returns
     -------
     value_matrix : array, shape (n_bars, n_trades)
         Represent value of each trade position.
 
+    Notes
+    -----
+    All slots are filled even if the coresponding trade is not opening.
+
     Examples
     --------
-    >>> universe.assets
-    Index(['AAPL', 'MSFT', 'AMZN'], dtype='object')
-    >>> trade0 = Trade(['AAPL', 'MSFT'], lot=[1, -2], ...)
-    >>> trade1 = Trade(['AMZN', 'MSFT'], lot=[3,  4], ...)
-    >>> universe.prices
-    array([[  1,  10, 100],
-           [  2,  20, 200],
-           [  3,  30, 300],
-           [  4,  40, 400]])
-    >>> value_matrix(...)
-    array([[   -19,   340],
-           [   -38,   680],
-           [   -57,  1020],
-           [   -76,  1360]])
+    >>> strategy.universe.prices
+           Asset0  Asset1  Asset2
+    01-01       1      10     100
+    01-02       2      20     200
+    01-03       3      30     300
+    01-04       4      40     400
+    01-05       5      50     500
+    >>> strategy.trades = [
+    ...     Trade(asset=['Asset0', 'Asset1'], lot=[1, -2], ...),
+    ...     Trade(asset='Asset2', lot=3, ...),
+    ... ]
+    >>> strategy._value_matrix
+    #       Trade0  Trade1
+    array([[   -19,    300]    # 01-01
+           [   -38,    600]    # 01-02
+           [   -57,    900]    # 01-03
+           [   -76,   1200]    # 01-04
+           [   -95,   1500]])  # 01-05
     """
     return np.dot(strategy.universe.prices, _lot_matrix(strategy))
 
 
 def _opening_matrix(strategy):
     """
+    Return array whose value is True iff each trade is opening.
+
     Parameters
     ----------
     - strategy : TradeStrategy
@@ -105,15 +129,16 @@ def _opening_matrix(strategy):
 
     Examples
     --------
-    >>> universe.assets
-    Index(['01-01', '01-02', '01-03'], dtype='object')
-    >>> trade0 = Trade(..., open_bar='01-01', close_bar='01-02')
-    >>> trade1 = Trade(..., open_bar='01-01', close_bar='01-03')
-    >>> strategy.trades = [trade0, trade1]
-    >>> opening_matrix(strategy)
-    array([[False, False],
-           [ True,  True],
-           [False,  True]])
+    >>> strategy.trades = [
+    ...     Trade(open_bar='01-01', close_bar='01-03', ...),
+    ...     Trade(open_bar='01-02', close_bar='01-05', ...),
+    ... ]
+    #       Trade0  Trade1
+    array([[ False,  False]    # 01-01
+           [  True,  False]    # 01-02
+           [ False,  False]    # 01-03
+           [ False,   True]    # 01-04
+           [ False,   True]])  # 01-05
     """
     open_bars = [trade.open_bar for trade in strategy.trades]
     open_ids = strategy.universe._bar_id(open_bars)
@@ -127,33 +152,63 @@ def _opening_matrix(strategy):
 
 def _closebar_matrix(strategy):
     """
+    Return an array whose bar is True only when each trade is closed.
+
     Examples
     --------
-    >>> universe.assets
-    Index(['01-01', '01-02', '01-03'], dtype='object')
-    >>> trade0 = Trade(..., open_bar='01-01', close_bar='01-02')
-    >>> trade1 = Trade(..., open_bar='01-01', close_bar='01-03')
-    >>> strategy.trades = [trade0, trade1]
-    >>> opening_matrix(strategy)
-    array([[False, False],
-           [False,  True],
-           [ True, False]])
+    >>> strategy.trades = [
+    ...     Trade(close_bar='01-03', ...),
+    ...     Trade(close_bar='01-05', ...),
+    ... ]
+    #       Trade0  Trade1
+    array([[ False,  False]    # 01-01
+           [ False,  False]    # 01-02
+           [  True,  False]    # 01-03
+           [ False,  False]    # 01-04
+           [ False,   True]])  # 01-05
     """
-    close_bars = [trade.close_bar for trade in strategy.trades]
-    closebar_ids = strategy.universe._bar_id(close_bars)
-    return true_at(closebar_ids, strategy.n_trades)
+    close_bars = [trade.close_bar for trade in strategy.trades]  # TODO make it pipe
+    return true_at(
+        strategy.universe._bar_id(close_bars),
+        strategy.n_trades,
+    )
 
 
 def _acumpnl_matrix(strategy):
     """
-    Return absolute cumulative profit and loss of each trade
+    Return array representing absolute cumulative p/l of each trade.
 
     Returns
     -------
-    acumpnl : shape (n_nars, n_trades)
+    acumpnl : shape (n_bars, n_trades)
+
+    Examples
+    --------
+    >>> strategy.universe.prices
+           Asset0  Asset1  Asset2
+    01-01       1      10     100
+    01-02       2      20     200
+    01-03       3      30     300
+    01-04       4      40     400
+    01-05       5      50     500
+    >>> strategy.trades = [
+    ...     Trade(
+    ...         open_bar='01-01', close_bar='01-03',
+    ...         asset=['Asset0', 'Asset1'], lot=[1, -2], ...
+    ...     ),
+    ...     Trade(
+    ...         open_bar='01-02', close_bar='01-05',
+    ...         asset=['Asset2'], lot=3, ...
+    ...     ),
+    ... ]
+    >>> strategy._value_matrix
+    #       Trade0  Trade1
+    array([[     0,      0]    # 01-01
+           [   -19,      0]    # 01-02
+           [   -38,    300]    # 01-03
+           [   -38,    600]    # 01-04
+           [   -38,    900]])  # 01-05
     """
-    value = _value_matrix(strategy)
-    opening = _opening_matrix(strategy)
-    apnl = value.diff(axis=0, prepend=value[0, :])
-    acumpnl = (apnl * opening).cumsum(axis=0)
+    apnl = strategy._value_matrix.diff(axis=0, prepend=value[0, :])
+    acumpnl = (apnl * strategy._opening_matrix).cumsum(axis=0)
     return acumpnl
