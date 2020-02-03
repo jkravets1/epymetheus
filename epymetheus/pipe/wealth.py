@@ -2,9 +2,25 @@ import numpy as np
 
 
 def wealth(strategy):
-    transaction = strategy._transaction_matrix
-    t_shift = np.roll(transaction, 1, axis=0)
-    t_shift[0, :] = 0
-    position = np.cumsum(t_shift, axis=0)
-    price_change = np.diff(strategy.universe.prices.values, axis=0, prepend=0)
-    return np.sum(np.cumsum(position * price_change, axis=0), axis=1)
+    """
+    Return time-series of wealth.
+
+    Returns
+    -------
+    wealth : array, shape (n_bars, )
+    """
+    position = np.cumsum(
+        np.stack([
+            np.zeros((strategy.universe.n_bars, strategy.n_trades)),
+            np.roll(strategy._transaction_matrix, 1, axis=0)[1:, :],
+        ]),
+        axis=0,
+    )
+    price_change = np.diff(
+        strategy.universe.prices.values,
+        axis=0, prepend=0,
+    )
+    return np.cumsum(
+        np.sum(position * price_change, axis=1),
+        axis=0,
+    )
