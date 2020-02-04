@@ -69,41 +69,41 @@ class Universe:
     def n_assets(self):
         return self.assets.size
 
-    @classmethod
-    def read_csv(
-        cls,
-        csv,
-        name=None,
-        begin_bar=None,
-        end_bar=None,
-        bars=None,
-        assets=None,
-        **kwargs
-    ):
-        name = name or Path(csv).stem
-        prices = pd.read_csv(csv, **kwargs)
-        prices = prices.loc[
-            begin_bar or prices.index[0]: end_bar or prices.index[-1]
-        ]
-        return cls(prices, name=name, bars=bars, assets=assets)
+    # @classmethod
+    # def read_csv(
+    #     cls,
+    #     csv,
+    #     name=None,
+    #     begin_bar=None,
+    #     end_bar=None,
+    #     bars=None,
+    #     assets=None,
+    #     **kwargs
+    # ):
+    #     name = name or Path(csv).stem
+    #     prices = pd.read_csv(csv, **kwargs)
+    #     prices = prices.loc[
+    #         begin_bar or prices.index[0]: end_bar or prices.index[-1]
+    #     ]
+    #     return cls(prices, name=name, bars=bars, assets=assets)
 
-    def read_csvs(
-        cls,
-        csvs,
-        name=None,
-        begin_bar=None,
-        end_bar=None,
-        bars=None,
-        assets=None,
-        **kwargs
-    ):
-        prices = pd.concat([
-            pd.read_csv(csv, **kwargs) for csv in csvs
-        ], axis=1)
-        prices = prices.loc[
-            begin_bar or prices.index[0]: end_bar or prices.index[-1]
-        ]
-        return cls(prices, name=name, bars=bars, assets=assets)
+    # def read_csvs(
+    #     cls,
+    #     csvs,
+    #     name=None,
+    #     begin_bar=None,
+    #     end_bar=None,
+    #     bars=None,
+    #     assets=None,
+    #     **kwargs
+    # ):
+    #     prices = pd.concat([
+    #         pd.read_csv(csv, **kwargs) for csv in csvs
+    #     ], axis=1)
+    #     prices = prices.loc[
+    #         begin_bar or prices.index[0]: end_bar or prices.index[-1]
+    #     ]
+    #     return cls(prices, name=name, bars=bars, assets=assets)
 
     # ------------------------------------------------------------
 
