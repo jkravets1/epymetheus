@@ -96,7 +96,8 @@ class Trade:
         >>> trade._lot_vector(universe)
         array([1, -2,  0])
         """
-        asset_onehot = universe._asset_onehot(self.asset)
+        asset_id = universe.assets.get_indexer(self.asset)
+        asset_onehot = universe._asset_onehot(asset_id)
         return np.dot(self.lot, asset_onehot)
 
     def __check_params(self):

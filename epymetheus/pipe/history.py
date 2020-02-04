@@ -50,28 +50,32 @@ def order_index(strategy):
     return np.arange(strategy.n_orders)
 
 
-def assets(strategy):
+def asset_ids(strategy):
     """
-    Return asset of each order.
+    Return asset id of each order.
 
     Returns
     -------
-    assets : array, shape (n_orders, )
+    asset_ids : array, shape (n_orders, )
 
     Examples
     --------
+    >>> strategy.universe.assets
+    >>> Index(['Asset0', 'Asset1', 'Asset2', ...])
     >>> strategy.trades = [
     ...     Trade(asset=['Asset0', 'Asset1'], ...),
     ...     Trade(asset=['Asset2'], ...),
     ... ]
     >>> strategy.assets
-    array([ 'Asset0', 'Asset1', 'Asset2'])
+    array([ 0, 1, 2])
     """
     if strategy.n_trades == 0:
         return np.array([])
-    return np.concatenate([
-        trade.asset for trade in strategy.trades
-    ])
+    return strategy.universe.assets.get_indexer(
+        np.concatenate([
+            trade.asset for trade in strategy.trades
+        ])
+    )
 
 
 def lots(strategy):
@@ -98,30 +102,32 @@ def lots(strategy):
     ])
 
 
-def open_bars(strategy):
+def open_bar_ids(strategy):
     """
     Return open_bar of each order.
 
     Returns
     -------
-    open_bars : array, shape (n_orders, )
+    open_bar_ids : array, shape (n_orders, )
 
     Examples
     --------
+    >>> strategy.universe.bars
+    Index(['01-01', '01-02', '01-03', ...])
     >>> strategy.trades = [
     ...     Trade(open_bar='01-01', asset=['Asset0', 'Asset1'], ...),
     ...     Trade(open_bar='01-02', asset=['Asset2'], ...),
     ... ]
-    >>> strategy.open_bars
-    array([ '01-01', '01-01', '01-02'])
+    >>> strategy.open_bar_ids
+    array([ 1, 1, 2])
     """
-    return np.repeat(
+    return strategy.universe._bar_id(np.repeat(
         [trade.open_bar for trade in strategy.trades],
         [trade.n_orders for trade in strategy.trades],
-    )
+    ))
 
 
-def close_bars(strategy):
+def close_bar_ids(strategy):
     """
     Return close_bar of each order.
 
@@ -136,16 +142,12 @@ def close_bars(strategy):
     ...     Trade(close_bar='01-02', asset=['Asset2'], ...),
     ... ]
     >>> strategy.close_bars
-    array([ '01-01', '01-01', '01-02'])
+    array([ 1, 1, 2])
     """
-    return np.repeat(
+    return strategy.universe._bar_id(np.repeat(
         [trade.close_bar for trade in strategy.trades],
         [trade.n_orders for trade in strategy.trades],
-    )
-
-
-def close_bars_bysignal(strategy):
-    pass
+    ))
 
 
 def durations(strategy):
@@ -196,7 +198,9 @@ def open_prices(strategy):
     >>> strategy.open_prices
     array([  1,  10, 200]
     """
-    return strategy.universe._pick_prices(strategy.open_bars, strategy.assets)
+    return strategy.universe._pick_prices(
+        strategy.open_bar_ids, strategy.asset_ids
+    )
 
 
 def close_prices(strategy):
@@ -220,7 +224,9 @@ def close_prices(strategy):
     >>> strategy.close_prices
     array([  1,  10, 200]
     """
-    return strategy.universe._pick_prices(strategy.close_bars, strategy.assets)
+    return strategy.universe._pick_prices(
+        strategy.close_bar_ids, strategy.asset_ids
+    )
 
 
 def gains(strategy):

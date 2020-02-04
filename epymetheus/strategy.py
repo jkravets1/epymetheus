@@ -135,20 +135,38 @@ class TradeStrategy(metaclass=ABCMeta):
         return pipe.order_index(self)
 
     @cached_property
+    def asset_ids(self):
+        return pipe.asset_ids(self)
+
+    @property
     def assets(self):
-        return pipe.assets(self)
+        if self.n_trades == 0:
+            return []
+        return self.universe.assets[self.asset_ids]
 
     @cached_property
     def lots(self):
         return pipe.lots(self)
 
     @cached_property
+    def open_bar_ids(self):
+        return pipe.open_bar_ids(self)
+
+    @property
     def open_bars(self):
-        return pipe.open_bars(self)
+        return self.universe.bars[self.open_bar_ids]
 
     @cached_property
+    def close_bar_ids(self):
+        return pipe.close_bar_ids(self)
+
+    @property
     def close_bars(self):
-        return pipe.close_bars(self)
+        return self.universe.bars[self.close_bar_ids]
+
+    @cached_property
+    def atakes(self):
+        return pipe.atakes(self)
 
     @cached_property
     def durations(self):
@@ -194,6 +212,10 @@ class TradeStrategy(metaclass=ABCMeta):
     def _transaction_matrix(self):
         return pipe._transaction_matrix(self)
 
+    @property
+    def _close_by_signals(self):
+        return pipe._close_by_signals(self)
+
     def __generate_trades(self, verbose=True):
         """
         Parameters
@@ -216,6 +238,12 @@ class TradeStrategy(metaclass=ABCMeta):
             print('Done.')
 
         if verbose:
-            return list(iter_trades_verbose())
+            trades = list(iter_trades_verbose())
+            if len(trades) == 0:
+                raise RuntimeError('No trade yielded')
+            return trades
         else:
-            return list(iter_trades)
+            trades = list(iter_trades)
+            if len(trades) == 0:
+                raise RuntimeError('No trade yielded')
+            return trades

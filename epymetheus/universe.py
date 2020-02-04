@@ -1,7 +1,4 @@
-from pathlib import Path
-
 import numpy as np
-import pandas as pd
 
 try:
     from functools import cached_property
@@ -45,6 +42,8 @@ class Universe:
         if assets:
             self.assets = assets
 
+        self.assets = np.array(self.assets).astype(str)
+
     @property
     def bars(self):
         return self.prices.index
@@ -63,7 +62,7 @@ class Universe:
 
     @assets.setter
     def assets(self, value):
-        self.prices.columns = value
+        self.prices.columns = np.array(value).astype(str)
 
     @property
     def n_assets(self):
@@ -117,30 +116,30 @@ class Universe:
         if not prices.columns.is_unique:
             raise ValueError('Assets are not unique.')
 
-    def _asset_id(self, assets):
-        """
-        Return asset indices from asset names.
+    # def _asset_id(self, assets):
+    #     """
+    #     Return asset indices from asset names.
 
-        Parameters
-        ----------
-        - assets : array-like, shape (n, )
+    #     Parameters
+    #     ----------
+    #     - assets : array-like, shape (n, )
 
-        Returns
-        -------
-        - asset_ids : array, shape (n, )
+    #     Returns
+    #     -------
+    #     - asset_ids : array, shape (n, )
 
-        Examples
-        --------
-        >>> universe.assets
-        Index(['AAPL', 'MSFT', 'AMZN'], dtype='object')
-        >>> universe._asset_id('MSFT')
-        array(1)
-        >>> universe._asset_id(['MSFT', 'AAPL'])
-        array([1, 0])
-        """
-        return self.assets.get_indexer(assets)
+    #     Examples
+    #     --------
+    #     >>> universe.assets
+    #     Index(['AAPL', 'MSFT', 'AMZN'], dtype='object')
+    #     >>> universe._asset_id('MSFT')
+    #     array(1)
+    #     >>> universe._asset_id(['MSFT', 'AAPL'])
+    #     array([1, 0])
+    #     """
+    #     return self.assets.get_indexer(assets)
 
-    def _asset_onehot(self, assets):
+    def _asset_onehot(self, asset_ids):
         """
         Return one-hot vectors of assers from asset names.
 
@@ -160,7 +159,7 @@ class Universe:
         array([[0., 1., 0.]
                [1., 0., 0.]])
         """
-        return np.eye(self.n_assets)[self._asset_id(assets)]
+        return np.eye(self.n_assets)[asset_ids]
 
     def _bar_id(self, bars):
         """
@@ -185,17 +184,17 @@ class Universe:
         """
         return self.bars.get_indexer(bars)
 
-    def _bar_onehot(self, bars):
+    def _bar_onehot(self, bar_ids):
         """
         Return one-hot vectors from bar names.
 
         Parameters
         ----------
-        - bars : array-like, shape (n, )
+        - bar_ids : array-like, shape (n, )
 
         Returns
         -------
-        bar_ids : array, shape (n, n_bars)
+        onehot_bars : array, shape (n, n_bars)
 
         Examples
         --------
@@ -205,16 +204,16 @@ class Universe:
         array([[0., 1., 0.]
                [1., 0., 0.]])
         """
-        return np.eye(self.n_bars)[self._bar_id(bars)]
+        return np.eye(self.n_bars)[bar_ids]
 
-    def _pick_prices(self, bars, assets):
+    def _pick_prices(self, bar_ids, asset_ids):
         """
         Return prices from bar names and asset names.
 
         Parameters
         ----------
-        - bars : array-like, shape (n, )
-        - assets : array-like, shape (n, )
+        - bar_ids : array-like, shape (n, )
+        - asset_ds : array-like, shape (n, )
 
         Returns
         -------
@@ -231,6 +230,6 @@ class Universe:
         >>> universe._pick_prices(['AAPL', 'MSFT'], ['01-02', '01-03'])
         array([ 2, 30])
         """
-        bar_ids = self._bar_id(bars)
-        asset_ids = self._asset_id(assets)
+        if len(bar_ids) == 0:
+            return np.array([], dtype=np.float64)
         return self.prices.values[bar_ids, asset_ids]

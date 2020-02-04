@@ -1,9 +1,10 @@
 import numpy as np
 
 
-def catch_first(arrays, fillnan=np.nan):
+def catch_first(arrays):
     """
     Return axis-1 indices for which the values of array are True.
+    If all false, filled with n_samples.
 
     Parameters
     ----------
@@ -24,7 +25,7 @@ def catch_first(arrays, fillnan=np.nan):
            [ True, False, False]])
     >>> catch_first([a])
     array([  0,   1, nan])
-    >>> catch_first(a, fillnan=-1)
+    >>> catch_first(a, fillna=-1)
     array([  0,   1,  -1])
 
     Multiple arrays:
@@ -39,11 +40,10 @@ def catch_first(arrays, fillnan=np.nan):
     n_samples, n_series = X.shape
     row = np.tile(np.arange(n_samples)[:, np.newaxis], (1, n_series))
     first = np.nanmin(np.where(X, row, n_samples), axis=0)
-    first[first == n_samples] = fillnan
     return first
 
 
-def cross_up(array, threshold=0):
+def cross_up(array, threshold=None):
     """
     Return array signaling if the series chop up the threshold.
 
@@ -73,9 +73,10 @@ def cross_up(array, threshold=0):
            [False, False],
            [ True,  True]])
     """
+    if threshold is not None:
+        return cross_up(array - threshold, threshold=None)
+
     n_samples, n_series = array.shape
-    if threshold != 0:
-        return cross_up(array - np.array(threshold))
     return np.concatenate([
         np.full((1, n_series), False),
         (array[1:] > 0) & (array[:-1] <= 0),

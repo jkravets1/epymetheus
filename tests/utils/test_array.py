@@ -9,6 +9,7 @@ from epymetheus.utils.array import (
     row,
     cross_up,
     cross_down,
+    catch_first,
 )
 
 params_seed = [42, 1, 2, 3]
@@ -112,3 +113,21 @@ def test_cross_down(seed, n_samples, n_series):
     print(np.concatenate([signal, signal_expected], axis=1))
 
     assert (signal == signal_expected).all()
+
+
+def test_catch_first():
+    a = np.array([
+        [ True, False, False],
+        [False,  True, False],
+        [ True, False, False]
+    ])
+    b = np.array([
+        [False,  True, False],
+        [False, False,  True],
+        [ True, False, False],
+    ])
+    signal = catch_first([a, b])
+    signal_expected = np.array([0, 0, 1])
+
+    assert (signal == signal_expected).all()
+

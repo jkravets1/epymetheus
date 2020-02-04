@@ -34,10 +34,10 @@ def _transaction_matrix(strategy):
     """
     # (n_bars, n_orders) . (n_orders, n_orders) . (n_orders, n_assets)
     return multi_dot([
-        strategy.universe._bar_onehot(strategy.open_bars).T
-        - strategy.universe._bar_onehot(strategy.close_bars).T,
+        strategy.universe._bar_onehot(strategy.open_bar_ids).T
+        - strategy.universe._bar_onehot(strategy.close_bar_ids).T,
         np.diag(strategy.lots),
-        strategy.universe._asset_onehot(strategy.assets),
+        strategy.universe._asset_onehot(strategy.asset_ids),
     ])
 
 
@@ -108,7 +108,7 @@ def _value_matrix(strategy):
            [   -76,   1200]    # 01-04
            [   -95,   1500]])  # 01-05
     """
-    return np.dot(strategy.universe.prices, _lot_matrix(strategy))
+    return np.dot(strategy.universe.prices.values, _lot_matrix(strategy))
 
 
 def _opening_matrix(strategy):
@@ -171,7 +171,7 @@ def _closebar_matrix(strategy):
     close_bars = [trade.close_bar for trade in strategy.trades]
     return true_at(
         strategy.universe._bar_id(close_bars),
-        strategy.n_trades,
+        strategy.universe.n_bars,
     )
 
 
@@ -202,7 +202,7 @@ def _acumpnl_matrix(strategy):
     ...         asset=['Asset2'], lot=3, ...
     ...     ),
     ... ]
-    >>> strategy._value_matrix
+    >>> strategy._acumpnl_matrix
     #       Trade0  Trade1
     array([[     0,      0]    # 01-01
            [   -19,      0]    # 01-02
@@ -211,6 +211,9 @@ def _acumpnl_matrix(strategy):
            [   -38,    900]])  # 01-05
     """
     value = strategy._value_matrix
-    apnl = value.diff(axis=0, prepend=value[0, :])
+    apnl = np.concatenate([
+        np.zeros((1, strategy.n_trades)),
+        np.diff(value, axis=0),
+    ])
     acumpnl = (apnl * strategy._opening_matrix).cumsum(axis=0)
     return acumpnl

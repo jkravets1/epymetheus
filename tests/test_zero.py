@@ -21,15 +21,5 @@ class VoidStrategy(TradeStrategy):
 def test_void(seed, n_bars, n_assets):
     universe = make_randomuniverse(n_bars, n_assets)
 
-    strategy = VoidStrategy().run(universe)
-
-    assert strategy.history.assets.size == 0
-    assert strategy.history.lots.size == 0
-    assert strategy.history.open_bars.size == 0
-    assert strategy.history.close_bars.size == 0
-    # assert strategy.history.durations.size == 0
-    assert strategy.history.open_prices.size == 0
-    assert strategy.history.close_prices.size == 0
-    assert strategy.history.gains.size == 0
-
-    # TODO test transaction, wealth
+    with pytest.raises(RuntimeError):
+        strategy = VoidStrategy().run(universe)
