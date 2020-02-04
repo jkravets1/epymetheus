@@ -177,6 +177,10 @@ class TradeStrategy(metaclass=ABCMeta):
         return pipe.atakes(self)
 
     @cached_property
+    def acuts(self):
+        return pipe.acuts(self)
+
+    @cached_property
     def durations(self):
         return pipe.durations(self)
 

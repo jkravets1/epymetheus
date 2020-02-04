@@ -84,8 +84,10 @@ def cross_up(array, threshold=None):
 
 
 
-def cross_down(X):
-    return cross_up(-X)
+def cross_down(array, threshold=None):
+    if threshold is not None:
+        threshold = -threshold
+    return cross_up(-array, threshold)
 
 
 def true_since(index, n_samples):

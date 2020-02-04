@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..utils.array import catch_first, cross_up, true_at
+from ..utils.array import catch_first, cross_up, cross_down, true_at
 
 
 def _close_by_signals(strategy):
@@ -42,17 +42,14 @@ def _close_by_signals(strategy):
     >>> _closebars_from_signals(strategy)
     array([ 2, 3])
     """
-    th_atake = np.array([atake or np.inf for atake in strategy.atakes])
-
-    # n_bars = strategy.universe.n_bars
-    # signal_lastbar = np.tile(
-    #     true_at(n_bars - 1, n_bars).reshape(n_bars, 1), (1, strategy.n_trades)
-    # )
+    th_atakes = np.array([atake or np.inf for atake in strategy.atakes])
+    th_acuts = np.array([acut or -np.inf for acut in strategy.acuts])
 
     close_ids = catch_first([
         strategy._signal_closebar,
         strategy._signal_lastbar,
-        cross_up(strategy._acumpnl, threshold=th_atake),
+        cross_up(strategy._acumpnl, threshold=th_atakes),
+        cross_down(strategy._acumpnl, threshold=th_acuts),
     ])
     return close_ids
 
@@ -170,3 +167,21 @@ def atakes(strategy):
     return [trade.atake for trade in strategy.trades]
 
 
+def acuts(strategy):
+    """
+    Return atake of each trade.
+
+    Returns
+    -------
+    acuts : array, shape (n_trades, )
+
+    Examples
+    --------
+    >>> strategy.trades = [
+    ...     Trade(acut=-1, asset=['Asset0', 'Asset1'], ...),
+    ...     Trade(acut=-2, asset=['Asset2'], ...),
+    ... ]
+    >>> strategy.acuts
+    array([ -1, -2])
+    """
+    return [trade.acut for trade in strategy.trades]
