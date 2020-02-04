@@ -69,8 +69,6 @@ def asset_ids(strategy):
     >>> strategy.assets
     array([ 0, 1, 2])
     """
-    if strategy.n_trades == 0:
-        return np.array([])
     return strategy.universe.assets.get_indexer(
         np.concatenate([
             trade.asset for trade in strategy.trades
@@ -95,8 +93,6 @@ def lots(strategy):
     >>> strategy.lots
     array([  1, -2,  3])
     """
-    if strategy.n_trades == 0:
-        return np.array([])
     return np.concatenate([
         trade.lot for trade in strategy.trades
     ])
