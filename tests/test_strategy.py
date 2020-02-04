@@ -1,5 +1,4 @@
 import pytest
-from ._utils import make_randomuniverse
 
 from epymetheus import TradeStrategy
 
@@ -9,7 +8,7 @@ class StrategyWithoutLogic(TradeStrategy):
     pass
 
 
-class TestStrategy(TradeStrategy):
+class SampleStrategy(TradeStrategy):
     """
     This is my favorite strategy.
     """
@@ -22,16 +21,16 @@ class TestStrategy(TradeStrategy):
 
 def test_abc():
     with pytest.raises(TypeError):
-        # Can't instantiate abstract class TradeStrategy with abstract methods logic
         strategy = TradeStrategy()
+        print(strategy)
 
     with pytest.raises(TypeError):
-        # Can't instantiate abstract class TradeStrategy with abstract methods logic
         strategy = StrategyWithoutLogic()
+        print(strategy)
 
 
 def test_name():
-    strategy = TestStrategy()
+    strategy = SampleStrategy()
 
-    assert strategy.name == 'TestStrategy'
+    assert strategy.name == 'SampleStrategy'
     assert strategy.description == 'This is my favorite strategy.'

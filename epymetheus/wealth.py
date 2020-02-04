@@ -1,10 +1,9 @@
-import numpy as np
-import pandas as pd
+from time import time
 
-from .utils import Bunch
+from epymetheus.utils import TradeResult
 
 
-class Wealth(Bunch):
+class Wealth(TradeResult):
     """
     Represent time-series of wealth.
 
@@ -12,22 +11,25 @@ class Wealth(Bunch):
     ----------
     - wealth
     """
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
     @classmethod
-    def _from_strategy(cls, strategy):
-        transaction = pd.DataFrame(strategy.transaction).set_index('bars')
-        position = transaction.cumsum(axis=0).shift().fillna(0.0).values
-        prices = strategy.universe.prices.values
-        price_changes = np.diff(prices, axis=0, prepend=0.0)
+    def from_strategy(cls, strategy, verbose=True):
+        """
+        Initialize wealth from strategy.
 
-        wealth = (position * price_changes).sum(axis=1).cumsum()
-        return cls(bars=strategy.universe.bars, wealth=wealth)
+        Parameters
+        ----------
+        - strategy : TradeStrategy
+        - verbose : bool
+        """
+        if verbose:
+            print('Evaluating wealth ... ', end='')
+            begin_time = time()
 
-    # @property
-    # def n_bars(self):
-    #     return len(self.wealth)
+        wealth = cls()
+        wealth.bars = strategy.universe.bars
+        wealth.wealth = strategy.wealth_
 
-    # def to_series(self):
-    #     return pd.Series(data=self.data, index=self.bars)
+        if verbose:
+            print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
+
+        return wealth

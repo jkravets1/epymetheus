@@ -1,8 +1,6 @@
-from copy import copy
+from copy import deepcopy
 
 import numpy as np
-
-from .utils import Bunch
 
 try:
     from functools import cached_property
@@ -18,16 +16,20 @@ class Trade:
     ---------
     - asset : str
         Name of asset.
-    - open_bar
+    - open_bar : object or None, default None
         Bar to open the trade.
-    - close_bar
+    - close_bar : object or None, default None
         Bar to close the trade.
     - lot : float, default 1.0
         Lot to trade in unit of share.
+    - atake : float > 0 or None, default None
+    - rtake : float > 0 or None, default None
+    - acut : float < 0 or None, default None
+    - rcut : float < 0 or None, default None
 
     Attributes
     ----------
-    - n_bets : int
+    - n_orders : int
         Number of assets to bet.
 
     Example
@@ -52,34 +54,79 @@ class Trade:
     ...     close_bar=cd,
     ... )
     """
-    def __init__(self, asset, open_bar, close_bar, lot=1.0):
-        self.asset = asset
+    def __init__(
+        self,
+        asset,
+        open_bar=None,
+        close_bar=None,
+        lot=1.0,
+        atake=None,
+        rtake=None,
+        acut=None,
+        rcut=None,
+    ):
+        self.asset = np.array(asset).reshape(-1)
         self.open_bar = open_bar
         self.close_bar = close_bar
-        self.lot = lot
+        self.lot = np.array(lot, dtype=np.float64).reshape(-1)
+        self.atake = atake
+        self.rtake = rtake
+        self.acut = acut
+        self.rcut = rcut
+
+        self.__check_params()
 
     @property
     def n_orders(self):
-        if hasattr(self.lot, '__iter__'):
-            return len(self.lot)
-        else:
-            return 1
+        return self.lot.size
 
-    @cached_property
-    def as_array(self):
-        return Bunch(
-            asset=np.array(self.asset).reshape(-1),
-            lot=np.array(self.lot).reshape(-1),
-            open_bar=np.tile(np.array(self.open_bar), self.n_orders),
-            close_bar=np.tile(np.array(self.close_bar), self.n_orders),
-        )
+    def _lot_vector(self, universe):
+        """
+        Return 1d array of lot to trade each asset.
+
+        Returns
+        -------
+        lot_vector : array, shape (n_assets, )
+
+        Examples
+        --------
+        >>> universe.assets
+        Index(['AAPL', 'MSFT', 'AMZN'], dtype='object')
+        >>> trade = Trade(['AAPL', 'MSFT'], lot=[1, -2], ...)
+        >>> trade._lot_vector(universe)
+        array([1, -2,  0])
+        """
+        asset_id = universe.assets.get_indexer(self.asset)
+        asset_onehot = universe._asset_onehot(asset_id)
+        return np.dot(self.lot, asset_onehot)
+
+    def __check_params(self):
+        if self.asset.size != self.lot.size:
+            raise ValueError('Numbers of asset and lot should be equal')
+
+    def __eq__(self, other):
+        return all([
+            (self.asset == other.asset).all(),
+            self.open_bar == other.open_bar,
+            (self.lot == other.lot).all(),
+            self.atake == other.atake,
+            self.rtake == other.rtake,
+            self.acut == other.acut,
+            self.rcut == other.rcut,
+        ])
 
     def __mul__(self, num):
-        trade = copy(self)
-        if hasattr(self.lot, '__iter__'):
-            trade.lot = [lot * num for lot in trade.lot]
-        else:
-            trade.lot *= num
+        """
+        Multiply lot of self.
+
+        Examples
+        --------
+        >>> trade = -2.0 * Trade(..., lot=1.2)
+        >>> trade.lot
+        -2.4
+        """
+        trade = deepcopy(self)
+        trade.lot *= num
         return trade
 
     def __rmul__(self, num):
@@ -89,13 +136,4 @@ class Trade:
         return self.__mul__(-1.0)
 
     def __truediv__(self, num):
-        print(1.0 / num)
         return self.__mul__(1.0 / num)
-
-    def __floordiv__(self, num):
-        trade = copy(self)
-        if hasattr(self.lot, '__iter__'):
-            trade.lot = [lot // num for lot in trade.lot]
-        else:
-            trade.lot //= num
-        return trade

@@ -1,8 +1,9 @@
-from pathlib import Path
+import numpy as np
 
-import pandas as pd
-
-from .utils.check import check_prices
+try:
+    from functools import cached_property
+except ImportError:
+    cached_property = property
 
 
 class Universe:
@@ -11,59 +12,37 @@ class Universe:
 
     Parameters
     ----------
+    - prices : `pandas.DataFrame`
+        Historical prices.
     - name : str
         Name of universe.
-    - data : `pandas.DataFrame`
-        Historical prices.
 
     Attributes
     ----------
-    - bars : array-like, shape (n_bars, )
+    - bars : pandas.Index, shape (n_bars, )
         Bars.  Alias of `self.data.index`.
-    - assets : array-like, shape (n_assets, )
+    - assets : pandas.Index, shape (n_assets, )
         Assets.  Alias of `self.data.columns`.
+    - n_bars : int
+        Equal to `len(self.bars)`.
+    - n_assets : int
+        Equal to `len(self.assets)`.
 
     Examples
     --------
-    Initializing:
-    >>> data
-    array([[ 1234.5  3456.7  ... ]
-           [ 1235.6  3457.8  ... ]
-             ......  ......  ...
-           [ 1236.7  3458.9  ... ]])
-    >>> bars
-    array(['2000-01-01', '2000-01-02', ..., '2019-12-31'])
-    >>> assets
-    array(['AAPL', 'MSFT', ...])
-    >>> universe = Universe(
-    ...     data=data,
-    ...     bars=bars,
-    ...     assets=assets,
-    ...     name='US Equity',
-    ... )
-
-    Show as `pandas.DataFrame`:
-    >>> universe.to_frame()
-                  AAPL    MSFT  ...
-    2000-01-01  1234.5  3456.7  ...
-    2000-01-02  1235.6  3457.8  ...
-    ..........  ......  ......  ...
-    2018-12-31  1236.7  3458.9  ...
-
-    Read csv files:
-    >>> csvs
-    ['data/AAPL.csv', 'data/MSFT.csv', ...]
-    >>> universe = Universe.read_csvs(
-    ...     name='US Equity', csvs=csvs,
-    ...     index_col=0, parse_dates=True,
-    ... )
+    >>> ...
     """
-    def __init__(self, prices, name=None):
-        """Initialize self."""
-        # TODO accept data other than pandas.DataFrame
-        check_prices(prices)
+    def __init__(self, prices, name=None, bars=None, assets=None):
+        self.__check_prices(prices)
+
         self.prices = prices
         self.name = name
+        if bars:
+            self.bars = bars
+        if assets:
+            self.assets = assets
+
+        self.assets = np.array(self.assets).astype(str)
 
     @property
     def bars(self):
@@ -75,7 +54,7 @@ class Universe:
 
     @property
     def n_bars(self):
-        return len(self.bars)
+        return self.bars.size
 
     @property
     def assets(self):
@@ -83,35 +62,174 @@ class Universe:
 
     @assets.setter
     def assets(self, value):
-        self.prices.columns = value
+        self.prices.columns = np.array(value).astype(str)
 
     @property
     def n_assets(self):
-        return len(self.assets)
+        return self.assets.size
 
-    @classmethod
-    def read_csv(cls, csv, name=None, begin_bar=None, end_bar=None, **kwargs):
-        name = name or Path(csv).stem
-        prices = pd.read_csv(csv, **kwargs)
+    # @classmethod
+    # def read_csv(
+    #     cls,
+    #     csv,
+    #     name=None,
+    #     begin_bar=None,
+    #     end_bar=None,
+    #     bars=None,
+    #     assets=None,
+    #     **kwargs
+    # ):
+    #     name = name or Path(csv).stem
+    #     prices = pd.read_csv(csv, **kwargs)
+    #     prices = prices.loc[
+    #         begin_bar or prices.index[0]: end_bar or prices.index[-1]
+    #     ]
+    #     return cls(prices, name=name, bars=bars, assets=assets)
 
-        prices = prices.loc[begin_bar or prices.index[0]:
-                            end_bar or prices.index[-1]]
+    # def read_csvs(
+    #     cls,
+    #     csvs,
+    #     name=None,
+    #     begin_bar=None,
+    #     end_bar=None,
+    #     bars=None,
+    #     assets=None,
+    #     **kwargs
+    # ):
+    #     prices = pd.concat([
+    #         pd.read_csv(csv, **kwargs) for csv in csvs
+    #     ], axis=1)
+    #     prices = prices.loc[
+    #         begin_bar or prices.index[0]: end_bar or prices.index[-1]
+    #     ]
+    #     return cls(prices, name=name, bars=bars, assets=assets)
 
-        return cls(prices, name=name)
+    # ------------------------------------------------------------
 
-    def read_csvs(cls,
-                  csvs,
-                  name=None,
-                  begin_bar=None,
-                  end_bar=None,
-                  assets=None,
-                  **kwargs):
-        prices = pd.concat([
-            pd.read_csv(csv, **kwargs) for csv in csvs
-        ], axis=1)
-        prices = prices.loc[begin_bar or prices.index[0]:
-                            end_bar or prices.index[-1]]
-        if assets is not None:
-            prices.columns = assets
+    def __check_prices(self, prices):
+        if np.isnan(prices).any(None):
+            raise ValueError('Price has NA.')
+        if np.isinf(prices).any(None):
+            raise ValueError('Price has INF.')
+        if not prices.index.is_unique:
+            raise ValueError('Bars are not unique.')
+        if not prices.columns.is_unique:
+            raise ValueError('Assets are not unique.')
 
-        return cls(prices, name=name)
+    # def _asset_id(self, assets):
+    #     """
+    #     Return asset indices from asset names.
+
+    #     Parameters
+    #     ----------
+    #     - assets : array-like, shape (n, )
+
+    #     Returns
+    #     -------
+    #     - asset_ids : array, shape (n, )
+
+    #     Examples
+    #     --------
+    #     >>> universe.assets
+    #     Index(['AAPL', 'MSFT', 'AMZN'], dtype='object')
+    #     >>> universe._asset_id('MSFT')
+    #     array(1)
+    #     >>> universe._asset_id(['MSFT', 'AAPL'])
+    #     array([1, 0])
+    #     """
+    #     return self.assets.get_indexer(assets)
+
+    def _asset_onehot(self, asset_ids):
+        """
+        Return one-hot vectors of assers from asset names.
+
+        Parameters
+        ----------
+        - assets : array-like, shape (n, )
+
+        Returns
+        -------
+        asset_onehot : array, shape (n, n_assets)
+
+        Examples
+        --------
+        >>> universe.assets
+        Index(['AAPL', 'MSFT', 'AMZN'], dtype='object')
+        >>> universe._asset_onehot(['MSFT', 'AAPL'])
+        array([[0., 1., 0.]
+               [1., 0., 0.]])
+        """
+        return np.eye(self.n_assets)[asset_ids]
+
+    def _bar_id(self, bars):
+        """
+        Return bar indices from bar names.
+
+        Parameters
+        ----------
+        - bars : array-like, shape (n, )
+
+        Returns
+        -------
+        bar_ids : array, shape (n, )
+
+        Examples
+        --------
+        >>> universe.bars
+        Index(['2000-01-01', '2000-01-02', '2000-01-03'], dtype='object')
+        >>> universe._bar_id('2000-01-02')
+        array(1)
+        >>> universe._bar_id(['2000-01-02', '2000-01-01'])
+        array([1, 0])
+        """
+        return self.bars.get_indexer(bars)
+
+    def _bar_onehot(self, bar_ids):
+        """
+        Return one-hot vectors from bar names.
+
+        Parameters
+        ----------
+        - bar_ids : array-like, shape (n, )
+
+        Returns
+        -------
+        onehot_bars : array, shape (n, n_bars)
+
+        Examples
+        --------
+        >>> universe.bars
+        Index(['2000-01-01', '2000-01-02', '2000-01-03'], dtype='object')
+        >>> universe._bar_onehot(['2000-01-02', '2000-01-01'])
+        array([[0., 1., 0.]
+               [1., 0., 0.]])
+        """
+        return np.eye(self.n_bars)[bar_ids]
+
+    def _pick_prices(self, bar_ids, asset_ids):
+        """
+        Return prices from bar names and asset names.
+
+        Parameters
+        ----------
+        - bar_ids : array-like, shape (n, )
+        - asset_ds : array-like, shape (n, )
+
+        Returns
+        -------
+        prices : array, shape (n, )
+
+        Examples
+        --------
+        >>> universe.prices
+               AAPL  MSFT  AMZN
+        01-01     1    10   100
+        01-02     2    20   200
+        01-03     3    30   300
+        01-04     4    40   400
+        >>> universe._pick_prices(['AAPL', 'MSFT'], ['01-02', '01-03'])
+        array([ 2, 30])
+        """
+        if len(bar_ids) == 0:
+            return np.array([], dtype=np.float64)
+        return self.prices.values[bar_ids, asset_ids]

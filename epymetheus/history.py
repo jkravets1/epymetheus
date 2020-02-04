@@ -1,10 +1,12 @@
-import numpy as np
+from time import time
 
-from .utils import Bunch
+from epymetheus.utils import TradeResult
 
 
-class History(Bunch):
+class History(TradeResult):
     """
+    Represent trade history.
+
     Attributes
     ----------
     - order_index : numpy.array, shape (n_orders, )
@@ -24,78 +26,41 @@ class History(Bunch):
 
     Examples
     --------
-    >>> history.assets
-    array(['AAPL', 'MSFT', ...])
-    >>> history.lots
+    >>> ...
     """
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
     @classmethod
-    def _from_strategy(cls, strategy):
+    def from_strategy(cls, strategy, verbose=True):
         """
         Initialize self from strategy.
+
+        Parameters
+        ----------
+        - strategy : TradeStrategy
+        - verbose : bool
+
+        Returns
+        -------
+        history : History
         """
-        # Generator or iterator of trades
-        gen_trades = strategy.logic(strategy.universe, **strategy.params)
+        if verbose:
+            print('Evaluating history ... ', end='')
+            begin_time = time()
 
-        if gen_trades is None:  # If no trade has been yielded
-            return cls(
-                index=np.array([]),
-                assets=np.array([], dtype=str),
-                lots=np.array([]),
-                open_bars=np.array([]),
-                close_bars=np.array([]),
-                open_prices=np.array([]),
-                close_prices=np.array([]),
-                gains=np.array([]),
-            )
+        history = cls()
+        history.trade_index = strategy.trade_index
+        history.order_index = strategy.order_index
+        history.assets = strategy.assets
+        history.lots = strategy.lots
+        history.open_bars = strategy.open_bars
+        history.close_bars = strategy.close_bars
+        history.durations = strategy.durations
+        history.open_prices = strategy.open_prices
+        history.close_prices = strategy.close_prices
+        history.gains = strategy.gains
 
-        trades = np.array(list(gen_trades))
+        history.close_bars = strategy._close_by_signals
 
-        trade_index = np.concatenate([
-            np.repeat(i, trade.n_orders) for i, trade in enumerate(trades)
-        ])
-        order_index = np.arange(len(trade_index))
-
-        # TODO not beautiful; avoid comprehension notation
-        history = cls(
-            order_index=order_index,
-            trade_index=trade_index,
-            assets=np.concatenate([
-                trade.as_array.asset for trade in trades]),
-            lots=np.concatenate([
-                trade.as_array.lot for trade in trades]),
-            open_bars=np.concatenate([
-                trade.as_array.open_bar for trade in trades]),
-            close_bars=np.concatenate([
-                trade.as_array.close_bar for trade in trades]),
-        )
-
-        history.durations = history.close_bars - history.open_bars
-        history.open_prices = history._get_open_prices(strategy.universe)
-        history.close_prices = history._get_close_prices(strategy.universe)
-        history.gains = history._get_gains()
+        if verbose:
+            print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
 
         return history
-
-    def _pick_prices(self, universe, bars, assets):
-        """
-        Pick array of prices of given bars (array-like) and
-        assets (array-like) from universe.
-        """
-        def pick_price(bars, asset):
-            return universe.prices.at[bars, asset]
-        return np.frompyfunc(pick_price, 2, 1)(bars, assets)
-
-    def _get_open_prices(self, universe):
-        prices = self._pick_prices(universe, self.open_bars, self.assets)
-        return prices.astype(np.float64)
-
-    def _get_close_prices(self, universe):
-        prices = self._pick_prices(universe, self.close_bars, self.assets)
-        return prices.astype(np.float64)
-
-    def _get_gains(self):
-        gains = (self.close_prices - self.open_prices) * self.lots
-        return gains.astype(np.float64)

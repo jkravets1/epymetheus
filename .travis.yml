@@ -13,8 +13,8 @@ install:
 script:
   - echo "script start"
   - pytest --cov=epymetheus
-  - sh tests/sample.sh
-  - flake8 epymetheus
   - echo "script end"
 after_success:
+  - sh tests/sample.sh
+  - flake8 epymetheus
   - codecov

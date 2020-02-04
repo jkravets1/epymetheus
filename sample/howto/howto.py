@@ -6,7 +6,7 @@ import seaborn
 from pandas.plotting import register_matplotlib_converters
 
 from epymetheus import Trade, TradeStrategy
-from epymetheus.datasets import fetch_usstock
+from epymetheus.datasets import fetch_usstocks
 
 register_matplotlib_converters()
 seaborn.set_style('ticks')
