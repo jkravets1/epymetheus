@@ -15,10 +15,11 @@ from .matrix import _transaction_matrix
 from .matrix import _lot_matrix
 from .matrix import _value_matrix
 from .matrix import _opening_matrix
-from .matrix import _closebar_matrix
-from .matrix import _acumpnl_matrix
 
 from .signal import atakes
+from .signal import _signal_closebar
+from .signal import _signal_lastbar
+from .signal import _acumpnl
 from .signal import _close_by_signals
 
 from .wealth import wealth

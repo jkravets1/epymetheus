@@ -58,7 +58,7 @@ class History(TradeResult):
         history.close_prices = strategy.close_prices
         history.gains = strategy.gains
 
-        # history.close_bars = strategy._close_by_signals
+        history.close_bars = strategy._close_by_signals
 
         if verbose:
             print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')

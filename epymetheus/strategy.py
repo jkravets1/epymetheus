@@ -126,6 +126,14 @@ class TradeStrategy(metaclass=ABCMeta):
     def n_orders(self):
         return sum(trade.n_orders for trade in self.trades)
 
+    @property
+    def n_bars(self):
+        return self.universe.n_bars
+
+    @property
+    def n_assets(self):
+        return self.universe.n_assets
+
     @cached_property
     def trade_index(self):
         return pipe.trade_index(self)
@@ -201,12 +209,16 @@ class TradeStrategy(metaclass=ABCMeta):
         return pipe._opening_matrix(self)
 
     @property
-    def _closebar_matrix(self):
-        return pipe._closebar_matrix(self)
+    def _signal_closebar(self):
+        return pipe._signal_closebar(self)
 
     @property
-    def _acumpnl_matrix(self):
-        return pipe._acumpnl_matrix(self)
+    def _signal_lastbar(self):
+        return pipe._signal_closebar(self)
+
+    @property
+    def _acumpnl(self):
+        return pipe._acumpnl(self)
 
     @property
     def _transaction_matrix(self):
