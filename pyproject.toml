@@ -8,6 +8,7 @@ license = "BSD-3-Clause"
 [tool.poetry.dependencies]
 python = "^3.6"
 pandas = "^0.25.3"
+pyyaml = "^5.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.3.2"
