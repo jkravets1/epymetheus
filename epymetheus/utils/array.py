@@ -1,29 +1,41 @@
 import numpy as np
 
 
-def catch_first(X, fillnan=np.nan):
+def catch_first(arrays, fillnan=np.nan):
     """
     Return axis-1 indices for which the values of array are True.
 
     Parameters
     ----------
-    - X : array, shape (m, n)
+    - arrays : sequence of array-like, shape (n_samples, n_series) each
+        Each array must have the same shape.
 
     Returns
     -------
-    - indices : array, shape (m, )
+    - indices : array, shape (n_series, )
+        First indices to make any of arrays True.
 
     Examples
     --------
-    >>> X
+    One array:
+    >>> a
     array([[ True, False, False],
            [False,  True, False],
            [ True, False, False]])
-    >>> catch_first(X)
+    >>> catch_first([a])
     array([  0,   1, nan])
-    >>> catch_first(X, fillnan=-1)
+    >>> catch_first(a, fillnan=-1)
     array([  0,   1,  -1])
+
+    Multiple arrays:
+    >>> b
+    array([[False,  True, False],
+           [False, False,  True],
+           [ True, False, False]])
+    >>> catch_first([a, b])
+    array([  0,   0,   1])
     """
+    X = np.logical_or.reduce(arrays)
     n_samples, n_series = X.shape
     row = np.tile(np.arange(n_samples)[:, np.newaxis], (1, n_series))
     first = np.nanmin(np.where(X, row, n_samples), axis=0)
@@ -31,37 +43,44 @@ def catch_first(X, fillnan=np.nan):
     return first
 
 
-def cross_up(X, threshold=None):
+def cross_up(array, threshold=0):
     """
     Return array signaling if the series chop up the threshold.
 
     Parameters
     ----------
-    - X : array, shape (n_samples, n_series)
-    - threshold : array-like, shape (n_series, ) or None, default None
+    - array : array, shape (n_samples, n_series)
+        Each array must have the same shape.
+    - threshold : float or array-like, shape (n_series, ), default 0
+        Threshold to cross up.
 
     Returns
     -------
-    - chopup : array, shape (n_samples, n_series)
+    - cross_up : array, shape (n_samples, n_series)
 
     Examples
     --------
-    >>> X
+    >>> a
     array([[ 1, -1],
            [ 0,  1],
            [ 1,  2]])
-    >>> cross_up(X)
+    >>> cross_up(a)
     array([[False, False],
            [False,  True],
            [ True, False]])
-    >>> cross_up(X, [0, 1])
+    >>> cross_up(a, [0, 1])
     array([[False, False],
            [False, False],
            [ True,  True]])
     """
-    if threshold is not None:
-        return cross_up(X - np.array(threshold))
-    return (X > 0) & (np.roll(X, axis=0) <= 0)
+    n_samples, n_series = array.shape
+    if threshold != 0:
+        return cross_up(array - np.array(threshold))
+    return np.concatenate([
+        np.full((1, n_series), False),
+        (array[1:] > 0) & (array[:-1] <= 0),
+    ])
+
 
 
 def cross_down(X):
