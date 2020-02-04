@@ -2,7 +2,6 @@ import pytest
 from ._utils import make_randomuniverse
 
 import random
-import pandas as pd
 import numpy as np
 
 from epymetheus import Universe
@@ -67,6 +66,7 @@ def test_error_nan(n_bars, n_assets):
     prices.iat[n_bars // 2, n_assets // 2] = np.nan
     with pytest.raises(ValueError):
         universe = Universe(prices)
+        print(universe)
 
 
 @pytest.mark.parametrize('n_bars', params_n_bars)
@@ -79,6 +79,7 @@ def test_error_inf(n_bars, n_assets):
     prices.iat[n_bars // 2, n_assets // 2] = np.inf
     with pytest.raises(ValueError):
         universe = Universe(prices)
+        print(universe)
 
 
 # @pytest.mark.parametrize('n_bars', params_n_bars[:1])
@@ -101,6 +102,7 @@ def test_error_nonunique_bar(n_bars, n_assets):
 
     with pytest.raises(ValueError):
         universe = Universe(prices)
+        print(universe)
 
 
 @pytest.mark.parametrize('n_bars', params_n_bars[-1:])
@@ -115,3 +117,4 @@ def test_error_nonunique_assets(n_bars, n_assets):
 
     with pytest.raises(ValueError):
         universe = Universe(prices)
+        print(universe)

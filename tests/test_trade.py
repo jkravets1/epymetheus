@@ -84,6 +84,7 @@ def test_truediv(n_orders, a):
         with pytest.raises(ZeroDivisionError):
             trade1 = trade0 / a
 
+
 def test_error():
     with pytest.raises(ValueError):
         trade = Trade(asset=['Asset0', 'Asset1'], lot=1, open_bar='Bar0')

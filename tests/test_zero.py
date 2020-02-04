@@ -23,3 +23,4 @@ def test_void(seed, n_bars, n_assets):
 
     with pytest.raises(RuntimeError):
         strategy = VoidStrategy().run(universe)
+        print(strategy)

@@ -5,7 +5,6 @@ import pandas as pd
 
 from epymetheus import Universe, Trade, TradeStrategy
 from epymetheus.pipe import (
-    trade_index,
     order_index,
     _lot_matrix,
     _value_matrix,

@@ -83,7 +83,6 @@ def cross_up(array, threshold=None):
     ])
 
 
-
 def cross_down(array, threshold=None):
     if threshold is not None:
         threshold = -threshold

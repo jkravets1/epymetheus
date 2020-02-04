@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.linalg import multi_dot
 
-from epymetheus.utils.array import true_since, true_until, true_at
+from epymetheus.utils.array import true_since, true_until
 
 
 def _transaction_matrix(strategy):

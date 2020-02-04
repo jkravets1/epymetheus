@@ -8,7 +8,6 @@ from pandas_datareader.data import DataReader
 from ..universe import Universe
 
 
-
 module_path = Path(dirname(__file__))
 
 

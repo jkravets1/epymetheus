@@ -11,7 +11,7 @@ def make_randomuniverse(n_bars, n_assets):
         100 + np.random.randn(n_bars, n_assets).cumsum(axis=0),
     )
     assets = [f'Asset{i}' for i in range(n_assets)]
-    bars = [pd.Timestamp('2000-01-01') + pd.Timedelta(days=i) for i in range(n_bars)]
+    # bars = [pd.Timestamp('2000-01-01') + pd.Timedelta(days=i) for i in range(n_bars)]
     return Universe(prices, assets=assets)
 
 

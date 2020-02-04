@@ -2,10 +2,9 @@ import pytest
 from ._utils import make_randomuniverse, generate_trades
 
 import random
-import pandas as pd
 import numpy as np
 
-from epymetheus import Trade, TradeStrategy
+from epymetheus import TradeStrategy
 
 
 params_seed = [42]
@@ -52,17 +51,6 @@ def test_one(seed, n_bars, n_assets, lot, verbose):
     assert strategy.history.order_index == np.array([0])
     assert strategy.history.trade_index == np.array([0])
 
-    print('asset', asset)
-    print('universe.assets', strategy.universe.assets)
-    print('indexer', strategy.universe.assets.get_indexer(asset))
-    print('indexer list', strategy.universe.assets.get_indexer(asset))
-    print('indexer array', strategy.universe.assets.get_indexer(np.array(asset)))
-    print('indexer index', strategy.universe.assets.get_indexer(pd.Index(asset)))
-    print('AAAAAAAAAAAAAa')
-    print('strategy.asset_ids', strategy.asset_ids)
-    print('strategy.assets', strategy.assets)
-    print('history.assets', strategy.history.assets)
-    print('np.array(asset)', np.array(asset))
     assert (strategy.history.assets == np.array(asset)).all()
     assert (strategy.history.lots == np.array([lot])).all()
     assert (strategy.history.open_bars == np.array([open_bar])).all()

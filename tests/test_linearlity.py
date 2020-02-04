@@ -104,7 +104,9 @@ def test_add(seed, n_bars, n_assets, n_trades):
     transaction_A = strategy_A.transaction
 
     for asset in universe.assets:
-        assert np.allclose(transaction_0[asset] + transaction_1[asset], transaction_A[asset])
+        assert np.allclose(
+            transaction_0[asset] + transaction_1[asset], transaction_A[asset]
+        )
 
     # wealth
     # ------
