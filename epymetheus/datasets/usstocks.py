@@ -83,7 +83,7 @@ class _USStockFetcher:
             except StopIteration:
                 raise ValueError(
                     f'Only {len(data)} stocks are available '
-                    'for {self.begin_date}-{self.end_date}'
+                    f'for {self.begin_date}-{self.end_date}'
                 )
             try:
                 price = self.fetch_one(ticker)
