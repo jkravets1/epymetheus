@@ -167,7 +167,8 @@ def _closebar_matrix(strategy):
            [ False,  False]    # 01-04
            [ False,   True]])  # 01-05
     """
-    close_bars = [trade.close_bar for trade in strategy.trades]  # TODO make it pipe
+    # TODO make it pipe
+    close_bars = [trade.close_bar for trade in strategy.trades]
     return true_at(
         strategy.universe._bar_id(close_bars),
         strategy.n_trades,
@@ -209,6 +210,7 @@ def _acumpnl_matrix(strategy):
            [   -38,    600]    # 01-04
            [   -38,    900]])  # 01-05
     """
-    apnl = strategy._value_matrix.diff(axis=0, prepend=value[0, :])
+    value = strategy._value_matrix
+    apnl = value.diff(axis=0, prepend=value[0, :])
     acumpnl = (apnl * strategy._opening_matrix).cumsum(axis=0)
     return acumpnl
