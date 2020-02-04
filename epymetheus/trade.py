@@ -16,7 +16,7 @@ class Trade:
     ---------
     - asset : str
         Name of asset.
-    - open_bar : object
+    - open_bar : object or None, default None
         Bar to open the trade.
     - close_bar : object or None, default None
         Bar to close the trade.
@@ -57,7 +57,7 @@ class Trade:
     def __init__(
         self,
         asset,
-        open_bar,
+        open_bar=None,
         close_bar=None,
         lot=1.0,
         atake=None,

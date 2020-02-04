@@ -121,9 +121,14 @@ def open_bar_ids(strategy):
     >>> strategy.open_bar_ids
     array([ 1, 1, 2])
     """
+    def ifnonefirst(bar):
+        if bar is None:
+            return strategy.universe.bars[0]
+        else:
+            return bar
+    open_bars = [ifnonefirst(trade.open_bar) for trade in strategy.trades]
     return strategy.universe._bar_id(np.repeat(
-        [trade.open_bar for trade in strategy.trades],
-        [trade.n_orders for trade in strategy.trades],
+        open_bars, [trade.n_orders for trade in strategy.trades],
     ))
 
 
@@ -144,9 +149,14 @@ def close_bar_ids(strategy):
     >>> strategy.close_bars
     array([ 1, 1, 2])
     """
+    def ifnonelast(bar):
+        if bar is None:
+            return strategy.universe.bars[-1]
+        else:
+            return bar
+    close_bars = [ifnonelast(trade.close_bar) for trade in strategy.trades]
     return strategy.universe._bar_id(np.repeat(
-        [trade.close_bar for trade in strategy.trades],
-        [trade.n_orders for trade in strategy.trades],
+        close_bars, [trade.n_orders for trade in strategy.trades],
     ))
 
 
