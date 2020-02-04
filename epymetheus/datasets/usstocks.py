@@ -3,13 +3,10 @@ from pathlib import Path
 import yaml
 
 import pandas as pd
+from pandas_datareader.data import DataReader
 
 from ..universe import Universe
 
-try:
-    from pandas_datareader.data import DataReader
-except ImportError as e:
-    print(e)
 
 
 module_path = Path(dirname(__file__))
