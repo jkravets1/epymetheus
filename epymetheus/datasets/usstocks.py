@@ -33,7 +33,9 @@ def fetch_usstocks(
     -------
     universe : Universe
     """
-    fetcher = _USStockFetcher(begin_date=begin_date, end_date=end_date, n_assets=n_assets)
+    fetcher = _USStockFetcher(
+        begin_date=begin_date, end_date=end_date, n_assets=n_assets
+    )
     prices = fetcher.fetch()
     return Universe(prices, name='USStocks')
 
@@ -50,7 +52,8 @@ class _USStockFetcher:
         self.end_date = pd.Timestamp(end_date)
         self.n_assets = n_assets
 
-        # make beginning date early enough for the case that begin_date is a holiday
+        # make beginning date early enough for the case
+        # that begin_date is a holiday
         self.begin_date_before = self.begin_date - pd.Timedelta(days=30)
 
     def fetch_one(self, ticker):
@@ -63,8 +66,13 @@ class _USStockFetcher:
         """
         price = DataReader(ticker, 'yahoo', self.begin_date, self.end_date)
         price = price['Adj Close'].rename(ticker)
-        price = price.reindex(pd.date_range(self.begin_date_before, self.end_date)).ffill()
-        price = price.reindex(pd.date_range(self.begin_date, self.end_date))
+        price = price.reindex(
+            pd.date_range(self.begin_date_before, self.end_date)
+        )
+        price = price.ffill()
+        price = price.reindex(
+            pd.date_range(self.begin_date, self.end_date)
+        )
         if price.isnull().any():
             raise ValueError('Full data not available')
         return price
@@ -77,7 +85,8 @@ class _USStockFetcher:
                 ticker = next(tickers)
             except StopIteration:
                 raise ValueError(
-                    f'Only {len(data)} stocks are available for {self.begin_date}-{self.end_date}'
+                    f'Only {len(data)} stocks are available '
+                    'for {self.begin_date}-{self.end_date}'
                 )
             try:
                 price = self.fetch_one(ticker)
