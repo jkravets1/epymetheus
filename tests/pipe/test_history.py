@@ -8,14 +8,16 @@ from epymetheus import Universe, Trade, TradeStrategy
 from epymetheus.pipe.history import (
     trade_index,
     order_index,
-    # asset_ids,
+    asset_ids,
     lots,
-    # open_bar_ids,
-    # close_bar_ids,
-    # durations,
-    # open_prices,
-    # close_prices,
-    # gains,
+    open_bar_ids,
+    shut_bar_ids,
+    atakes,
+    acuts,
+    durations,
+    open_prices,
+    close_prices,
+    gains,
 )
 
 params_seed = [42]
@@ -99,25 +101,25 @@ def test_index(seed, n_bars, n_assets, n_trades):
     assert np.equal(order_index(strategy), order_index_expected).all()
 
 
-# @pytest.mark.parametrize('seed', params_seed)
-# @pytest.mark.parametrize('n_bars', params_n_bars)
-# @pytest.mark.parametrize('n_assets', params_n_assets)
-# @pytest.mark.parametrize('n_trades', params_n_trades)
-# def test_asset_ids(seed, n_bars, n_assets, n_trades):
-#     np.random.seed(seed)
-#     random.seed(seed)
+@pytest.mark.parametrize('seed', params_seed)
+@pytest.mark.parametrize('n_bars', params_n_bars)
+@pytest.mark.parametrize('n_assets', params_n_assets)
+@pytest.mark.parametrize('n_trades', params_n_trades)
+def test_asset_ids(seed, n_bars, n_assets, n_trades):
+    np.random.seed(seed)
+    random.seed(seed)
 
-#     universe = make_universe(n_bars, n_assets)
+    universe = make_universe(n_bars, n_assets)
 
-#     trades = []
-#     asset_ids_expected = []
-#     for i, trade in enumerate(generate_trades(universe, n_trades)):
-#         asset_ids_expected += [a[5:] for a in trade.asset]  # Asset name is 'Asset{i}'
-#         trades.append(trade)
+    trades = []
+    asset_ids_expected = []
+    for i, trade in enumerate(generate_trades(universe, n_trades)):
+        asset_ids_expected += [int(a[5:]) for a in trade.asset]  # Asset name is 'Asset{i}'
+        trades.append(trade)
 
-#     strategy = make_strategy(universe=universe, trades=trades)
+    strategy = make_strategy(universe=universe, trades=trades)
 
-#     assert np.equal(asset_ids(strategy), asset_ids_expected).all()
+    assert np.equal(asset_ids(strategy), asset_ids_expected).all()
 
 
 @pytest.mark.parametrize('seed', params_seed)

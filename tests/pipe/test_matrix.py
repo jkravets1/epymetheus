@@ -8,12 +8,6 @@ from epymetheus.pipe.matrix import(
     _lot_matrix,
     _value_matrix,
 )
-# from epymetheus.pipe import (
-#     order_index,
-#     _lot_matrix,
-#     _value_matrix,
-#     _opening_matrix,
-# )
 
 
 # TODO this is just tentative; add multiple and robust tests
@@ -45,27 +39,6 @@ def make_strategy(universe=None, trades=None):
 
 
 # --------------------------------------------------------------------------------
-
-
-# def test_closebar_matrix():
-#     universe = make_universe(4, 3)
-#     trades = [
-#         Trade(asset=['Asset0', 'Asset1'], lot=[1, -2], open_bar='Bar0', close_bar='Bar1'),
-#         Trade(asset=['Asset2', 'Asset1'], lot=[3, 4], open_bar='Bar1', close_bar='Bar3'),
-#     ]
-#     strategy = make_strategy(universe=universe, trades=trades)
-
-#     closebar_expected = np.array([
-#         [False, False],
-#         [ True, False],
-#         [False, False],
-#         [False,  True],
-#     ])
-
-#     trade_index_expected = np.array([0, 1, 2, 3])
-
-#     assert np.equal(order_index(strategy), trade_index_expected).all()
-
 
 
 def test_lot_matrix():
@@ -109,28 +82,3 @@ def test_value_matrix():
     assert np.equal(_value_matrix(strategy), value_expected).all()
 
 
-# def test_opening_matrix():
-#     universe = make_universe(3, 3)
-#     trades = [
-#         Trade(
-#             asset=['Asset0', 'Asset1'],
-#             lot=[1, 1],
-#             open_bar='Bar0',
-#             close_bar='Bar1'
-#         ),
-#         Trade(
-#             asset=['Asset2', 'Asset1'],
-#             lot=[1, 1],
-#             open_bar='Bar0',
-#             close_bar='Bar2'
-#         ),
-#     ]
-#     strategy = make_strategy(universe=universe, trades=trades)
-
-#     opening_expected = np.array([
-#         [False, False],
-#         [True, True],
-#         [False, True],
-#     ])
-
-#     assert np.equal(_opening_matrix(strategy), opening_expected).all()
