@@ -27,7 +27,8 @@ class Transaction(TradeResult):
         transaction : Transaction
         """
         if verbose:
-            print('Evaluating transaction ... ', end='')
+            msg = 'Evaluating transaction'
+            print(f'{msg:<22} ... ', end='')
             begin_time = time()
 
         transaction = cls()

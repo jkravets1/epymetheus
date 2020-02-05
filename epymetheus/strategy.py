@@ -104,7 +104,7 @@ class TradeStrategy(metaclass=ABCMeta):
         self.is_runned = True
 
         if verbose:
-            print(f'Done. (Runtime : {time() - begin_time:.1f} sec)')
+            print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
 
         return self
 
@@ -234,10 +234,12 @@ class TradeStrategy(metaclass=ABCMeta):
         iter_trades = self.logic(self.universe, **self.params) or []
 
         def iter_trades_verbose():
+            begin_time = time()
             for i, trade in enumerate(iter_trades):
-                print(f'\rGenerating {i + 1} trades ... ', end='')
+                msg = f'Generating {i + 1} trades'
+                print(f'\r{msg:<22} ... ', end='')
                 yield trade
-            print('Done.')
+            print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
 
         if verbose:
             trades = list(iter_trades_verbose())

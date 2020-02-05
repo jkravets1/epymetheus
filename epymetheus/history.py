@@ -43,7 +43,8 @@ class History(TradeResult):
         history : History
         """
         if verbose:
-            print('Evaluating history ... ', end='')
+            msg = 'Evaluating history'
+            print(f'{msg:<22} ... ', end='')
             begin_time = time()
 
         history = cls()
