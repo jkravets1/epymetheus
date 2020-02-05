@@ -4,12 +4,14 @@ import random
 import numpy as np
 
 from epymetheus import Trade, TradeStrategy
+from epymetheus.datasets import make_randomwalk
+from epymetheus.benchmarks import RandomTrader
 
 
-params_seed = [42, 1, 2, 3]
+params_seed = [42]
 params_n_bars = [10, 1000]
 params_n_assets = [10, 100]
-params_n_trades = [10]
+params_n_trades = [10, 100]
 params_a = [1.23, -1.23]
 
 lots = [0.0, 1, 1.23, -1.23, 12345.678]
@@ -51,6 +53,12 @@ def assert_mul(history_1, history_a, attribute, a=None):
         assert (array_1 == array_a).all()
 
 
+def make_random_trades(universe, n_trades, seed):
+    random_trader = RandomTrader(n_trades=n_trades, seed=seed)
+    trades = random_trader.run(universe).trades
+    return list(trades)  # for of array is slow
+
+
 # --------------------------------------------------------------------------------
 
 
@@ -58,7 +66,7 @@ def assert_mul(history_1, history_a, attribute, a=None):
 @pytest.mark.parametrize('n_bars', params_n_bars)
 @pytest.mark.parametrize('n_assets', params_n_assets)
 @pytest.mark.parametrize('n_trades', params_n_trades)
-def test_add(seed, n_bars, n_assets, n_trades, make_randomuniverse, generate_trades):
+def test_add(seed, n_bars, n_assets, n_trades):
     """
     Test additivity of strategies for the following strategies:
         - strategy_0 : yield (trade_00, trade_01, ...)
@@ -68,10 +76,10 @@ def test_add(seed, n_bars, n_assets, n_trades, make_randomuniverse, generate_tra
     np.random.seed(seed)
     random.seed(seed)
 
-    universe = make_randomuniverse(n_bars, n_assets)
+    universe = make_randomwalk(n_bars, n_assets)
 
-    trades_0 = list(generate_trades(universe, n_trades))
-    trades_1 = list(generate_trades(universe, n_trades))
+    trades_0 = make_random_trades(universe, n_trades, seed + 0)
+    trades_1 = make_random_trades(universe, n_trades, seed + 1)
     trades_A = trades_0 + trades_1
 
     strategy_0 = MultipleTradeStrategy(trades=trades_0).run(universe)
@@ -120,7 +128,7 @@ def test_add(seed, n_bars, n_assets, n_trades, make_randomuniverse, generate_tra
 @pytest.mark.parametrize('n_assets', params_n_assets)
 @pytest.mark.parametrize('n_trades', params_n_trades)
 @pytest.mark.parametrize('a', params_a)
-def test_mul(seed, n_bars, n_assets, n_trades, a, make_randomuniverse, generate_trades):
+def test_mul(seed, n_bars, n_assets, n_trades, a):
     """
     Test additivity of strategies for the following strategies:
         - strategy_1 : yield (1 * trade_0, 1 * trade_11, ...)
@@ -129,9 +137,9 @@ def test_mul(seed, n_bars, n_assets, n_trades, a, make_randomuniverse, generate_
     np.random.seed(seed)
     random.seed(seed)
 
-    universe = make_randomuniverse(n_bars, n_assets)
+    universe = make_randomwalk(n_bars, n_assets)
 
-    trades_1 = list(generate_trades(universe, n_trades))
+    trades_1 = make_random_trades(universe, n_trades, seed + 1)
     trades_a = [
         Trade(
             asset=trade.asset,

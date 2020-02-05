@@ -4,6 +4,8 @@ import random
 import numpy as np
 
 from epymetheus import TradeStrategy
+from epymetheus.datasets import make_randomwalk
+from epymetheus.benchmarks import RandomTrader, SingleTradeStrategy
 
 
 params_seed = [42]
@@ -13,12 +15,17 @@ params_lot = [0.0, 1, 1.23, -1.23, 123.4, -123.4]
 params_verbose = [True, False]
 
 
-class OneTradeStrategy(TradeStrategy):
+def one_random_trade(universe, max_n_orders, seed):
     """
-    Yield a single trade.
+    Generate a single trade randomly.
+
+    Returns
+    -------
+    trade : Trade
     """
-    def logic(self, universe, trade):
-        yield trade
+    random_trader = RandomTrader(n_trades=1, max_n_orders=max_n_orders, seed=seed)
+    trade = random_trader.run(universe).trades[0]
+    return trade
 
 
 # --------------------------------------------------------------------------------
@@ -29,13 +36,11 @@ class OneTradeStrategy(TradeStrategy):
 @pytest.mark.parametrize('n_assets', params_n_assets)
 @pytest.mark.parametrize('lot', params_lot)
 @pytest.mark.parametrize('verbose', params_verbose)
-def test_one(seed, n_bars, n_assets, lot, verbose, make_randomuniverse, generate_trades):
-    np.random.seed(seed)
-    random.seed(seed)
+def test_one(seed, n_bars, n_assets, lot, verbose):
+    universe = make_randomwalk(n_bars=n_bars, n_assets=n_assets, seed=seed)
 
-    universe = make_randomuniverse(n_bars, n_assets)
+    trade = one_random_trade(universe, max_n_orders=1, seed=seed)
 
-    trade = list(generate_trades(universe, n_trades=1, max_n_orders=1))[0]
     asset = trade.asset
     lot = trade.lot
     open_bar = trade.open_bar
@@ -45,7 +50,7 @@ def test_one(seed, n_bars, n_assets, lot, verbose, make_randomuniverse, generate
     gain = lot * (close_price - open_price)
     duration = shut_bar - open_bar
 
-    strategy = OneTradeStrategy(trade=trade).run(universe, verbose=verbose)
+    strategy = SingleTradeStrategy(trade=trade).run(universe, verbose=verbose)
 
     assert strategy.history.order_index == np.array([0])
     assert strategy.history.trade_index == np.array([0])

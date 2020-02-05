@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 
 from epymetheus import Universe, Trade, TradeStrategy
+from epymetheus.datasets import make_randomwalk
+from epymetheus.benchmarks import RandomTrader
 
 params_seed = [42, 1, 2, 3]
 params_n_bars = [100, 1000]
@@ -23,32 +25,6 @@ def make_universe(n_bars, n_assets, pricedata=None):
     return Universe(prices)
 
 
-class RandomStrategy(TradeStrategy):
-    """
-    Yield trades randomly.
-    """
-    def logic(self, universe, n_trades):
-        for trade in generate_trades(universe, n_trades):
-            yield trade
-
-
-def generate_trades(universe, n_trades):
-    """
-    Yield trades randomly.
-    """
-    for _ in range(n_trades):
-        n_orders = np.random.randint(1, 5)
-        asset = random.sample(list(universe.assets), n_orders)
-        lot = 20 * np.random.rand(n_orders) - 10  # -10 ~ +10
-        open_bar, shut_bar = sorted(random.sample(list(universe.bars), 2))
-        yield Trade(
-            asset=asset,
-            lot=lot,
-            open_bar=open_bar,
-            shut_bar=shut_bar,
-        )
-
-
 # --------------------------------------------------------------------------------
 
 
@@ -57,8 +33,8 @@ def generate_trades(universe, n_trades):
 @pytest.mark.parametrize('n_assets', params_n_assets)
 @pytest.mark.parametrize('n_trades', params_n_trades)
 def test_dataframe(seed, n_bars, n_assets, n_trades):
-    universe = make_universe(n_bars, n_assets)
-    strategy = RandomStrategy(n_trades=n_trades).run(universe)
+    universe = make_randomwalk(n_bars=n_bars, n_assets=n_assets, seed=seed)
+    strategy = RandomTrader(n_trades=n_trades, seed=seed).run(universe)
 
     frame_history = pd.DataFrame(strategy.history)
     frame_transaction = pd.DataFrame(strategy.transaction)
