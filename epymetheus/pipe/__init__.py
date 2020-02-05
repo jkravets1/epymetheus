@@ -26,6 +26,7 @@ from .signal import acuts
 from .signal import _signal_closebar
 from .signal import _signal_lastbar
 from .signal import _acumpnl
-from .signal import _close_by_signals
+from .signal import _closeorder_by_signals
+from .signal import _closetrade_by_signals
 
 from .wealth import wealth

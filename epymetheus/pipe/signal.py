@@ -3,9 +3,9 @@ import numpy as np
 from ..utils.array import catch_first, cross_up, cross_down, true_at
 
 
-def _close_by_signals(strategy):
+def _closetrade_by_signals(strategy):
     """
-    Return close_bars from signals.
+    Return close_bar of each trade from signals.
 
     Returns
     -------
@@ -52,6 +52,52 @@ def _close_by_signals(strategy):
         cross_down(strategy._acumpnl, threshold=th_acuts),
     ])
     return close_ids
+
+
+def _closeorder_by_signals(strategy):
+    """
+    Return close_bar of each order from signals.
+
+    Returns
+    -------
+    close_bars : array, shape (n_order, )
+
+    Examples
+    --------
+    >>> strategy.universe.prices
+           Asset0  Asset1  Asset2
+    01-01       1      10     100
+    01-02       2      20     200
+    01-03       3      30     300
+    01-04       4      40     400
+    01-05       5      50     500
+    >>> strategy.trades = [
+    ...     Trade(
+    ...         open_bar='01-01', close_bar='01-03',
+    ...         asset=['Asset0', 'Asset1'], lot=[1, -2], ...
+    ...     ),
+    ...     Trade(
+    ...         open_bar='01-02', close_bar='01-05',
+    ...         asset=['Asset2'], lot=3, ...
+    ...     ),
+    ... ]
+    >>> strategy._acumpnl
+    #       Trade0  Trade1
+    array([[     0,      0]    # 01-01
+           [   -19,      0]    # 01-02
+           [   -38,    300]    # 01-03
+           [   -38,    600]    # 01-04
+           [   -38,    900]])  # 01-05
+    >>> strategy.atakes
+    array([ 500, 500])
+    >>> _closebars_from_signals(strategy)
+    array([ 2, 2, 3])
+    """
+    return np.repeat(
+        strategy._closetrade_by_signals,
+        [trade.n_orders for trade in strategy.trades],
+    )
+
 
 
 def _signal_closebar(strategy):

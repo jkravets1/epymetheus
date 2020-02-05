@@ -229,8 +229,12 @@ class TradeStrategy(metaclass=ABCMeta):
         return pipe._transaction_matrix(self)
 
     @property
-    def _close_by_signals(self):
-        return pipe._close_by_signals(self)
+    def _closeorder_by_signals(self):
+        return pipe._closeorder_by_signals(self)
+
+    @property
+    def _closetrade_by_signals(self):
+        return pipe._closetrade_by_signals(self)
 
     def __generate_trades(self, verbose=True):
         """

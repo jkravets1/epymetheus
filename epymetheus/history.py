@@ -52,13 +52,13 @@ class History(TradeResult):
         history.assets = strategy.assets
         history.lots = strategy.lots
         history.open_bars = strategy.open_bars
-        history.close_bars = strategy.close_bars
+        # history.close_bars = strategy.close_bars
         history.durations = strategy.durations
         history.open_prices = strategy.open_prices
         history.close_prices = strategy.close_prices
         history.gains = strategy.gains
 
-        history.close_bars = strategy._close_by_signals
+        history.close_bars = strategy._closeorder_by_signals
 
         if verbose:
             print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
