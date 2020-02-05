@@ -148,8 +148,6 @@ class TradeStrategy(metaclass=ABCMeta):
 
     @property
     def assets(self):
-        if self.n_trades == 0:
-            return []
         return self.universe.assets[self.asset_ids]
 
     @cached_property

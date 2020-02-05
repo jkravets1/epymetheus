@@ -230,6 +230,4 @@ class Universe:
         >>> universe._pick_prices(['AAPL', 'MSFT'], ['01-02', '01-03'])
         array([ 2, 30])
         """
-        if len(bar_ids) == 0:
-            return np.array([], dtype=np.float64)
         return self.prices.values[bar_ids, asset_ids]
