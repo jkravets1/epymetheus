@@ -210,6 +210,14 @@ class TradeStrategy(metaclass=ABCMeta):
     def transaction_matrix(self):
         return pipe.transaction_matrix(self)
 
+    @property
+    def net_exposure(self):
+        return pipe.net_exposure(self)
+
+    @property
+    def abs_exposure(self):
+        return pipe.abs_exposure(self)
+
     def __generate_trades(self, verbose=True):
         """
         Parameters
