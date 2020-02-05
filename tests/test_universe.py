@@ -1,5 +1,4 @@
 import pytest
-from ._utils import make_randomuniverse
 
 import random
 import numpy as np
@@ -18,7 +17,7 @@ params_n_assets = [1, 100]
 @pytest.mark.parametrize('seed', params_seed)
 @pytest.mark.parametrize('n_bars', params_n_bars)
 @pytest.mark.parametrize('n_assets', params_n_assets)
-def test_assets(seed, n_bars, n_assets):
+def test_assets(seed, n_bars, n_assets, make_randomuniverse):
     """
     Tests n_bars, n_assets, bars, assets.
     """
@@ -42,7 +41,7 @@ def test_assets(seed, n_bars, n_assets):
 
 @pytest.mark.parametrize('n_bars', params_n_bars[:1])
 @pytest.mark.parametrize('n_assets', params_n_assets[:1])
-def test_set(n_bars, n_assets):
+def test_set(n_bars, n_assets, make_randomuniverse):
     """
     Tests setting bars, assets when initializing.
     """
@@ -58,7 +57,7 @@ def test_set(n_bars, n_assets):
 
 @pytest.mark.parametrize('n_bars', params_n_bars)
 @pytest.mark.parametrize('n_assets', params_n_assets)
-def test_error_nan(n_bars, n_assets):
+def test_error_nan(n_bars, n_assets, make_randomuniverse):
     """
     Test that Universe rejects np.nan.
     """
@@ -71,7 +70,7 @@ def test_error_nan(n_bars, n_assets):
 
 @pytest.mark.parametrize('n_bars', params_n_bars)
 @pytest.mark.parametrize('n_assets', params_n_assets)
-def test_error_inf(n_bars, n_assets):
+def test_error_inf(n_bars, n_assets, make_randomuniverse):
     """
     Test that Universe rejects np.inf.
     """
@@ -93,7 +92,7 @@ def test_error_inf(n_bars, n_assets):
 
 @pytest.mark.parametrize('n_bars', params_n_bars)
 @pytest.mark.parametrize('n_assets', params_n_assets)
-def test_error_nonunique_bar(n_bars, n_assets):
+def test_error_nonunique_bar(n_bars, n_assets, make_randomuniverse):
     bars = [f'MyBar{i}' for i in range(n_bars)]
     bars[n_bars // 2] = 'MyBar0'
 
@@ -107,7 +106,7 @@ def test_error_nonunique_bar(n_bars, n_assets):
 
 @pytest.mark.parametrize('n_bars', params_n_bars[-1:])
 @pytest.mark.parametrize('n_assets', params_n_assets[-1:])
-def test_error_nonunique_assets(n_bars, n_assets):
+def test_error_nonunique_assets(n_bars, n_assets, make_randomuniverse):
     assets = [f'MyAsset{i}' for i in range(n_assets)]
     assets[n_assets // 2] = 'MyAsset0'
     print(assets)
@@ -118,3 +117,4 @@ def test_error_nonunique_assets(n_bars, n_assets):
     with pytest.raises(ValueError):
         universe = Universe(prices)
         print(universe)
+

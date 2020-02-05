@@ -58,18 +58,6 @@ def make_strategy(universe=None, trades=None):
     return strategy
 
 
-def generate_trades(universe, n_trades):
-    """
-    Yield trades randomly.
-    """
-    for _ in range(n_trades):
-        n_orders = np.random.randint(1, 5)
-        asset = random.sample(list(universe.assets), n_orders)
-        lot = 20 * np.random.rand(n_orders) - 10  # -10 ~ +10
-        open_bar, shut_bar = sorted(random.sample(list(universe.bars), 2))
-        yield Trade(
-            asset=asset, lot=lot, open_bar=open_bar, shut_bar=shut_bar,
-        )
 
 
 # --------------------------------------------------------------------------------
@@ -79,7 +67,7 @@ def generate_trades(universe, n_trades):
 @pytest.mark.parametrize('n_bars', params_n_bars)
 @pytest.mark.parametrize('n_assets', params_n_assets)
 @pytest.mark.parametrize('n_trades', params_n_trades)
-def test_index(seed, n_bars, n_assets, n_trades):
+def test_index(seed, n_bars, n_assets, n_trades, generate_trades):
     """
     Test trade_id and order_id.
     """
@@ -105,7 +93,7 @@ def test_index(seed, n_bars, n_assets, n_trades):
 @pytest.mark.parametrize('n_bars', params_n_bars)
 @pytest.mark.parametrize('n_assets', params_n_assets)
 @pytest.mark.parametrize('n_trades', params_n_trades)
-def test_asset_ids(seed, n_bars, n_assets, n_trades):
+def test_asset_ids(seed, n_bars, n_assets, n_trades, generate_trades):
     np.random.seed(seed)
     random.seed(seed)
 
@@ -126,7 +114,7 @@ def test_asset_ids(seed, n_bars, n_assets, n_trades):
 @pytest.mark.parametrize('n_bars', params_n_bars)
 @pytest.mark.parametrize('n_assets', params_n_assets)
 @pytest.mark.parametrize('n_trades', params_n_trades)
-def test_lots(seed, n_bars, n_assets, n_trades):
+def test_lots(seed, n_bars, n_assets, n_trades, generate_trades):
     np.random.seed(seed)
     random.seed(seed)
 

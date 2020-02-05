@@ -1,5 +1,4 @@
 import pytest
-from ._utils import make_randomuniverse, generate_trades
 
 import random
 import numpy as np
@@ -9,7 +8,7 @@ from epymetheus import Trade, TradeStrategy
 
 params_seed = [42, 1, 2, 3]
 params_n_bars = [10, 1000]
-params_n_assets = [1, 100]
+params_n_assets = [10, 100]
 params_n_trades = [10]
 params_a = [1.23, -1.23]
 
@@ -59,7 +58,7 @@ def assert_mul(history_1, history_a, attribute, a=None):
 @pytest.mark.parametrize('n_bars', params_n_bars)
 @pytest.mark.parametrize('n_assets', params_n_assets)
 @pytest.mark.parametrize('n_trades', params_n_trades)
-def test_add(seed, n_bars, n_assets, n_trades):
+def test_add(seed, n_bars, n_assets, n_trades, make_randomuniverse, generate_trades):
     """
     Test additivity of strategies for the following strategies:
         - strategy_0 : yield (trade_00, trade_01, ...)
@@ -71,8 +70,8 @@ def test_add(seed, n_bars, n_assets, n_trades):
 
     universe = make_randomuniverse(n_bars, n_assets)
 
-    trades_0 = list(generate_trades(universe, lots, n_trades))
-    trades_1 = list(generate_trades(universe, lots, n_trades))
+    trades_0 = list(generate_trades(universe, n_trades))
+    trades_1 = list(generate_trades(universe, n_trades))
     trades_A = trades_0 + trades_1
 
     strategy_0 = MultipleTradeStrategy(trades=trades_0).run(universe)
@@ -121,7 +120,7 @@ def test_add(seed, n_bars, n_assets, n_trades):
 @pytest.mark.parametrize('n_assets', params_n_assets)
 @pytest.mark.parametrize('n_trades', params_n_trades)
 @pytest.mark.parametrize('a', params_a)
-def test_mul(seed, n_bars, n_assets, n_trades, a):
+def test_mul(seed, n_bars, n_assets, n_trades, a, make_randomuniverse, generate_trades):
     """
     Test additivity of strategies for the following strategies:
         - strategy_1 : yield (1 * trade_0, 1 * trade_11, ...)
@@ -132,7 +131,7 @@ def test_mul(seed, n_bars, n_assets, n_trades, a):
 
     universe = make_randomuniverse(n_bars, n_assets)
 
-    trades_1 = list(generate_trades(universe, lots, n_trades))
+    trades_1 = list(generate_trades(universe, n_trades))
     trades_a = [
         Trade(
             asset=trade.asset,

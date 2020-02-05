@@ -1,5 +1,4 @@
 import pytest
-from ._utils import make_randomuniverse
 
 from epymetheus import TradeStrategy
 
@@ -20,7 +19,7 @@ class VoidStrategy(TradeStrategy):
 @pytest.mark.parametrize('n_bars', params_n_bars)
 @pytest.mark.parametrize('n_assets', params_n_assets)
 @pytest.mark.parametrize('verbose', params_verbose)
-def test_void(seed, n_bars, n_assets, verbose):
+def test_void(seed, n_bars, n_assets, verbose, make_randomuniverse):
     universe = make_randomuniverse(n_bars, n_assets)
 
     with pytest.raises(RuntimeError):

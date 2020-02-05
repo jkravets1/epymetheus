@@ -1,5 +1,4 @@
 import pytest
-from ._utils import make_randomuniverse, generate_trades
 
 import random
 import numpy as np
@@ -30,13 +29,13 @@ class OneTradeStrategy(TradeStrategy):
 @pytest.mark.parametrize('n_assets', params_n_assets)
 @pytest.mark.parametrize('lot', params_lot)
 @pytest.mark.parametrize('verbose', params_verbose)
-def test_one(seed, n_bars, n_assets, lot, verbose):
+def test_one(seed, n_bars, n_assets, lot, verbose, make_randomuniverse, generate_trades):
     np.random.seed(seed)
     random.seed(seed)
 
     universe = make_randomuniverse(n_bars, n_assets)
 
-    trade = list(generate_trades(universe, [lot], 1))[0]
+    trade = list(generate_trades(universe, n_trades=1, max_n_orders=1))[0]
     asset = trade.asset
     lot = trade.lot
     open_bar = trade.open_bar

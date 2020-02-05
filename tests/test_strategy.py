@@ -34,3 +34,4 @@ def test_name():
 
     assert strategy.name == 'SampleStrategy'
     assert strategy.description == 'This is my favorite strategy.'
+
