@@ -59,8 +59,8 @@ pd.DataFrame(strategy.wealth).plot()
 You can also inspect the exposure as:
 
 ```python
-exposure = pd.DataFrame(strategy.transaction).cumsum().sum(axis=1)
-exposure.plot()
+net_exposure = pd.Series(strategy.net_exposure)
+net_exposure.plot()
 ```
 
 ![wealth](sample/howto/exposure.png)
