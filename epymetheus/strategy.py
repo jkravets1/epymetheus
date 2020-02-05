@@ -158,15 +158,23 @@ class TradeStrategy(metaclass=ABCMeta):
 
     @cached_property
     def open_bar_ids(self):
-        return pipe.open_bar_ids(self)
+        return pipe.open_bar_ids(self, columns='orders')
 
     @property
     def open_bars(self):
         return self.universe.bars[self.open_bar_ids]
 
     @cached_property
+    def shut_bar_ids(self):
+        return pipe.shut_bar_ids(self, columns='orders')
+
+    @property
+    def shut_bars(self):
+        return self.universe.bars[self.shut_bar_ids]
+
+    @cached_property
     def close_bar_ids(self):
-        return pipe.close_bar_ids(self)
+        return pipe._close_bar_ids_from_signals(self, columns='orders')
 
     @property
     def close_bars(self):
@@ -174,11 +182,11 @@ class TradeStrategy(metaclass=ABCMeta):
 
     @cached_property
     def atakes(self):
-        return pipe.atakes(self)
+        return pipe.atakes(self, columns='orders')
 
     @cached_property
     def acuts(self):
-        return pipe.acuts(self)
+        return pipe.acuts(self, columns='orders')
 
     @cached_property
     def durations(self):
@@ -200,41 +208,9 @@ class TradeStrategy(metaclass=ABCMeta):
     def wealth_(self):
         return pipe.wealth(self)
 
-    @property
-    def _lot_matrix(self):
-        return pipe._lot_matrix(self)
-
-    @property
-    def _value_matrix(self):
-        return pipe._value_matrix(self)
-
-    @property
-    def _opening_matrix(self):
-        return pipe._opening_matrix(self)
-
-    @property
-    def _signal_closebar(self):
-        return pipe._signal_closebar(self)
-
-    @property
-    def _signal_lastbar(self):
-        return pipe._signal_closebar(self)
-
-    @property
-    def _acumpnl(self):
-        return pipe._acumpnl(self)
-
-    @property
-    def _transaction_matrix(self):
-        return pipe._transaction_matrix(self)
-
-    @property
-    def _closeorder_by_signals(self):
-        return pipe._closeorder_by_signals(self)
-
-    @property
-    def _closetrade_by_signals(self):
-        return pipe._closetrade_by_signals(self)
+    @cached_property
+    def transaction_matrix(self):
+        return pipe.transaction_matrix(self)
 
     def __generate_trades(self, verbose=True):
         """

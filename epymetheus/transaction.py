@@ -32,7 +32,7 @@ class Transaction(TradeResult):
 
         transaction = cls()
         transaction.bars = strategy.universe.bars
-        transaction_matrix = strategy._transaction_matrix
+        transaction_matrix = strategy.transaction_matrix
 
         for asset_id, asset in enumerate(strategy.universe.assets):
             setattr(transaction, asset, transaction_matrix[:, asset_id])
