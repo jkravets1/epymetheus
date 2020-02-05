@@ -1,6 +1,5 @@
 import pytest  # noqa
 
-import random
 import numpy as np
 import pandas as pd
 
@@ -9,7 +8,7 @@ from epymetheus.pipe.signal import (
     _signal_shutbar,
     _signal_lastbar,
     _signal_opening,
-    _acumpnl,
+    # _acumpnl,
 )
 
 params_seed = [42]
@@ -56,16 +55,16 @@ def make_strategy(universe=None, trades=None):
 def test_signal_shutbar():
     universe = make_universe(4, 3)
     trades = [
-        Trade(asset=['Asset0', 'Asset1'], lot=[1, -2], open_bar='Bar0', shut_bar='Bar1'),
-        Trade(asset=['Asset2', 'Asset1'], lot=[3, 4], open_bar='Bar1', shut_bar='Bar3'),
+        Trade(asset=['Asset0', 'Asset1'], lot=[1, -2], shut_bar='Bar1'),
+        Trade(asset=['Asset2', 'Asset1'], lot=[3, 4], shut_bar='Bar3'),
     ]
     strategy = make_strategy(universe=universe, trades=trades)
 
     expected = np.array([
         [False, False],
-        [ True, False],
+        [True, False],
         [False, False],
-        [False,  True],
+        [False, True],
     ])
 
     assert np.equal(_signal_shutbar(strategy), expected).all()

@@ -118,4 +118,3 @@ def test_error_nonunique_assets(n_bars, n_assets):
     with pytest.raises(ValueError):
         universe = Universe(prices)
         print(universe)
-

@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from epymetheus import Universe, Trade, TradeStrategy
-from epymetheus.pipe.matrix import(
+from epymetheus.pipe.matrix import (
     _lot_matrix,
     _value_matrix,
 )
@@ -80,5 +80,3 @@ def test_value_matrix():
     ])
 
     assert np.equal(_value_matrix(strategy), value_expected).all()
-
-

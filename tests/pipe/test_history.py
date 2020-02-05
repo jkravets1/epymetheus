@@ -2,9 +2,8 @@ import pytest  # noqa
 
 import random
 import numpy as np
-import pandas as pd
 
-from epymetheus import Universe, Trade, TradeStrategy
+from epymetheus import TradeStrategy
 from epymetheus.datasets import make_randomwalk
 from epymetheus.benchmarks import RandomTrader
 from epymetheus.pipe.history import (
@@ -12,14 +11,14 @@ from epymetheus.pipe.history import (
     order_index,
     asset_ids,
     lots,
-    open_bar_ids,
-    shut_bar_ids,
-    atakes,
-    acuts,
-    durations,
-    open_prices,
-    close_prices,
-    gains,
+    # open_bar_ids,
+    # shut_bar_ids,
+    # atakes,
+    # acuts,
+    # durations,
+    # open_prices,
+    # close_prices,
+    # gains,
 )
 
 params_seed = [42]
@@ -93,7 +92,8 @@ def test_asset_ids(seed, n_bars, n_assets, n_trades):
 
     asset_ids_expected = []
     for i, trade in enumerate(trades):
-        asset_ids_expected += [int(a[5:]) for a in trade.asset]  # Asset name is 'Asset{i}'
+        # Asset name is 'Asset{i}'
+        asset_ids_expected += [int(a[5:]) for a in trade.asset]
 
     strategy = make_strategy(universe=universe, trades=trades)
 

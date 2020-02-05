@@ -1,9 +1,7 @@
 import pytest
 
-import random
 import numpy as np
 
-from epymetheus import TradeStrategy
 from epymetheus.datasets import make_randomwalk
 from epymetheus.benchmarks import RandomTrader, SingleTradeStrategy
 
@@ -23,7 +21,11 @@ def one_random_trade(universe, max_n_orders, seed):
     -------
     trade : Trade
     """
-    random_trader = RandomTrader(n_trades=1, max_n_orders=max_n_orders, seed=seed)
+    random_trader = RandomTrader(
+        n_trades=1,
+        max_n_orders=max_n_orders,
+        seed=seed,
+    )
     trade = random_trader.run(universe).trades[0]
     return trade
 

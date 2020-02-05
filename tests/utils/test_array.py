@@ -71,7 +71,6 @@ def test_true_at(seed, n_samples, n_series):
 @pytest.mark.parametrize('n_series', params_n_series)
 def test_row(seed, n_samples, n_series):
     np.random.seed(seed)
-    index = np.random.randint(n_samples, size=n_series)
 
     array = row((n_samples, n_series))
     for i in range(n_series):
@@ -117,17 +116,16 @@ def test_cross_down(seed, n_samples, n_series):
 
 def test_catch_first():
     a = np.array([
-        [ True, False, False],
-        [False,  True, False],
-        [ True, False, False]
+        [True, False, False],
+        [False, True, False],
+        [True, False, False]
     ])
     b = np.array([
-        [False,  True, False],
-        [False, False,  True],
-        [ True, False, False],
+        [False, True, False],
+        [False, False, True],
+        [True, False, False],
     ])
     signal = catch_first([a, b])
     signal_expected = np.array([0, 0, 1])
 
     assert (signal == signal_expected).all()
-
