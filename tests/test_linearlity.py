@@ -22,8 +22,7 @@ class MultipleTradeStrategy(TradeStrategy):
 
     Parameters
     ----------
-    - alocs : list of (asset, lot, open_bar, close_bar)
-        Represent trades to yield.
+    trades : iterable of Trade
     """
     def logic(self, universe, trades):
         for trade in trades:
@@ -90,7 +89,7 @@ def test_add(seed, n_bars, n_assets, n_trades):
     assert_add(history_0, history_1, history_A, 'assets')
     assert_add(history_0, history_1, history_A, 'lots')
     assert_add(history_0, history_1, history_A, 'open_bars')
-    assert_add(history_0, history_1, history_A, 'close_bars')
+    assert_add(history_0, history_1, history_A, 'shut_bars')
     assert_add(history_0, history_1, history_A, 'durations')
     assert_add(history_0, history_1, history_A, 'open_prices')
     assert_add(history_0, history_1, history_A, 'close_prices')
@@ -134,14 +133,12 @@ def test_mul(seed, n_bars, n_assets, n_trades, a):
     universe = make_randomuniverse(n_bars, n_assets)
 
     trades_1 = list(generate_trades(universe, lots, n_trades))
-    # trades_a = [(asset, a * lot, open_bar, close_bar)
-    #             for asset, lot, open_bar, close_bar in trades_1]
     trades_a = [
         Trade(
             asset=trade.asset,
             lot=a * trade.lot,
             open_bar=trade.open_bar,
-            close_bar=trade.close_bar
+            shut_bar=trade.shut_bar
         )
         for trade in trades_1
     ]
@@ -158,7 +155,7 @@ def test_mul(seed, n_bars, n_assets, n_trades, a):
     assert_mul(history_1, history_a, 'assets', None)
     assert_mul(history_1, history_a, 'lots', a)
     assert_mul(history_1, history_a, 'open_bars', None)
-    assert_mul(history_1, history_a, 'close_bars', None)
+    assert_mul(history_1, history_a, 'shut_bars', None)
     assert_mul(history_1, history_a, 'durations', None)
     assert_mul(history_1, history_a, 'open_prices', None)
     assert_mul(history_1, history_a, 'close_prices', None)

@@ -21,15 +21,12 @@ def generate_trades(universe, lots, n_trades):
 
     Yields
     ------
-    - (asset, lot, open_bar, close_bar)
-        * asset is in universe.asset
-        * lot is in lots
-        * open_bar, close_bar are in universe.bars and open_bar < close_bar
+    trade : Trade
     """
     for _ in range(n_trades):
         asset = random.choice(universe.assets)
         lot = random.choice(lots)
-        open_bar, close_bar = sorted(random.sample(list(universe.bars), 2))
+        open_bar, shut_bar = sorted(random.sample(list(universe.bars), 2))
         yield Trade(
-            asset=asset, lot=lot, open_bar=open_bar, close_bar=close_bar
+            asset=asset, lot=lot, open_bar=open_bar, shut_bar=shut_bar
         )

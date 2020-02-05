@@ -40,11 +40,11 @@ def test_one(seed, n_bars, n_assets, lot, verbose):
     asset = trade.asset
     lot = trade.lot
     open_bar = trade.open_bar
-    close_bar = trade.close_bar
+    shut_bar = trade.shut_bar
     open_price = universe.prices.at[open_bar, asset[0]]
-    close_price = universe.prices.at[close_bar, asset[0]]
+    close_price = universe.prices.at[shut_bar, asset[0]]
     gain = lot * (close_price - open_price)
-    duration = close_bar - open_bar
+    duration = shut_bar - open_bar
 
     strategy = OneTradeStrategy(trade=trade).run(universe, verbose=verbose)
 
@@ -54,7 +54,7 @@ def test_one(seed, n_bars, n_assets, lot, verbose):
     assert (strategy.history.assets == np.array(asset)).all()
     assert (strategy.history.lots == np.array([lot])).all()
     assert (strategy.history.open_bars == np.array([open_bar])).all()
-    assert (strategy.history.close_bars == np.array([close_bar])).all()
+    assert (strategy.history.close_bars == np.array([shut_bar])).all()
     assert (strategy.history.durations == np.array([duration])).all()
 
     assert (strategy.history.open_prices == np.array([open_price])).all()

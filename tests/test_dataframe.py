@@ -40,9 +40,12 @@ def generate_trades(universe, n_trades):
         n_orders = np.random.randint(1, 5)
         asset = random.sample(list(universe.assets), n_orders)
         lot = 20 * np.random.rand(n_orders) - 10  # -10 ~ +10
-        open_bar, close_bar = sorted(random.sample(list(universe.bars), 2))
+        open_bar, shut_bar = sorted(random.sample(list(universe.bars), 2))
         yield Trade(
-            asset=asset, lot=lot, open_bar=open_bar, close_bar=close_bar
+            asset=asset,
+            lot=lot,
+            open_bar=open_bar,
+            shut_bar=shut_bar,
         )
 
 

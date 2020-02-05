@@ -19,7 +19,7 @@ def make_trade(n_orders):
         asset = [f'asset{i}' for i in range(n_orders)],
         lot = choices(lots, k=n_orders)
     return Trade(
-        asset=asset, open_bar='bar0', close_bar='bar1', lot=lot,
+        asset=asset, open_bar='bar0', shut_bar='bar1', lot=lot,
     )
 
 
