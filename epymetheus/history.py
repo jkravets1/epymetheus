@@ -53,6 +53,8 @@ class History(TradeResult):
         history.lots = strategy.lots
         history.open_bars = strategy.open_bars
         history.shut_bars = strategy.shut_bars
+        history.atakes = strategy.atakes
+        history.acuts = strategy.acuts
 
         history.close_bars = strategy.close_bars
 
