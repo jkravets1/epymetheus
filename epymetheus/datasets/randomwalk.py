@@ -6,28 +6,39 @@ from epymetheus import Universe
 
 def make_randomwalk(
     n_bars=1000,
-    n_assets=100,
-    volatility=0.001,
-    distribution='normal',
-    name='RandomWalker',
+    n_assets=10,
+    volatility=0.01,
+    name='RandomWalk',
+    bars=None,
+    assets=None,
+    seed=None,
 ):
     """
-    Return Universe of which prices are random-walks.
+    Return Universe whose prices are random-walks.
+    Daily returns follow log-normal distribution.
 
     Parameters
     ----------
-    - n_bars : int, default=1000
-    - n_assets : int, default=100
-    - volatility : float, default=0.01
-    - distribution : {'normal'}, default='normal'
-    - name : str, default='RandomWalker'
+    - n_bars : int, default 1000
+    - n_assets : int, default 10
+    - volatility : float, default 0.01
+    - name : str, default='RandomWalk'
+    - bars
+    - assets
+    - seed : int
+
+    Returns
+    -------
+    Universe
     """
-    assets = [str(i) for i in range(n_assets)]
+    data = np.random.lognormal(
+        sigma=volatility, size=(n_bars, n_assets)
+    ).cumprod(axis=0)
+    data /= data[0, :]
 
-    if distribution == 'normal':
-        random = np.random.randn(n_bars, n_assets)
-    prices = pd.DataFrame(
-        np.cumprod(1.0 + volatility * random, axis=0), columns=assets
-    )
+    bars = bars or list(range(n_bars))
+    assets = assets or [f'Asset{i}' for i in range(n_assets)]
 
-    return Universe(prices, name=name)
+    prices = pd.DataFrame(data)
+
+    return Universe(prices, name=name, bars=bars, assets=assets)

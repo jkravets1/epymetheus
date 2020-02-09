@@ -27,12 +27,13 @@ class Transaction(TradeResult):
         transaction : Transaction
         """
         if verbose:
-            print('Evaluating transaction ... ', end='')
+            msg = 'Evaluating transaction'
+            print(f'{msg:<22} ... ', end='')
             begin_time = time()
 
         transaction = cls()
         transaction.bars = strategy.universe.bars
-        transaction_matrix = strategy._transaction_matrix
+        transaction_matrix = strategy.transaction_matrix
 
         for asset_id, asset in enumerate(strategy.universe.assets):
             setattr(transaction, asset, transaction_matrix[:, asset_id])

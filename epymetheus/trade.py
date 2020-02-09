@@ -18,8 +18,8 @@ class Trade:
         Name of asset.
     - open_bar : object or None, default None
         Bar to open the trade.
-    - close_bar : object or None, default None
-        Bar to close the trade.
+    - shut_bar : object or None, default None
+        Bar to enforce the trade to close.
     - lot : float, default 1.0
         Lot to trade in unit of share.
     - atake : float > 0 or None, default None
@@ -38,12 +38,12 @@ class Trade:
     >>> od = datetime.date(2018, 1, 1)
     >>> cd = datetime.date(2018, 2, 1)
     >>> trade = Trade(
-    ...     asset='AAPL', lot=123.4, open_bar=od, close_bar=cd,
+    ...     asset='AAPL', lot=123.4, open_bar=od, shut_bar=cd,
     ... )
 
     Short position:
     >>> trade = -45.6 * Trade(
-    ...     asset='AAPL', open_bar=od, close_bar=cd,
+    ...     asset='AAPL', open_bar=od, shut_bar=cd,
     ... )
 
     Long-short position:
@@ -51,14 +51,14 @@ class Trade:
     ...     asset=['AAPL', 'MSFT'],
     ...     lot=[12.3, -45.6],
     ...     open_bar=od,
-    ...     close_bar=cd,
+    ...     shut_bar=cd,
     ... )
     """
     def __init__(
         self,
         asset,
         open_bar=None,
-        close_bar=None,
+        shut_bar=None,
         lot=1.0,
         atake=None,
         rtake=None,
@@ -67,7 +67,7 @@ class Trade:
     ):
         self.asset = np.array(asset).reshape(-1)
         self.open_bar = open_bar
-        self.close_bar = close_bar
+        self.shut_bar = shut_bar
         self.lot = np.array(lot, dtype=np.float64).reshape(-1)
         self.atake = atake
         self.rtake = rtake

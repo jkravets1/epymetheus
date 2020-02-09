@@ -7,7 +7,7 @@
 
 Python library for multi-asset backtesting.
 
-![wealth](sample/howto/wealth.png)
+![wealth](examples/howto/wealth.png)
 
 ## Installation
 
@@ -20,6 +20,8 @@ $ pip install epymetheus
 - Multi-asset backtesting
 
 ## How to use
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/simaki/fracdiff/blob/master/examples/howto/howto.ipynb)
 
 Let's construct your own strategy by subclassing `TradeStrategy`.
 
@@ -54,16 +56,16 @@ You can plot the wealth right away:
 pd.DataFrame(strategy.wealth).plot()
 ```
 
-![wealth](sample/howto/wealth.png)
+![wealth](examples/howto/wealth.png)
 
 You can also inspect the exposure as:
 
 ```python
-exposure = pd.DataFrame(strategy.transaction).cumsum().sum(axis=1)
-exposure.plot()
+net_exposure = pd.Series(strategy.net_exposure)
+net_exposure.plot()
 ```
 
-![wealth](sample/howto/exposure.png)
+![wealth](examples/howto/exposure.png)
 
 Profit-loss distribution can be accessed by:
 
@@ -71,7 +73,7 @@ Profit-loss distribution can be accessed by:
 plt.hist(strategy.history.gains)
 ```
 
-![wealth](sample/howto/gains.png)
+![wealth](examples/howto/gains.png)
 
 Detailed trade history can be viewed as:
 
@@ -87,5 +89,3 @@ index|assets|lots|open_dates|close_dates|durations|open_prices|gains
 3|WMT|293.91|2000-03-01|2000-04-01|31 days|34.02|1545.11
 4|JNJ|480.09|2000-04-01|2000-05-01|30 days|20.82|1770.46
 ...|...|...|...|...|...|...|...
-
-Other examples are provided [here](sample/examples/).

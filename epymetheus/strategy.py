@@ -104,7 +104,7 @@ class TradeStrategy(metaclass=ABCMeta):
         self.is_runned = True
 
         if verbose:
-            print(f'Done. (Runtime : {time() - begin_time:.1f} sec)')
+            print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
 
         return self
 
@@ -148,8 +148,6 @@ class TradeStrategy(metaclass=ABCMeta):
 
     @property
     def assets(self):
-        if self.n_trades == 0:
-            return []
         return self.universe.assets[self.asset_ids]
 
     @cached_property
@@ -158,15 +156,23 @@ class TradeStrategy(metaclass=ABCMeta):
 
     @cached_property
     def open_bar_ids(self):
-        return pipe.open_bar_ids(self)
+        return pipe.open_bar_ids(self, columns='orders')
 
     @property
     def open_bars(self):
         return self.universe.bars[self.open_bar_ids]
 
     @cached_property
+    def shut_bar_ids(self):
+        return pipe.shut_bar_ids(self, columns='orders')
+
+    @property
+    def shut_bars(self):
+        return self.universe.bars[self.shut_bar_ids]
+
+    @cached_property
     def close_bar_ids(self):
-        return pipe.close_bar_ids(self)
+        return pipe._close_bar_ids_from_signals(self, columns='orders')
 
     @property
     def close_bars(self):
@@ -174,11 +180,11 @@ class TradeStrategy(metaclass=ABCMeta):
 
     @cached_property
     def atakes(self):
-        return pipe.atakes(self)
+        return pipe.atakes(self, columns='orders')
 
     @cached_property
     def acuts(self):
-        return pipe.acuts(self)
+        return pipe.acuts(self, columns='orders')
 
     @cached_property
     def durations(self):
@@ -200,37 +206,17 @@ class TradeStrategy(metaclass=ABCMeta):
     def wealth_(self):
         return pipe.wealth(self)
 
-    @property
-    def _lot_matrix(self):
-        return pipe._lot_matrix(self)
+    @cached_property
+    def transaction_matrix(self):
+        return pipe.transaction_matrix(self)
 
     @property
-    def _value_matrix(self):
-        return pipe._value_matrix(self)
+    def net_exposure(self):
+        return pipe.net_exposure(self)
 
     @property
-    def _opening_matrix(self):
-        return pipe._opening_matrix(self)
-
-    @property
-    def _signal_closebar(self):
-        return pipe._signal_closebar(self)
-
-    @property
-    def _signal_lastbar(self):
-        return pipe._signal_closebar(self)
-
-    @property
-    def _acumpnl(self):
-        return pipe._acumpnl(self)
-
-    @property
-    def _transaction_matrix(self):
-        return pipe._transaction_matrix(self)
-
-    @property
-    def _close_by_signals(self):
-        return pipe._close_by_signals(self)
+    def abs_exposure(self):
+        return pipe.abs_exposure(self)
 
     def __generate_trades(self, verbose=True):
         """
@@ -248,10 +234,12 @@ class TradeStrategy(metaclass=ABCMeta):
         iter_trades = self.logic(self.universe, **self.params) or []
 
         def iter_trades_verbose():
+            begin_time = time()
             for i, trade in enumerate(iter_trades):
-                print(f'\rGenerating {i + 1} trades ... ', end='')
+                msg = f'Generating {i + 1} trades'
+                print(f'\r{msg:<22} ... ', end='')
                 yield trade
-            print('Done.')
+            print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
 
         if verbose:
             trades = list(iter_trades_verbose())

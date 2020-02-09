@@ -98,13 +98,21 @@ def lots(strategy):
     ])
 
 
-def open_bar_ids(strategy):
+def open_bar_ids(strategy, columns='trades'):
     """
-    Return open_bar of each order.
+    Return open_bar of each trade/order.
+
+    Parameters
+    ----------
+    - strategy
+    - columns : {'trades', 'orders'}, default 'trades'
 
     Returns
     -------
-    open_bar_ids : array, shape (n_orders, )
+    If columns = 'trades' :
+        open_bar_ids : array, shape (n_trades, )
+    If columns = 'orders' :
+        open_bar_ids : array, shape (n_orders, )
 
     Examples
     --------
@@ -115,45 +123,118 @@ def open_bar_ids(strategy):
     ...     Trade(open_bar='01-02', asset=['Asset2'], ...),
     ... ]
     >>> strategy.open_bar_ids
-    array([ 1, 1, 2])
+    array([ 1, 2])
     """
+    if columns == 'orders':
+        return np.repeat(
+            open_bar_ids(strategy, columns='trades'),
+            [trade.n_orders for trade in strategy.trades],
+        )
+
     def ifnonefirst(bar):
         if bar is None:
             return strategy.universe.bars[0]
         else:
             return bar
     open_bars = [ifnonefirst(trade.open_bar) for trade in strategy.trades]
-    return strategy.universe._bar_id(np.repeat(
-        open_bars, [trade.n_orders for trade in strategy.trades],
-    ))
+    return strategy.universe._bar_id(open_bars)
 
 
-def close_bar_ids(strategy):
+def shut_bar_ids(strategy, columns='trades'):
     """
-    Return close_bar of each order.
+    Return shut_bar of each trade/order.
 
     Returns
     -------
-    close_bars : array, shape (n_orders, )
+    If columns = 'trades' :
+        open_bar_ids : array, shape (n_trades, )
+    If columns = 'orders' :
+        open_bar_ids : array, shape (n_orders, )
+    shut_bars : array, shape (n_trades, )
 
     Examples
     --------
     >>> strategy.trades = [
-    ...     Trade(close_bar='01-01', asset=['Asset0', 'Asset1'], ...),
-    ...     Trade(close_bar='01-02', asset=['Asset2'], ...),
+    ...     Trade(shut_bar='01-01', asset=['Asset0', 'Asset1'], ...),
+    ...     Trade(shut_bar='01-02', asset=['Asset2'], ...),
     ... ]
-    >>> strategy.close_bars
-    array([ 1, 1, 2])
+    >>> strategy.shut_bars
+    array([ 1, 2])
     """
+    if columns == 'orders':
+        return np.repeat(
+            shut_bar_ids(strategy, columns='trades'),
+            [trade.n_orders for trade in strategy.trades],
+        )
+
     def ifnonelast(bar):
         if bar is None:
             return strategy.universe.bars[-1]
         else:
             return bar
-    close_bars = [ifnonelast(trade.close_bar) for trade in strategy.trades]
-    return strategy.universe._bar_id(np.repeat(
-        close_bars, [trade.n_orders for trade in strategy.trades],
-    ))
+    shut_bars = [ifnonelast(trade.shut_bar) for trade in strategy.trades]
+    return strategy.universe._bar_id(shut_bars)
+
+
+def atakes(strategy, columns='trades'):
+    """
+    Return atake of each trade.
+
+    Returns
+    -------
+    If columns = 'trades' :
+        atakes : array, shape (n_trades, )
+    If columns = 'orders' :
+        atakes : array, shape (n_orders, )
+
+    Examples
+    --------
+    >>> strategy.trades = [
+    ...     Trade(atake=1, asset=['Asset0', 'Asset1'], ...),
+    ...     Trade(atake=2, asset=['Asset2'], ...),
+    ... ]
+    >>> strategy.atakes
+    array([ 1, 2])
+    """
+    if columns == 'orders':
+        return np.repeat(
+            atakes(strategy, columns='trades'),
+            [trade.n_orders for trade in strategy.trades],
+        )
+    return np.array([trade.atake or np.inf for trade in strategy.trades])
+
+
+def acuts(strategy, columns='trades'):
+    """
+    Return atake of each trade.
+
+    Parameters
+    ----------
+    - strategy
+    - columns
+
+    Returns
+    -------
+    If columns = 'trades' :
+        acuts : array, shape (n_trades, )
+    If columns = 'orders' :
+        acuts : array, shape (n_orders, )
+
+    Examples
+    --------
+    >>> strategy.trades = [
+    ...     Trade(acut=-1, asset=['Asset0', 'Asset1'], ...),
+    ...     Trade(acut=-2, asset=['Asset2'], ...),
+    ... ]
+    >>> strategy.acuts
+    array([ -1, -2])
+    """
+    if columns == 'orders':
+        return np.repeat(
+            acuts(strategy, columns='trades'),
+            [trade.n_orders for trade in strategy.trades],
+        )
+    return np.array([trade.acut or -np.inf for trade in strategy.trades])
 
 
 def durations(strategy):
@@ -169,11 +250,11 @@ def durations(strategy):
     With '01-01' denoting datetime object with subtraction operation,
     >>> strategy.trades = [
     ...     Trade(
-    ...         open_bar='01-01', close_bar='01-03',
+    ...         open_bar='01-01', shut_bar='01-03',
     ...         asset=['Asset0', 'Asset1'], ...
     ...     ),
     ...     Trade(
-    ...         open_bar='01-02', close_bar='01-05',
+    ...         open_bar='01-02', shut_bar='01-05',
     ...         asset=['Asset2'], ...
     ...     ),
     ... ]
@@ -224,8 +305,8 @@ def close_prices(strategy):
     01-01       1      10     100
     01-02       2      20     200
     >>> strategy.trades = [
-    ...     Trade(close_bar='01-01', asset=['Asset0', 'Asset1'], ...),
-    ...     Trade(close_bar='01-02', asset=['Asset2'], ...),
+    ...     Trade(shut_bar='01-01', asset=['Asset0', 'Asset1'], ...),
+    ...     Trade(shut_bar='01-02', asset=['Asset2'], ...),
     ... ]
     >>> strategy.close_prices
     array([  1,  10, 200]
@@ -254,11 +335,11 @@ def gains(strategy):
     01-05       5      50     500
     >>> strategy.trades = [
     ...     Trade(
-    ...         open_bar='01-01', close_bar='01-03',
+    ...         open_bar='01-01', shut_bar='01-03',
     ...         asset=['Asset0', 'Asset1'], ...
     ...     ),
     ...     Trade(
-    ...         open_bar='01-02', close_bar='01-05',
+    ...         open_bar='01-02', shut_bar='01-05',
     ...         asset=['Asset2'], ...
     ...     ),
     ... ]

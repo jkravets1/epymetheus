@@ -1,15 +1,24 @@
 import numpy as np
 
-from ..utils.array import catch_first, cross_up, cross_down, true_at
+from epymetheus.utils.array import (
+    catch_first,
+    cross_up,
+    cross_down,
+    true_at,
+    true_since,
+    true_until,
+)
+from epymetheus.pipe.matrix import _value_matrix
+from epymetheus.pipe.history import open_bar_ids, shut_bar_ids, atakes, acuts
 
 
-def _close_by_signals(strategy):
+def _close_bar_ids_from_signals(strategy, columns='trades'):
     """
-    Return close_bars from signals.
+    Return close_bar of each trade from signals.
 
     Returns
     -------
-    close_bars : array, shape (n_trades, )
+    closebar_ids : array, shape (n_trades, )
 
     Examples
     --------
@@ -22,11 +31,11 @@ def _close_by_signals(strategy):
     01-05       5      50     500
     >>> strategy.trades = [
     ...     Trade(
-    ...         open_bar='01-01', close_bar='01-03',
+    ...         open_bar='01-01', shut_bar='01-03',
     ...         asset=['Asset0', 'Asset1'], lot=[1, -2], ...
     ...     ),
     ...     Trade(
-    ...         open_bar='01-02', close_bar='01-05',
+    ...         open_bar='01-02', shut_bar='01-05',
     ...         asset=['Asset2'], lot=3, ...
     ...     ),
     ... ]
@@ -42,27 +51,36 @@ def _close_by_signals(strategy):
     >>> _closebars_from_signals(strategy)
     array([ 2, 3])
     """
-    th_atakes = np.array([atake or np.inf for atake in strategy.atakes])
-    th_acuts = np.array([acut or -np.inf for acut in strategy.acuts])
+    if columns == 'orders':
+        return np.repeat(
+            _close_bar_ids_from_signals(strategy, columns='trades'),
+            [trade.n_orders for trade in strategy.trades],
+        )
 
-    close_ids = catch_first([
-        strategy._signal_closebar,
-        strategy._signal_lastbar,
-        cross_up(strategy._acumpnl, threshold=th_atakes),
-        cross_down(strategy._acumpnl, threshold=th_acuts),
+    th_atakes = atakes(strategy, columns='trades')
+    th_acuts = acuts(strategy, columns='trades')
+
+    return catch_first([
+        _signal_shutbar(strategy),
+        _signal_lastbar(strategy),
+        cross_up(_acumpnl(strategy), threshold=th_atakes),
+        cross_down(_acumpnl(strategy), threshold=th_acuts),
     ])
-    return close_ids
 
 
-def _signal_closebar(strategy):
+def _signal_shutbar(strategy):
     """
-    Return an array whose bar is True only when each trade is closed.
+    Return an array whose bar is True only when each trade is shut.
+
+    Returns
+    -------
+    signal_shutbar : array, shape (n_bars, n_trades)
 
     Examples
     --------
     >>> strategy.trades = [
-    ...     Trade(close_bar='01-03', ...),
-    ...     Trade(close_bar='01-05', ...),
+    ...     Trade(shut_bar='01-03', ...),
+    ...     Trade(shut_bar='01-05', ...),
     ... ]
     #       Trade0  Trade1
     array([[ False,  False]    # 01-01
@@ -72,15 +90,18 @@ def _signal_closebar(strategy):
            [ False,   True]])  # 01-05
     """
     # TODO make it pipe
-    close_bars = [trade.close_bar for trade in strategy.trades]
-    return true_at(
-        strategy.universe._bar_id(close_bars),
-        strategy.n_bars,
-    )
+    shutbar_ids = strategy.universe._bar_id([
+        trade.shut_bar for trade in strategy.trades
+    ])
+    return true_at(shutbar_ids, strategy.n_bars)
 
 
 def _signal_lastbar(strategy):
     """
+    Returns
+    -------
+    signal_lastbar : array, shape (n_bars, n_trades)
+
     Examples
     --------
     >>> strategy.universe.prices
@@ -103,6 +124,47 @@ def _signal_lastbar(strategy):
     return signal
 
 
+def _signal_opening(strategy):
+    """
+    Return array whose value is True iff each trade has been opened
+    and has not been shut.
+
+    Notes
+    -----
+    It is True until each trade is shut, not until each trade is closed.
+
+    Parameters
+    ----------
+    - strategy : TradeStrategy
+        Necessary atrributes:
+        * universe
+        * trades
+
+    Returns
+    -------
+    opening_matrix : array, shape (n_bars, n_trades)
+        Represent whether each trade is opening.
+
+    Examples
+    --------
+    >>> strategy.trades = [
+    ...     Trade(open_bar='01-01', close_bar='01-03', ...),
+    ...     Trade(open_bar='01-02', close_bar='01-05', ...),
+    ... ]
+    #       Trade0  Trade1
+    array([[ False,  False]    # 01-01
+           [  True,  False]    # 01-02
+           [ False,  False]    # 01-03
+           [ False,   True]    # 01-04
+           [ False,   True]])  # 01-05
+    """
+    op = open_bar_ids(strategy, columns='trades')  # (n_bars, n_trades)
+    sh = shut_bar_ids(strategy, columns='trades')  # (n_bars, n_trades)
+
+    return true_since(op + 1, strategy.universe.n_bars) \
+        & true_until(sh, strategy.universe.n_bars)
+
+
 def _acumpnl(strategy):
     """
     Return array representing absolute cumulative p/l of each trade.
@@ -122,11 +184,11 @@ def _acumpnl(strategy):
     01-05       5      50     500
     >>> strategy.trades = [
     ...     Trade(
-    ...         open_bar='01-01', close_bar='01-03',
+    ...         open_bar='01-01', shut_bar='01-03',
     ...         asset=['Asset0', 'Asset1'], lot=[1, -2], ...
     ...     ),
     ...     Trade(
-    ...         open_bar='01-02', close_bar='01-05',
+    ...         open_bar='01-02', shut_bar='01-05',
     ...         asset=['Asset2'], lot=3, ...
     ...     ),
     ... ]
@@ -138,50 +200,10 @@ def _acumpnl(strategy):
            [   -38,    600]    # 01-04
            [   -38,    900]])  # 01-05
     """
-    value = strategy._value_matrix
+    value = _value_matrix(strategy)
     apnl = np.concatenate([
         np.zeros((1, strategy.n_trades)),
         np.diff(value, axis=0),
     ])
-    acumpnl = (apnl * strategy._opening_matrix).cumsum(axis=0)
+    acumpnl = (apnl * _signal_opening(strategy)).cumsum(axis=0)
     return acumpnl
-
-
-def atakes(strategy):
-    """
-    Return atake of each trade.
-
-    Returns
-    -------
-    atakes : array, shape (n_trades, )
-
-    Examples
-    --------
-    >>> strategy.trades = [
-    ...     Trade(atake=1, asset=['Asset0', 'Asset1'], ...),
-    ...     Trade(atake=2, asset=['Asset2'], ...),
-    ... ]
-    >>> strategy.atakes
-    array([ 1, 2])
-    """
-    return [trade.atake for trade in strategy.trades]
-
-
-def acuts(strategy):
-    """
-    Return atake of each trade.
-
-    Returns
-    -------
-    acuts : array, shape (n_trades, )
-
-    Examples
-    --------
-    >>> strategy.trades = [
-    ...     Trade(acut=-1, asset=['Asset0', 'Asset1'], ...),
-    ...     Trade(acut=-2, asset=['Asset2'], ...),
-    ... ]
-    >>> strategy.acuts
-    array([ -1, -2])
-    """
-    return [trade.acut for trade in strategy.trades]

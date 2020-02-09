@@ -15,6 +15,6 @@ script:
   - pytest --cov=epymetheus
   - echo "script end"
 after_success:
-  - sh tests/sample.sh
+  - sh tests/examples.sh
   - flake8 epymetheus
   - codecov

@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "epymetheus"
-version = "0.2.3"
+version = "0.2.4"
 description = "Python framework for multi-asset backtesting."
 authors = ["Shota Imaki <shota.imaki@icloud.com>"]
 license = "BSD-3-Clause"
 
 [tool.poetry.dependencies]
-python = "^3.6"
-pandas = "^0.25.3"
+python = "^3.6.1"
+pandas = "^1.0.0"
 pyyaml = "^5.3"
 pandas-datareader = "^0.8.1"
 

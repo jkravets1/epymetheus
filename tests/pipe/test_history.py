@@ -2,16 +2,19 @@ import pytest  # noqa
 
 import random
 import numpy as np
-import pandas as pd
 
-from epymetheus import Universe, Trade, TradeStrategy
+from epymetheus import TradeStrategy
+from epymetheus.datasets import make_randomwalk
+from epymetheus.benchmarks import RandomTrader
 from epymetheus.pipe.history import (
     trade_index,
     order_index,
-    # asset_ids,
+    asset_ids,
     lots,
     # open_bar_ids,
-    # close_bar_ids,
+    # shut_bar_ids,
+    # atakes,
+    # acuts,
     # durations,
     # open_prices,
     # close_prices,
@@ -20,19 +23,8 @@ from epymetheus.pipe.history import (
 
 params_seed = [42]
 params_n_bars = [100, 1000]
-params_n_assets = [10, 100]  # >= 5
+params_n_assets = [10, 100]
 params_n_trades = [10, 100]
-
-
-def make_universe(n_bars, n_assets, pricedata=None):
-    if pricedata is None:
-        pricedata = np.zeros((n_bars, n_assets))
-    prices = pd.DataFrame(
-        pricedata,
-        index=[f'Bar{i}' for i in range(n_bars)],
-        columns=[f'Asset{i}' for i in range(n_assets)],
-    )
-    return Universe(prices)
 
 
 class MockStrategy(TradeStrategy):
@@ -56,18 +48,10 @@ def make_strategy(universe=None, trades=None):
     return strategy
 
 
-def generate_trades(universe, n_trades):
-    """
-    Yield trades randomly.
-    """
-    for _ in range(n_trades):
-        n_orders = np.random.randint(1, 5)
-        asset = random.sample(list(universe.assets), n_orders)
-        lot = 20 * np.random.rand(n_orders) - 10  # -10 ~ +10
-        open_bar, close_bar = sorted(random.sample(list(universe.bars), 2))
-        yield Trade(
-            asset=asset, lot=lot, open_bar=open_bar, close_bar=close_bar
-        )
+def make_random_trades(universe, n_trades, seed):
+    random_trader = RandomTrader(n_trades=n_trades, seed=seed)
+    trades = random_trader.run(universe).trades
+    return list(trades)  # for of array is slow
 
 
 # --------------------------------------------------------------------------------
@@ -81,16 +65,12 @@ def test_index(seed, n_bars, n_assets, n_trades):
     """
     Test trade_id and order_id.
     """
-    np.random.seed(seed)
-    random.seed(seed)
+    universe = make_randomwalk(n_bars, n_assets)
+    trades = make_random_trades(universe, n_trades, seed)
 
-    universe = make_universe(n_bars, n_assets)
-
-    trades = []
     trade_index_expected = []
-    for i, trade in enumerate(generate_trades(universe, n_trades)):
+    for i, trade in enumerate(trades):
         trade_index_expected += [i for _ in range(len(trade.asset))]
-        trades.append(trade)
     order_index_expected = list(range(len(trade_index_expected)))
 
     strategy = make_strategy(universe=universe, trades=trades)
@@ -99,25 +79,25 @@ def test_index(seed, n_bars, n_assets, n_trades):
     assert np.equal(order_index(strategy), order_index_expected).all()
 
 
-# @pytest.mark.parametrize('seed', params_seed)
-# @pytest.mark.parametrize('n_bars', params_n_bars)
-# @pytest.mark.parametrize('n_assets', params_n_assets)
-# @pytest.mark.parametrize('n_trades', params_n_trades)
-# def test_asset_ids(seed, n_bars, n_assets, n_trades):
-#     np.random.seed(seed)
-#     random.seed(seed)
+@pytest.mark.parametrize('seed', params_seed)
+@pytest.mark.parametrize('n_bars', params_n_bars)
+@pytest.mark.parametrize('n_assets', params_n_assets)
+@pytest.mark.parametrize('n_trades', params_n_trades)
+def test_asset_ids(seed, n_bars, n_assets, n_trades):
+    np.random.seed(seed)
+    random.seed(seed)
 
-#     universe = make_universe(n_bars, n_assets)
+    universe = make_randomwalk(n_bars, n_assets)
+    trades = make_random_trades(universe, n_trades, seed)
 
-#     trades = []
-#     asset_ids_expected = []
-#     for i, trade in enumerate(generate_trades(universe, n_trades)):
-#         asset_ids_expected += [a[5:] for a in trade.asset]  # Asset name is 'Asset{i}'
-#         trades.append(trade)
+    asset_ids_expected = []
+    for i, trade in enumerate(trades):
+        # Asset name is 'Asset{i}'
+        asset_ids_expected += [int(a[5:]) for a in trade.asset]
 
-#     strategy = make_strategy(universe=universe, trades=trades)
+    strategy = make_strategy(universe=universe, trades=trades)
 
-#     assert np.equal(asset_ids(strategy), asset_ids_expected).all()
+    assert np.equal(asset_ids(strategy), asset_ids_expected).all()
 
 
 @pytest.mark.parametrize('seed', params_seed)
@@ -128,13 +108,12 @@ def test_lots(seed, n_bars, n_assets, n_trades):
     np.random.seed(seed)
     random.seed(seed)
 
-    universe = make_universe(n_bars, n_assets)
+    universe = make_randomwalk(n_bars, n_assets)
+    trades = make_random_trades(universe, n_trades, seed)
 
-    trades = []
     expected = []
-    for i, trade in enumerate(generate_trades(universe, n_trades)):
+    for i, trade in enumerate(trades):
         expected += [lot for lot in trade.lot]  # Asset name is 'Asset{i}'
-        trades.append(trade)
 
     strategy = make_strategy(universe=universe, trades=trades)
 

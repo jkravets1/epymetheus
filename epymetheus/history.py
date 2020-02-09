@@ -43,7 +43,8 @@ class History(TradeResult):
         history : History
         """
         if verbose:
-            print('Evaluating history ... ', end='')
+            msg = 'Evaluating history'
+            print(f'{msg:<22} ... ', end='')
             begin_time = time()
 
         history = cls()
@@ -52,13 +53,16 @@ class History(TradeResult):
         history.assets = strategy.assets
         history.lots = strategy.lots
         history.open_bars = strategy.open_bars
+        history.shut_bars = strategy.shut_bars
+        history.atakes = strategy.atakes
+        history.acuts = strategy.acuts
+
         history.close_bars = strategy.close_bars
+
         history.durations = strategy.durations
         history.open_prices = strategy.open_prices
         history.close_prices = strategy.close_prices
         history.gains = strategy.gains
-
-        history.close_bars = strategy._close_by_signals
 
         if verbose:
             print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')

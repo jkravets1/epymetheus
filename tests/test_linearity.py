@@ -1,16 +1,17 @@
 import pytest
-from ._utils import make_randomuniverse, generate_trades
 
 import random
 import numpy as np
 
 from epymetheus import Trade, TradeStrategy
+from epymetheus.datasets import make_randomwalk
+from epymetheus.benchmarks import RandomTrader
 
 
-params_seed = [42, 1, 2, 3]
+params_seed = [42]
 params_n_bars = [10, 1000]
-params_n_assets = [1, 100]
-params_n_trades = [10]
+params_n_assets = [10, 100]
+params_n_trades = [10, 100]
 params_a = [1.23, -1.23]
 
 lots = [0.0, 1, 1.23, -1.23, 12345.678]
@@ -22,8 +23,7 @@ class MultipleTradeStrategy(TradeStrategy):
 
     Parameters
     ----------
-    - alocs : list of (asset, lot, open_bar, close_bar)
-        Represent trades to yield.
+    trades : iterable of Trade
     """
     def logic(self, universe, trades):
         for trade in trades:
@@ -53,6 +53,12 @@ def assert_mul(history_1, history_a, attribute, a=None):
         assert (array_1 == array_a).all()
 
 
+def make_random_trades(universe, n_trades, seed):
+    random_trader = RandomTrader(n_trades=n_trades, seed=seed)
+    trades = random_trader.run(universe).trades
+    return list(trades)  # for of array is slow
+
+
 # --------------------------------------------------------------------------------
 
 
@@ -70,10 +76,10 @@ def test_add(seed, n_bars, n_assets, n_trades):
     np.random.seed(seed)
     random.seed(seed)
 
-    universe = make_randomuniverse(n_bars, n_assets)
+    universe = make_randomwalk(n_bars, n_assets)
 
-    trades_0 = list(generate_trades(universe, lots, n_trades))
-    trades_1 = list(generate_trades(universe, lots, n_trades))
+    trades_0 = make_random_trades(universe, n_trades, seed + 0)
+    trades_1 = make_random_trades(universe, n_trades, seed + 1)
     trades_A = trades_0 + trades_1
 
     strategy_0 = MultipleTradeStrategy(trades=trades_0).run(universe)
@@ -90,7 +96,7 @@ def test_add(seed, n_bars, n_assets, n_trades):
     assert_add(history_0, history_1, history_A, 'assets')
     assert_add(history_0, history_1, history_A, 'lots')
     assert_add(history_0, history_1, history_A, 'open_bars')
-    assert_add(history_0, history_1, history_A, 'close_bars')
+    assert_add(history_0, history_1, history_A, 'shut_bars')
     assert_add(history_0, history_1, history_A, 'durations')
     assert_add(history_0, history_1, history_A, 'open_prices')
     assert_add(history_0, history_1, history_A, 'close_prices')
@@ -131,17 +137,15 @@ def test_mul(seed, n_bars, n_assets, n_trades, a):
     np.random.seed(seed)
     random.seed(seed)
 
-    universe = make_randomuniverse(n_bars, n_assets)
+    universe = make_randomwalk(n_bars, n_assets)
 
-    trades_1 = list(generate_trades(universe, lots, n_trades))
-    # trades_a = [(asset, a * lot, open_bar, close_bar)
-    #             for asset, lot, open_bar, close_bar in trades_1]
+    trades_1 = make_random_trades(universe, n_trades, seed + 1)
     trades_a = [
         Trade(
             asset=trade.asset,
             lot=a * trade.lot,
             open_bar=trade.open_bar,
-            close_bar=trade.close_bar
+            shut_bar=trade.shut_bar
         )
         for trade in trades_1
     ]
@@ -158,7 +162,7 @@ def test_mul(seed, n_bars, n_assets, n_trades, a):
     assert_mul(history_1, history_a, 'assets', None)
     assert_mul(history_1, history_a, 'lots', a)
     assert_mul(history_1, history_a, 'open_bars', None)
-    assert_mul(history_1, history_a, 'close_bars', None)
+    assert_mul(history_1, history_a, 'shut_bars', None)
     assert_mul(history_1, history_a, 'durations', None)
     assert_mul(history_1, history_a, 'open_prices', None)
     assert_mul(history_1, history_a, 'close_prices', None)

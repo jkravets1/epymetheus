@@ -1,9 +1,6 @@
 import numpy as np
 
 
-# TODO Implement roll without periodic boundary condition
-
-
 def wealth(strategy):
     """
     Return time-series of wealth.
@@ -16,7 +13,7 @@ def wealth(strategy):
     position = np.cumsum(
         np.concatenate([
             np.zeros((1, strategy.universe.n_assets)),
-            strategy._transaction_matrix[1:, :],
+            strategy.transaction_matrix[1:, :],
         ], axis=0),
         axis=0,
     )

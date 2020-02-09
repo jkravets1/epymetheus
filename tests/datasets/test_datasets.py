@@ -1,7 +1,7 @@
-import pytest  # noqa
+# import pytest  # noqa
 
-import numpy as np
-from epymetheus.datasets import fetch_usstocks
+# import numpy as np
+# from epymetheus.datasets import fetch_usstocks
 
 
 # --------------------------------------------------------------------------------
