@@ -37,7 +37,7 @@ class SimpleTrendFollower(TradeStrategy):
             / universe.prices.loc[open_date - DateOffset(months=1)]
         return list(onemonth_returns.sort_values().index)
 
-    def logic(self, universe, percentile, bet_price):
+    def logic(self, universe, percentile, bet_price, atake, acut):
         n_trade = int(universe.n_assets * percentile)
         date_range = pd.date_range(universe.bars[0], universe.bars[-1], freq='BM')
         hold_period = DateOffset(months=3)
@@ -47,12 +47,10 @@ class SimpleTrendFollower(TradeStrategy):
             for asset in assets[:n_trade]:
                 lot = bet_price / universe.prices.at[open_date, asset]
                 yield Trade(
-                    asset=asset,
-                    lot=lot,
+                    asset=asset, lot=lot,
                     open_bar=open_date,
                     shut_bar=open_date + hold_period,
-                    atake=0.30 * bet_price,
-                    acut=-0.05 * bet_price,
+                    atake=atake, acut=acut,
                 )
 
 
@@ -83,7 +81,12 @@ def plot(strategy):
 def main():
     universe = fetch_usstocks(n_assets=10)
 
-    strategy = SimpleTrendFollower(percentile=0.2, bet_price=10000)
+    strategy = SimpleTrendFollower(
+        percentile=0.2,
+        bet_price=10000,
+        atake=10000,
+        acut=-1000,
+    )
     strategy.run(universe)
 
     plot(strategy)
