@@ -15,6 +15,7 @@ def fetch_usstocks(
     begin_date='2000-01-01',
     end_date='2019-01-01',
     n_assets=10,
+    verbose=True,
 ):
     """
     Return Universe of US stocks.
@@ -32,7 +33,7 @@ def fetch_usstocks(
     fetcher = _USStockFetcher(
         begin_date=begin_date, end_date=end_date, n_assets=n_assets
     )
-    prices = fetcher.fetch()
+    prices = fetcher.fetch(verbose=verbose)
     return Universe(prices, name='USStocks')
 
 
@@ -73,7 +74,7 @@ class _USStockFetcher:
             raise ValueError('Full data not available')
         return price
 
-    def fetch(self):
+    def fetch(self, verbose=True):
         tickers = iter(self.tickers)
         data = []
         while len(data) < self.n_assets:
@@ -85,13 +86,21 @@ class _USStockFetcher:
                     f'for {self.begin_date}-{self.end_date}'
                 )
             try:
+                if verbose:
+                    print(
+                        f'\rFetching {ticker} '
+                        f'({len(data) + 1}/{self.n_assets}) ...'
+                    )
                 price = self.fetch_one(ticker)
             except ValueError:
                 pass
             else:
                 data.append(price)
 
-        return pd.concat(data, axis=1)
+        dataframe = pd.concat(data, axis=1)
+        if verbose:
+            print('Done.')
+        return dataframe
 
 
 if __name__ == '__main__':
