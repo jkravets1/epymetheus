@@ -21,6 +21,8 @@ $ pip install epymetheus
 
 ## How to use
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/simaki/fracdiff/blob/master/examples/howto/howto.ipynb)
+
 Let's construct your own strategy by subclassing `TradeStrategy`.
 
 ```python
