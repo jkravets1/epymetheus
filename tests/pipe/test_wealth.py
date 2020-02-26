@@ -74,10 +74,10 @@ def test_wealth():
     #     np.cumsum(strategy.transaction_matrix, axis=0)[:-1, :],
     # ], axis=0)
 
-    # w1 = np.array([0, 1, 3, 3, 3])
-    # w2 = (-2) * np.array([0, 10, 30, 30, 30])
-    # w3 = 3 * np.array([0, 0, 200, 500, 800])
-    # expected = w1 + w2 + w3
+    w1 = np.array([0, 1, 3, 3, 3])
+    w2 = (-2) * np.array([0, 10, 30, 30, 30])
+    w3 = 3 * np.array([0, 0, 200, 500, 800])
+    expected = w1 + w2 + w3
 
     # price_change = np.diff(
     #     strategy.universe.prices.values,
@@ -94,4 +94,4 @@ def test_wealth():
     # print('wealth expected', expected)
 
     # assert np.equal(wealth(strategy), expected).all()
-    assert np.equal(a, expected).all()
+    assert np.equal(wealth(strategy), expected).all()
