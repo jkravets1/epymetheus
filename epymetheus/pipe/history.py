@@ -176,37 +176,37 @@ def shut_bar_ids(strategy, columns='trades'):
     return strategy.universe._bar_id(shut_bars)
 
 
-def atakes(strategy, columns='trades'):
+def takes(strategy, columns='trades'):
     """
-    Return atake of each trade.
+    Return take of each trade.
 
     Returns
     -------
     If columns = 'trades' :
-        atakes : array, shape (n_trades, )
+        takes : array, shape (n_trades, )
     If columns = 'orders' :
-        atakes : array, shape (n_orders, )
+        takes : array, shape (n_orders, )
 
     Examples
     --------
     >>> strategy.trades = [
-    ...     Trade(atake=1, asset=['Asset0', 'Asset1'], ...),
-    ...     Trade(atake=2, asset=['Asset2'], ...),
+    ...     Trade(take=1, asset=['Asset0', 'Asset1'], ...),
+    ...     Trade(take=2, asset=['Asset2'], ...),
     ... ]
-    >>> strategy.atakes
+    >>> strategy.takes
     array([ 1, 2])
     """
     if columns == 'orders':
         return np.repeat(
-            atakes(strategy, columns='trades'),
+            takes(strategy, columns='trades'),
             [trade.n_orders for trade in strategy.trades],
         )
-    return np.array([trade.atake or np.inf for trade in strategy.trades])
+    return np.array([trade.take or np.inf for trade in strategy.trades])
 
 
-def acuts(strategy, columns='trades'):
+def stops(strategy, columns='trades'):
     """
-    Return atake of each trade.
+    Return stop of each trade.
 
     Parameters
     ----------
@@ -216,25 +216,25 @@ def acuts(strategy, columns='trades'):
     Returns
     -------
     If columns = 'trades' :
-        acuts : array, shape (n_trades, )
+        stops : array, shape (n_trades, )
     If columns = 'orders' :
-        acuts : array, shape (n_orders, )
+        stops : array, shape (n_orders, )
 
     Examples
     --------
     >>> strategy.trades = [
-    ...     Trade(acut=-1, asset=['Asset0', 'Asset1'], ...),
-    ...     Trade(acut=-2, asset=['Asset2'], ...),
+    ...     Trade(stop=-1, asset=['Asset0', 'Asset1'], ...),
+    ...     Trade(stop=-2, asset=['Asset2'], ...),
     ... ]
-    >>> strategy.acuts
+    >>> strategy.stop
     array([ -1, -2])
     """
     if columns == 'orders':
         return np.repeat(
-            acuts(strategy, columns='trades'),
+            stops(strategy, columns='trades'),
             [trade.n_orders for trade in strategy.trades],
         )
-    return np.array([trade.acut or -np.inf for trade in strategy.trades])
+    return np.array([trade.stop or -np.inf for trade in strategy.trades])
 
 
 def durations(strategy):

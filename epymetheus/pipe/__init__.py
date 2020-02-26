@@ -6,8 +6,8 @@ from .history import asset_ids
 from .history import lots
 from .history import open_bar_ids
 from .history import shut_bar_ids
-from .history import atakes
-from .history import acuts
+from .history import takes
+from .history import stops
 from .history import durations
 from .history import open_prices
 from .history import close_prices

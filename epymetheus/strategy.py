@@ -179,12 +179,12 @@ class TradeStrategy(metaclass=ABCMeta):
         return self.universe.bars[self.close_bar_ids]
 
     @cached_property
-    def atakes(self):
-        return pipe.atakes(self, columns='orders')
+    def takes(self):
+        return pipe.takes(self, columns='orders')
 
     @cached_property
-    def acuts(self):
-        return pipe.acuts(self, columns='orders')
+    def stops(self):
+        return pipe.stops(self, columns='orders')
 
     @cached_property
     def durations(self):

@@ -9,7 +9,12 @@ from epymetheus.utils.array import (
     true_until,
 )
 from epymetheus.pipe.matrix import _value_matrix
-from epymetheus.pipe.history import open_bar_ids, shut_bar_ids, atakes, acuts
+from epymetheus.pipe.history import (
+    open_bar_ids,
+    shut_bar_ids,
+    takes,
+    stops,
+)
 
 
 def _close_bar_ids_from_signals(strategy, columns='trades'):
@@ -46,7 +51,7 @@ def _close_bar_ids_from_signals(strategy, columns='trades'):
            [   -38,    300]    # 01-03
            [   -38,    600]    # 01-04
            [   -38,    900]])  # 01-05
-    >>> strategy.atakes
+    >>> strategy.takes
     array([ 500, 500])
     >>> _closebars_from_signals(strategy)
     array([ 2, 3])
@@ -57,14 +62,14 @@ def _close_bar_ids_from_signals(strategy, columns='trades'):
             [trade.n_orders for trade in strategy.trades],
         )
 
-    th_atakes = atakes(strategy, columns='trades')
-    th_acuts = acuts(strategy, columns='trades')
+    th_takes = takes(strategy, columns='trades')
+    th_stops = stops(strategy, columns='trades')
 
     return catch_first([
         _signal_shutbar(strategy),
         _signal_lastbar(strategy),
-        cross_up(_acumpnl(strategy), threshold=th_atakes),
-        cross_down(_acumpnl(strategy), threshold=th_acuts),
+        cross_up(_acumpnl(strategy), threshold=th_takes),
+        cross_down(_acumpnl(strategy), threshold=th_stops),
     ])
 
 

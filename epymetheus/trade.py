@@ -22,10 +22,12 @@ class Trade:
         Bar to enforce the trade to close.
     - lot : float, default 1.0
         Lot to trade in unit of share.
-    - atake : float > 0 or None, default None
+    - take : float > 0 or None, default None
+        Threshold of profit-take.
+    - stop : float < 0 or None, default None
+        Threshold of stop-loss.
     - rtake : float > 0 or None, default None
-    - acut : float < 0 or None, default None
-    - rcut : float < 0 or None, default None
+    - rstop : float < 0 or None, default None
 
     Attributes
     ----------
@@ -60,19 +62,19 @@ class Trade:
         open_bar=None,
         shut_bar=None,
         lot=1.0,
-        atake=None,
-        rtake=None,
-        acut=None,
-        rcut=None,
+        take=None,
+        stop=None,
+        # rtake=None,
+        # rstop=None,
     ):
         self.asset = np.array(asset).reshape(-1)
         self.open_bar = open_bar
         self.shut_bar = shut_bar
         self.lot = np.array(lot, dtype=np.float64).reshape(-1)
-        self.atake = atake
-        self.rtake = rtake
-        self.acut = acut
-        self.rcut = rcut
+        self.take = take
+        self.stop = stop
+        # self.rtake = rtake
+        # self.rtake = rstop
 
         self.__check_params()
 
@@ -109,10 +111,10 @@ class Trade:
             (self.asset == other.asset).all(),
             self.open_bar == other.open_bar,
             (self.lot == other.lot).all(),
-            self.atake == other.atake,
-            self.rtake == other.rtake,
-            self.acut == other.acut,
-            self.rcut == other.rcut,
+            self.take == other.take,
+            self.stop == other.stop,
+            # self.rtake == other.rtake,
+            # self.rstop == other.rstop,
         ])
 
     def __mul__(self, num):
