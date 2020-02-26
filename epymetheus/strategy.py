@@ -237,7 +237,7 @@ class TradeStrategy(metaclass=ABCMeta):
             begin_time = time()
             for i, trade in enumerate(iter_trades):
                 msg = f'Generating {i + 1} trades'
-                print(f'\r{msg:<22} ... ', end='')
+                print(f'\r{msg:<22} ({trade.open_bar}) ...', end='')
                 yield trade
             print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
 
