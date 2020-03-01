@@ -34,6 +34,6 @@ def transaction_matrix(strategy):
     return multi_dot([
         strategy.universe._bar_onehot(strategy.open_bar_ids).T
         - strategy.universe._bar_onehot(strategy.close_bar_ids).T,
-        np.diag(strategy.lots),
-        strategy.universe._asset_onehot(strategy.asset_ids),
+        np.diag(strategy.lot),
+        strategy.universe._asset_onehot(strategy.asset_id),
     ])

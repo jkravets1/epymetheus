@@ -1,103 +1,6 @@
 import numpy as np
 
 
-def trade_index(strategy):
-    """
-    Return order_index of each order.
-
-    Parameters
-    ----------
-    - strategy : Tradestrategy
-        with the following attributes:
-        * trades
-
-    Returns
-    -------
-    trade_index : array, shape (n_orders, )
-
-    Examples
-    --------
-    >>> strategy.trades = [
-    ...     Trade(asset=['Asset0', 'Asset1'], ...),
-    ...     Trade(asset=['Asset2'], ...),
-    ... ]
-    >>> strategy.trade_index
-    array([ 0, 0, 1])
-    """
-    return np.repeat(
-        np.arange(strategy.n_trades),
-        [trade.n_orders for trade in strategy.trades]
-    )
-
-
-def order_index(strategy):
-    """
-    Return order_index of each order.
-
-    Returns
-    -------
-    array([0, 1, ..., n_orders - 1]) : shape (n_orders, )
-
-    Examples
-    --------
-    >>> strategy.trades = [
-    ...     Trade(asset=['Asset0', 'Asset1'], ...),
-    ...     Trade(asset=['Asset2'], ...),
-    ... ]
-    >>> strategy.trade_index
-    array([ 0, 1, 2])
-    """
-    return np.arange(strategy.n_orders)
-
-
-def asset_ids(strategy):
-    """
-    Return asset id of each order.
-
-    Returns
-    -------
-    asset_ids : array, shape (n_orders, )
-
-    Examples
-    --------
-    >>> strategy.universe.assets
-    >>> Index(['Asset0', 'Asset1', 'Asset2', ...])
-    >>> strategy.trades = [
-    ...     Trade(asset=['Asset0', 'Asset1'], ...),
-    ...     Trade(asset=['Asset2'], ...),
-    ... ]
-    >>> strategy.assets
-    array([ 0, 1, 2])
-    """
-    return strategy.universe.assets.get_indexer(
-        np.concatenate([
-            trade.asset for trade in strategy.trades
-        ])
-    )
-
-
-def lots(strategy):
-    """
-    Return lot of each order.
-
-    Returns
-    -------
-    lots : array, shape (n_orders, )
-
-    Examples
-    --------
-    >>> strategy.trades = [
-    ...     Trade(lot=[1, -2], ...),
-    ...     Trade(lot=[3], ...),
-    ... ]
-    >>> strategy.lots
-    array([  1, -2,  3])
-    """
-    return np.concatenate([
-        trade.lot for trade in strategy.trades
-    ])
-
-
 def open_bar_ids(strategy, columns='trades'):
     """
     Return open_bar of each trade/order.
@@ -286,7 +189,7 @@ def open_prices(strategy):
     array([  1,  10, 200]
     """
     return strategy.universe._pick_prices(
-        strategy.open_bar_ids, strategy.asset_ids
+        strategy.open_bar_ids, strategy.asset_id
     )
 
 
@@ -312,7 +215,7 @@ def close_prices(strategy):
     array([  1,  10, 200]
     """
     return strategy.universe._pick_prices(
-        strategy.close_bar_ids, strategy.asset_ids
+        strategy.close_bar_ids, strategy.asset_id
     )
 
 
@@ -346,4 +249,4 @@ def gains(strategy):
     >>> strategy.gains
     array([  2,  20, 300])
     """
-    return (strategy.close_prices - strategy.open_prices) * strategy.lots
+    return (strategy.close_prices - strategy.open_prices) * strategy.lot

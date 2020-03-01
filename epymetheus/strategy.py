@@ -2,6 +2,8 @@ from abc import ABCMeta, abstractmethod
 from inspect import cleandoc
 from time import time
 
+import numpy as np
+
 from epymetheus.history import History
 from epymetheus.transaction import Transaction
 from epymetheus.wealth import Wealth
@@ -134,25 +136,63 @@ class TradeStrategy(metaclass=ABCMeta):
     def n_assets(self):
         return self.universe.n_assets
 
-    @cached_property
-    def trade_index(self):
-        return pipe.trade_index(self)
+    # @cached_property
+    # def trade_index(self):
+    #     return pipe.trade_index(self)
 
-    @cached_property
-    def order_index(self):
-        return pipe.order_index(self)
-
-    @cached_property
-    def asset_ids(self):
-        return pipe.asset_ids(self)
+    # @cached_property
+    # def order_index(self):
+    #     return pipe.order_index(self)
 
     @property
-    def assets(self):
-        return self.universe.assets[self.asset_ids]
+    def asset_id(self):
+        """
+        Return asset id of each order.
+
+        Returns
+        -------
+        asset_id : array, shape (n_orders, )
+
+        Examples
+        --------
+        >>> strategy.universe.assets
+        >>> Index(['Asset0', 'Asset1', 'Asset2', ...])
+        >>> strategy.trades = [
+        ...     Trade(asset=['Asset0', 'Asset1'], ...),
+        ...     Trade(asset=['Asset2'], ...),
+        ... ]
+        >>> strategy.assets
+        array([ 0, 1, 2])
+        """
+        return self.universe.assets.get_indexer(
+            np.concatenate([
+                trade.asset for trade in self.trades
+            ])
+        )
+
+    # @property
+    # def assets(self):
+    #     return self.universe.assets[self.asset_id]
 
     @cached_property
-    def lots(self):
-        return pipe.lots(self)
+    def lot(self):
+        """
+        Return lot of each order.
+
+        Returns
+        -------
+        lot : array, shape (n_orders, )
+
+        Examples
+        --------
+        >>> strategy.trades = [
+        ...     Trade(lot=[1, -2], ...),
+        ...     Trade(lot=[3], ...),
+        ... ]
+        >>> strategy.lots
+        array([  1, -2,  3])
+        """
+        return np.concatenate([trade.lot for trade in self.trades])
 
     @cached_property
     def open_bar_ids(self):

@@ -93,8 +93,8 @@ def test_add(seed, n_bars, n_assets, n_trades):
     history_1 = strategy_1.history
     history_A = strategy_A.history
 
-    assert_add(history_0, history_1, history_A, 'assets')
-    assert_add(history_0, history_1, history_A, 'lots')
+    assert_add(history_0, history_1, history_A, 'asset')
+    assert_add(history_0, history_1, history_A, 'lot')
     assert_add(history_0, history_1, history_A, 'open_bars')
     assert_add(history_0, history_1, history_A, 'shut_bars')
     assert_add(history_0, history_1, history_A, 'durations')
@@ -159,8 +159,8 @@ def test_mul(seed, n_bars, n_assets, n_trades, a):
     history_1 = strategy_1.history
     history_a = strategy_a.history
 
-    assert_mul(history_1, history_a, 'assets', None)
-    assert_mul(history_1, history_a, 'lots', a)
+    assert_mul(history_1, history_a, 'asset', None)
+    assert_mul(history_1, history_a, 'lot', a)
     assert_mul(history_1, history_a, 'open_bars', None)
     assert_mul(history_1, history_a, 'shut_bars', None)
     assert_mul(history_1, history_a, 'durations', None)

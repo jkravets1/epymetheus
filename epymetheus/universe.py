@@ -126,7 +126,7 @@ class Universe:
 
     #     Returns
     #     -------
-    #     - asset_ids : array, shape (n, )
+    #     - asset_id : array, shape (n, )
 
     #     Examples
     #     --------
@@ -139,7 +139,7 @@ class Universe:
     #     """
     #     return self.assets.get_indexer(assets)
 
-    def _asset_onehot(self, asset_ids):
+    def _asset_onehot(self, asset_id):
         """
         Return one-hot vectors of assers from asset names.
 
@@ -159,7 +159,7 @@ class Universe:
         array([[0., 1., 0.]
                [1., 0., 0.]])
         """
-        return np.eye(self.n_assets)[asset_ids]
+        return np.eye(self.n_assets)[asset_id]
 
     def _bar_id(self, bars):
         """
@@ -206,7 +206,7 @@ class Universe:
         """
         return np.eye(self.n_bars)[bar_ids]
 
-    def _pick_prices(self, bar_ids, asset_ids):
+    def _pick_prices(self, bar_ids, asset_id):
         """
         Return prices from bar names and asset names.
 
@@ -230,4 +230,4 @@ class Universe:
         >>> universe._pick_prices(['AAPL', 'MSFT'], ['01-02', '01-03'])
         array([ 2, 30])
         """
-        return self.prices.values[bar_ids, asset_ids]
+        return self.prices.values[bar_ids, asset_id]

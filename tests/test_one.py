@@ -57,8 +57,8 @@ def test_one(seed, n_bars, n_assets, lot, verbose):
     assert strategy.history.order_index == np.array([0])
     assert strategy.history.trade_index == np.array([0])
 
-    assert (strategy.history.assets == np.array(asset)).all()
-    assert (strategy.history.lots == np.array([lot])).all()
+    assert (strategy.history.asset == np.array(asset)).all()
+    assert (strategy.history.lot == np.array([lot])).all()
     assert (strategy.history.open_bars == np.array([open_bar])).all()
     assert (strategy.history.close_bars == np.array([shut_bar])).all()
     assert (strategy.history.durations == np.array([duration])).all()
