@@ -62,12 +62,11 @@ class TradeStrategy(metaclass=ABCMeta):
     >>> universe = Universe(...)
     >>> my_strategy.run(universe)
     """
-    def __init__(self, **params):
-        self.params = params
-        self.is_runned = False
+    def __init__(self):
+        """Initialize self."""
 
     @abstractmethod
-    def logic(self, universe, **kwargs):
+    def logic(self, universe):
         """
         Logic to return iterable of ``Trade`` from ``Universe``.
 
@@ -78,6 +77,10 @@ class TradeStrategy(metaclass=ABCMeta):
         - kwargs
             Parameters of the trade strategy.
         """
+
+    @property
+    def is_run(self):
+        return getattr(self, '__is_runned', False)
 
     def run(self, universe, verbose=True, save={}):
         """
@@ -100,10 +103,12 @@ class TradeStrategy(metaclass=ABCMeta):
 
         self.universe = universe
         self.trades = self.__generate_trades(verbose=verbose)
+
         self.history = History(strategy=self, verbose=verbose)
         self.transaction = Transaction(strategy=self, verbose=verbose)
         self.wealth = Wealth(strategy=self, verbose=verbose)
-        self.is_runned = True
+
+        self.__is_run = True
 
         if verbose:
             print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
@@ -271,7 +276,7 @@ class TradeStrategy(metaclass=ABCMeta):
         -------
         - list of Trade
         """
-        iter_trades = self.logic(self.universe, **self.params) or []
+        iter_trades = self.logic(self.universe) or []
 
         def iter_trades_verbose():
             begin_time = time()
