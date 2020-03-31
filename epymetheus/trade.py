@@ -21,8 +21,6 @@ class Trade:
         Threshold of profit-take.
     - stop : float < 0 or None, default None
         Threshold of stop-loss.
-    - rtake : float > 0 or None, default None
-    - rstop : float < 0 or None, default None
 
     Attributes
     ----------
@@ -59,8 +57,6 @@ class Trade:
         lot=1.0,
         take=None,
         stop=None,
-        # rtake=None,
-        # rstop=None,
     ):
         self.asset = np.array(asset).reshape(-1)
         self.open_bar = open_bar
@@ -68,8 +64,6 @@ class Trade:
         self.lot = np.array(lot, dtype=np.float64).reshape(-1)
         self.take = take
         self.stop = stop
-        # self.rtake = rtake
-        # self.rtake = rstop
 
         self.__check_params()
 
@@ -108,8 +102,6 @@ class Trade:
             (self.lot == other.lot).all(),
             self.take == other.take,
             self.stop == other.stop,
-            # self.rtake == other.rtake,
-            # self.rstop == other.rstop,
         ])
 
     def __mul__(self, num):
