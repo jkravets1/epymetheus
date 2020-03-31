@@ -262,32 +262,46 @@ class TradeStrategy(metaclass=ABCMeta):
         """
         Parameters
         ----------
-        - self
-            TradeStrategy; necessary attributes:
-            * universe
         - verbose : bool
 
         Returns
         -------
         - list of Trade
         """
-        iter_trades = self.logic(self.universe) or []
+        def iter_trades(verbose):
+            if verbose:
+                begin_time = time()
+                for i, trade in enumerate(self.logic(self.universe) or []):
+                    msg = f'Generating {i + 1} trades'
+                    print(f'\r{msg:<22} ({trade.open_bar}) ...', end='')
+                    yield trade
+                print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
+            else:
+                for trade in self.logic(self.universe) or []:
+                    yield trade
 
-        def iter_trades_verbose():
-            begin_time = time()
-            for i, trade in enumerate(iter_trades):
-                msg = f'Generating {i + 1} trades'
-                print(f'\r{msg:<22} ({trade.open_bar}) ...', end='')
-                yield trade
-            print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
+        trades = list(iter_trades(verbose))
 
-        if verbose:
-            trades = list(iter_trades_verbose())
-            if len(trades) == 0:
-                raise RuntimeError('No trade yielded')
-            return trades
-        else:
-            trades = list(iter_trades)
-            if len(trades) == 0:
-                raise RuntimeError('No trade yielded')
-            return trades
+        if len(trades) == 0:
+            raise RuntimeError('No trades')
+
+        return trades
+
+        # iter_trades = self.logic(self.universe) or []
+
+        # def iter_trades_verbose():
+        #     begin_time = time()
+        #     for i, trade in enumerate(iter_trades):
+        #         msg = f'Generating {i + 1} trades'
+        #         print(f'\r{msg:<22} ({trade.open_bar}) ...', end='')
+        #         yield trade
+        #     print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
+
+        # if verbose:
+        #     trades = list(iter_trades_verbose())
+        #     if len(trades) == 0:
+        #         raise RuntimeError('No trade yielded')
+        # else:
+        #     trades = list(iter_trades)
+        #     if len(trades) == 0:
+        #         raise RuntimeError('No trade yielded')

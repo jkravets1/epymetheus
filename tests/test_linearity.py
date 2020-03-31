@@ -25,8 +25,11 @@ class MultipleTradeStrategy(TradeStrategy):
     ----------
     trades : iterable of Trade
     """
-    def logic(self, universe, trades):
-        for trade in trades:
+    def __init__(self, trades):
+        self.trades = trades
+
+    def logic(self, universe):
+        for trade in self.trades:
             yield trade
 
 

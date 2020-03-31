@@ -14,8 +14,11 @@ class SingleTradeStrategy(TradeStrategy):
     trade : Trade
         Trade to yield.
     """
-    def logic(self, universe, trade):
-        yield trade
+    def __init__(self, trade):
+        self.trade = trade
+
+    def logic(self, universe):
+        yield self.trade
 
 
 class RandomTrader(TradeStrategy):
@@ -35,30 +38,33 @@ class RandomTrader(TradeStrategy):
     - seed : int, default None
         Seed of randomness. If None, seed is not set.
     """
-    def logic(
+    def __init__(
         self,
-        universe,
         n_trades=100,
         max_n_orders=5,
         max_lot=100,
         min_lot=-100,
         seed=None,
     ):
-        if seed is not None:
-            np.random.seed(seed)
-            random.seed(seed)
+        self.__n_trades = n_trades
+        self.max_n_orders = max_n_orders
+        self.max_lot = max_lot
+        self.min_lot = min_lot
+        self.seed = seed
 
-        for _ in range(n_trades):
-            n_orders = np.random.randint(1, max_n_orders + 1, size=1)[0]
-            print(n_orders)
+    def logic(self, universe):
+        if self.seed is not None:
+            np.random.seed(self.seed)
+            random.seed(self.seed)
+
+        for _ in range(self.__n_trades):
+            n_orders = np.random.randint(1, self.max_n_orders + 1, size=1)[0]
 
             asset = random.sample(list(universe.assets), n_orders)
-            lot = (max_lot - min_lot) * np.random.rand(n_orders) - min_lot
+            lot = (self.max_lot - self.min_lot) \
+                * np.random.rand(n_orders) - self.min_lot
             open_bar, shut_bar = sorted(random.sample(list(universe.bars), 2))
 
             yield Trade(
-                asset=asset,
-                lot=lot,
-                open_bar=open_bar,
-                shut_bar=shut_bar,
+                asset=asset, lot=lot, open_bar=open_bar, shut_bar=shut_bar
             )
