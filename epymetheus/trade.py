@@ -2,11 +2,6 @@ from copy import deepcopy
 
 import numpy as np
 
-try:
-    from functools import cached_property
-except ImportError:
-    cached_property = property
-
 
 class Trade:
     """

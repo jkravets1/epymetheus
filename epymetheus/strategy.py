@@ -9,11 +9,6 @@ from epymetheus.transaction import Transaction
 from epymetheus.wealth import Wealth
 from epymetheus import pipe
 
-try:
-    from functools import cached_property
-except ImportError:
-    cached_property = property
-
 
 class TradeStrategy(metaclass=ABCMeta):
     """
@@ -125,11 +120,11 @@ class TradeStrategy(metaclass=ABCMeta):
         """Return detailed description of the strategy."""
         return cleandoc(self.__class__.__doc__)
 
-    @cached_property
+    @property
     def n_trades(self):
         return len(self.trades)
 
-    @cached_property
+    @property
     def n_orders(self):
         return sum(trade.n_orders for trade in self.trades)
 
@@ -141,11 +136,11 @@ class TradeStrategy(metaclass=ABCMeta):
     def n_assets(self):
         return self.universe.n_assets
 
-    # @cached_property
+    # @property
     # def trade_index(self):
     #     return pipe.trade_index(self)
 
-    # @cached_property
+    # @property
     # def order_index(self):
     #     return pipe.order_index(self)
 
@@ -179,7 +174,7 @@ class TradeStrategy(metaclass=ABCMeta):
     # def assets(self):
     #     return self.universe.assets[self.asset_id]
 
-    @cached_property
+    @property
     def lot(self):
         """
         Return lot of each order.
@@ -199,7 +194,7 @@ class TradeStrategy(metaclass=ABCMeta):
         """
         return np.concatenate([trade.lot for trade in self.trades])
 
-    @cached_property
+    @property
     def open_bar_ids(self):
         return pipe.open_bar_ids(self, columns='orders')
 
@@ -207,7 +202,7 @@ class TradeStrategy(metaclass=ABCMeta):
     def open_bars(self):
         return self.universe.bars[self.open_bar_ids]
 
-    @cached_property
+    @property
     def shut_bar_ids(self):
         return pipe.shut_bar_ids(self, columns='orders')
 
@@ -215,7 +210,7 @@ class TradeStrategy(metaclass=ABCMeta):
     def shut_bars(self):
         return self.universe.bars[self.shut_bar_ids]
 
-    @cached_property
+    @property
     def close_bar_ids(self):
         return pipe._close_bar_ids_from_signals(self, columns='orders')
 
@@ -223,35 +218,35 @@ class TradeStrategy(metaclass=ABCMeta):
     def close_bars(self):
         return self.universe.bars[self.close_bar_ids]
 
-    @cached_property
+    @property
     def takes(self):
         return pipe.takes(self, columns='orders')
 
-    @cached_property
+    @property
     def stops(self):
         return pipe.stops(self, columns='orders')
 
-    @cached_property
+    @property
     def durations(self):
         return pipe.durations(self)
 
-    @cached_property
+    @property
     def open_prices(self):
         return pipe.open_prices(self)
 
-    @cached_property
+    @property
     def close_prices(self):
         return pipe.close_prices(self)
 
-    @cached_property
+    @property
     def gains(self):
         return pipe.gains(self)
 
-    @cached_property
+    @property
     def wealth_(self):
         return pipe.wealth(self)
 
-    @cached_property
+    @property
     def transaction_matrix(self):
         return pipe.transaction_matrix(self)
 
