@@ -7,8 +7,8 @@ class Trade:
     """
     Represent a single trade.
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     - asset : str
         Name of asset.
     - open_bar : object or None, default None
@@ -29,8 +29,8 @@ class Trade:
     - n_orders : int
         Number of assets to bet.
 
-    Example
-    -------
+    Examples
+    --------
     Long position:
     >>> od = datetime.date(2018, 1, 1)
     >>> cd = datetime.date(2018, 2, 1)
