@@ -50,15 +50,11 @@ class History(TradeResult):
             begin_time = time()
 
         history = cls()
-        # history.trade_index = strategy.trade_index
-        # history.order_index = strategy.order_index
         history.trade_index = cls._get_trade_index(strategy)
         history.order_index = cls._get_order_index(strategy)
 
         history.asset = cls._get_asset(strategy)
         history.lot = cls._get_lot(strategy)
-
-        # history.lots = strategy.lots
 
         history.open_bars = strategy.open_bars
         history.shut_bars = strategy.shut_bars
@@ -177,3 +173,46 @@ class History(TradeResult):
         return np.concatenate([
             trade.lot for trade in strategy.trades
         ])
+
+    # TODO
+    # @staticmethod
+    # def _get_open_bar_id(strategy):
+    #     """
+    #     Return open_bar of each trade/order.
+
+    #     Parameters
+    #     ----------
+    #     - strategy
+    #     - columns : {'trades', 'orders'}, default 'trades'
+
+    #     Returns
+    #     -------
+    #     If columns = 'trades' :
+    #         open_bar_ids : array, shape (n_trades, )
+    #     If columns = 'orders' :
+    #         open_bar_ids : array, shape (n_orders, )
+
+    #     Examples
+    #     --------
+    #     >>> strategy.universe.bars
+    #     Index(['01-01', '01-02', '01-03', ...])
+    #     >>> strategy.trades = [
+    #     ...     Trade(open_bar='01-01', asset=['Asset0', 'Asset1'], ...),
+    #     ...     Trade(open_bar='01-02', asset=['Asset2'], ...),
+    #     ... ]
+    #     >>> strategy.open_bar_ids
+    #     array([ 1, 2])
+    #     """
+    #     if columns == 'orders':
+    #         return np.repeat(
+    #             open_bar_ids(strategy, columns='trades'),
+    #             [trade.n_orders for trade in strategy.trades],
+    #         )
+
+    #     def ifnonefirst(bar):
+    #         if bar is None:
+    #             return strategy.universe.bars[0]
+    #         else:
+    #             return bar
+    #     open_bars = [ifnonefirst(trade.open_bar) for trade in strategy.trades]
+    #     return strategy.universe._bar_id(open_bars)

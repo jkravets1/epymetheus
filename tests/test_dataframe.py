@@ -1,4 +1,4 @@
-import pytest  # noqa
+import pytest
 
 import pandas as pd
 
@@ -26,6 +26,5 @@ def test_dataframe(seed, n_bars, n_assets, n_trades):
     frame_history = pd.DataFrame(strategy.history)
     frame_transaction = pd.DataFrame(strategy.transaction)
     frame_wealth = pd.DataFrame(strategy.wealth)
-    print(frame_history)
-    print(frame_transaction)
-    print(frame_wealth)
+
+    # TODO Check contents of dataframe

@@ -33,6 +33,12 @@ class MultipleTradeStrategy(TradeStrategy):
             yield trade
 
 
+def make_random_trades(universe, n_trades, seed):
+    random_trader = RandomTrader(n_trades=n_trades, seed=seed)
+    trades = random_trader.run(universe).trades
+    return list(trades)  # for of array is slow
+
+
 def assert_add(history_0, history_1, history_A, attribute):
     array_0 = getattr(history_0, attribute)
     array_1 = getattr(history_1, attribute)
@@ -56,12 +62,6 @@ def assert_mul(history_1, history_a, attribute, a=None):
         assert (array_1 == array_a).all()
 
 
-def make_random_trades(universe, n_trades, seed):
-    random_trader = RandomTrader(n_trades=n_trades, seed=seed)
-    trades = random_trader.run(universe).trades
-    return list(trades)  # for of array is slow
-
-
 # --------------------------------------------------------------------------------
 
 
@@ -69,7 +69,7 @@ def make_random_trades(universe, n_trades, seed):
 @pytest.mark.parametrize('n_bars', params_n_bars)
 @pytest.mark.parametrize('n_assets', params_n_assets)
 @pytest.mark.parametrize('n_trades', params_n_trades)
-def test_add(seed, n_bars, n_assets, n_trades):
+def test_linearity_add(seed, n_bars, n_assets, n_trades):
     """
     Test additivity of strategies for the following strategies:
         - strategy_0 : yield (trade_00, trade_01, ...)
@@ -89,25 +89,21 @@ def test_add(seed, n_bars, n_assets, n_trades):
     strategy_1 = MultipleTradeStrategy(trades=trades_1).run(universe)
     strategy_A = MultipleTradeStrategy(trades=trades_A).run(universe)
 
-    # transaction
-    # -----------
+    history_0 = strategy_0.history
+    history_1 = strategy_1.history
+    history_A = strategy_A.history
 
-    transaction_0 = strategy_0.transaction
-    transaction_1 = strategy_1.transaction
-    transaction_A = strategy_A.transaction
-
-    for asset in universe.assets:
-        assert np.allclose(
-            transaction_0[asset] + transaction_1[asset], transaction_A[asset]
-        )
-
-    # wealth
-    # ------
-
-    wealth_01 = 100 + strategy_0.wealth['wealth'] + strategy_1.wealth['wealth']
-    wealth_A = 100 + strategy_A.wealth['wealth']
-
-    assert np.allclose(wealth_01, wealth_A)
+    for attr in (
+        'asset',
+        'lot',
+        'open_bars',
+        'shut_bars',
+        'durations',
+        'open_prices',
+        'close_prices',
+        'gains',
+    ):
+        assert_add(history_0, history_1, history_A, attr)
 
 
 @pytest.mark.parametrize('seed', params_seed)
@@ -115,7 +111,7 @@ def test_add(seed, n_bars, n_assets, n_trades):
 @pytest.mark.parametrize('n_assets', params_n_assets)
 @pytest.mark.parametrize('n_trades', params_n_trades)
 @pytest.mark.parametrize('a', params_a)
-def test_mul(seed, n_bars, n_assets, n_trades, a):
+def test_linearity_mul(seed, n_bars, n_assets, n_trades, a):
     """
     Test additivity of strategies for the following strategies:
         - strategy_1 : yield (1 * trade_0, 1 * trade_11, ...)
@@ -140,19 +136,18 @@ def test_mul(seed, n_bars, n_assets, n_trades, a):
     strategy_1 = MultipleTradeStrategy(trades=trades_1).run(universe)
     strategy_a = MultipleTradeStrategy(trades=trades_a).run(universe)
 
-    # transaction
-    # -----------
+    history_1 = strategy_1.history
+    history_a = strategy_a.history
 
-    transaction_1 = strategy_1.transaction
-    transaction_a = strategy_a.transaction
+    for attr in (
+        'asset',
+        'open_bars',
+        'shut_bars',
+        'durations',
+        'open_prices',
+        'close_prices',
+    ):
+        assert_mul(history_1, history_a, attr, None)
 
-    for asset in universe.assets:
-        assert_mul(transaction_1, transaction_a, asset, a)
-
-    # wealth
-    # ------
-
-    wealth_1 = strategy_1.wealth
-    wealth_a = strategy_a.wealth
-
-    assert_mul(wealth_1, wealth_a, 'wealth', a)
+    for attr in ('lot', 'gains'):
+        assert_mul(history_1, history_a, attr, a)

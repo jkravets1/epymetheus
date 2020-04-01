@@ -73,10 +73,6 @@ class TradeStrategy(metaclass=ABCMeta):
             Parameters of the trade strategy.
         """
 
-    @property
-    def is_run(self):
-        return getattr(self, '__is_runned', False)
-
     def run(self, universe, verbose=True, save={}):
         """
         Run a backtesting of strategy.
@@ -92,23 +88,49 @@ class TradeStrategy(metaclass=ABCMeta):
         -------
         self
         """
+        self.verbose = verbose
+
         if verbose:
             begin_time = time()
             print('Running ... ')
 
         self.universe = universe
         self.trades = self.__generate_trades(verbose=verbose)
-
-        self.history = History(strategy=self, verbose=verbose)
-        self.transaction = Transaction(strategy=self, verbose=verbose)
-        self.wealth = Wealth(strategy=self, verbose=verbose)
-
         self.__is_run = True
 
         if verbose:
             print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
 
         return self
+
+    def __generate_trades(self, verbose=True):
+        """
+        Parameters
+        ----------
+        - verbose : bool
+
+        Returns
+        -------
+        - list of Trade
+        """
+        def iter_trades(verbose):
+            if verbose:
+                begin_time = time()
+                for i, trade in enumerate(self.logic(self.universe) or []):
+                    msg = f'Generating {i + 1} trades'
+                    print(f'\r{msg:<22} ({trade.open_bar}) ...', end='')
+                    yield trade
+                print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
+            else:
+                for trade in self.logic(self.universe) or []:
+                    yield trade
+
+        trades = list(iter_trades(verbose))
+
+        if len(trades) == 0:
+            raise RuntimeError('No trades')
+
+        return trades
 
     @property
     def name(self):
@@ -119,6 +141,10 @@ class TradeStrategy(metaclass=ABCMeta):
     def description(self):
         """Return detailed description of the strategy."""
         return cleandoc(self.__class__.__doc__)
+
+    @property
+    def is_run(self):
+        return getattr(self, '__is_run', False)
 
     @property
     def n_trades(self):
@@ -136,13 +162,17 @@ class TradeStrategy(metaclass=ABCMeta):
     def n_assets(self):
         return self.universe.n_assets
 
-    # @property
-    # def trade_index(self):
-    #     return pipe.trade_index(self)
+    @property
+    def history(self):
+        return History(strategy=self)
 
-    # @property
-    # def order_index(self):
-    #     return pipe.order_index(self)
+    @property
+    def transaction(self):
+        return Transaction(strategy=self)
+
+    @property
+    def wealth(self):
+        return Wealth(strategy=self)
 
     @property
     def asset_id(self):
@@ -169,10 +199,6 @@ class TradeStrategy(metaclass=ABCMeta):
                 trade.asset for trade in self.trades
             ])
         )
-
-    # @property
-    # def assets(self):
-    #     return self.universe.assets[self.asset_id]
 
     @property
     def lot(self):
@@ -258,50 +284,3 @@ class TradeStrategy(metaclass=ABCMeta):
     def abs_exposure(self):
         return pipe.abs_exposure(self)
 
-    def __generate_trades(self, verbose=True):
-        """
-        Parameters
-        ----------
-        - verbose : bool
-
-        Returns
-        -------
-        - list of Trade
-        """
-        def iter_trades(verbose):
-            if verbose:
-                begin_time = time()
-                for i, trade in enumerate(self.logic(self.universe) or []):
-                    msg = f'Generating {i + 1} trades'
-                    print(f'\r{msg:<22} ({trade.open_bar}) ...', end='')
-                    yield trade
-                print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
-            else:
-                for trade in self.logic(self.universe) or []:
-                    yield trade
-
-        trades = list(iter_trades(verbose))
-
-        if len(trades) == 0:
-            raise RuntimeError('No trades')
-
-        return trades
-
-        # iter_trades = self.logic(self.universe) or []
-
-        # def iter_trades_verbose():
-        #     begin_time = time()
-        #     for i, trade in enumerate(iter_trades):
-        #         msg = f'Generating {i + 1} trades'
-        #         print(f'\r{msg:<22} ({trade.open_bar}) ...', end='')
-        #         yield trade
-        #     print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
-
-        # if verbose:
-        #     trades = list(iter_trades_verbose())
-        #     if len(trades) == 0:
-        #         raise RuntimeError('No trade yielded')
-        # else:
-        #     trades = list(iter_trades)
-        #     if len(trades) == 0:
-        #         raise RuntimeError('No trade yielded')
