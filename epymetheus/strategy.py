@@ -61,6 +61,10 @@ class TradeStrategy(metaclass=ABCMeta):
     Run:
     >>> universe = Universe(...)
     >>> my_strategy.run(universe)
+
+    Todo
+    ----
+    - dump trades in a light data structure
     """
     def __init__(self):
         """Initialize self."""
