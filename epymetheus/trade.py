@@ -52,24 +52,68 @@ class Trade:
     def __init__(
         self,
         asset,
+        lot=1.0,
         open_bar=None,
         shut_bar=None,
-        lot=1.0,
         take=None,
         stop=None,
     ):
-        self.asset = np.array(asset).reshape(-1)
+        self.asset = asset
+        self.lot = lot
         self.open_bar = open_bar
         self.shut_bar = shut_bar
-        self.lot = np.array(lot, dtype=np.float64).reshape(-1)
         self.take = take
         self.stop = stop
 
-        self.__check_params()
+    # def __check_params(self):
+    #     if self.asset.size != self.lot.size:
+    #         raise ValueError('Numbers of asset and lot should be equal')
 
     @property
-    def n_orders(self):
-        return self.lot.size
+    def _array_asset(self):
+        """
+        Return asset as `numpy.array`.
+
+        Returns
+        -------
+        array_asset : numpy.array, shape (n_orders, )
+
+        Examples
+        --------
+        >>> trade = Trade(asset='AAPL', ...)
+        >>> trade.a_asset
+        array(['AAPL'])
+
+        >>> trade = Trade(asset=['AAPL', 'MSFT'])
+        >>> trade.a_asset
+        array(['AAPL', 'MSFT'])
+        """
+        return np.array(self.asset).reshape(-1)
+
+    @property
+    def _array_lot(self):
+        """
+        Return lot as `numpy.array`.
+
+        Returns
+        -------
+        array_lot : numpy.array, shape (n_orders, )
+
+        Examples
+        --------
+        >>> trade = Trade(lot=1.2, ...)
+        >>> trade.a_lot
+        array([1.2])
+
+        >>> trade = Trade(asset=[1.2, 3.4])
+        >>> trade.a_asset
+        array([1.2, 3.4])
+        """
+        return np.array(self.lot).reshape(-1)
+
+    @property
+    def _n_orders(self):
+        return self._array_lot.size
 
     def _lot_vector(self, universe):
         """
