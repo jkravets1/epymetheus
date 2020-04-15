@@ -63,44 +63,6 @@ class Universe:
     def n_assets(self):
         return self.assets.size
 
-    # @classmethod
-    # def read_csv(
-    #     cls,
-    #     csv,
-    #     name=None,
-    #     begin_bar=None,
-    #     end_bar=None,
-    #     bars=None,
-    #     assets=None,
-    #     **kwargs
-    # ):
-    #     name = name or Path(csv).stem
-    #     prices = pd.read_csv(csv, **kwargs)
-    #     prices = prices.loc[
-    #         begin_bar or prices.index[0]: end_bar or prices.index[-1]
-    #     ]
-    #     return cls(prices, name=name, bars=bars, assets=assets)
-
-    # def read_csvs(
-    #     cls,
-    #     csvs,
-    #     name=None,
-    #     begin_bar=None,
-    #     end_bar=None,
-    #     bars=None,
-    #     assets=None,
-    #     **kwargs
-    # ):
-    #     prices = pd.concat([
-    #         pd.read_csv(csv, **kwargs) for csv in csvs
-    #     ], axis=1)
-    #     prices = prices.loc[
-    #         begin_bar or prices.index[0]: end_bar or prices.index[-1]
-    #     ]
-    #     return cls(prices, name=name, bars=bars, assets=assets)
-
-    # ------------------------------------------------------------
-
     def __check_prices(self, prices):
         if np.isnan(prices).any(None):
             raise ValueError('Price has NA.')
@@ -110,29 +72,6 @@ class Universe:
             raise ValueError('Bars are not unique.')
         if not prices.columns.is_unique:
             raise ValueError('Assets are not unique.')
-
-    # def _asset_id(self, assets):
-    #     """
-    #     Return asset indices from asset names.
-
-    #     Parameters
-    #     ----------
-    #     - assets : array-like, shape (n, )
-
-    #     Returns
-    #     -------
-    #     - asset_id : array, shape (n, )
-
-    #     Examples
-    #     --------
-    #     >>> universe.assets
-    #     Index(['AAPL', 'MSFT', 'AMZN'], dtype='object')
-    #     >>> universe._asset_id('MSFT')
-    #     array(1)
-    #     >>> universe._asset_id(['MSFT', 'AAPL'])
-    #     array([1, 0])
-    #     """
-    #     return self.assets.get_indexer(assets)
 
     def _asset_onehot(self, asset_id):
         """
