@@ -135,18 +135,14 @@ class Trade:
         asset_onehot = universe._asset_onehot(asset_id)
         return np.dot(self.lot, asset_onehot)
 
-    def __check_params(self):
-        if self.asset.size != self.lot.size:
-            raise ValueError('Numbers of asset and lot should be equal')
-
-    def __eq__(self, other):
-        return all([
-            (self.asset == other.asset).all(),
-            self.open_bar == other.open_bar,
-            (self.lot == other.lot).all(),
-            self.take == other.take,
-            self.stop == other.stop,
-        ])
+    # def __eq__(self, other):
+    #     return all([
+    #         (self.array_asset == other.array_asset).all(),
+    #         self.open_bar == other.open_bar,
+    #         (self.array_lot == other.array_lot).all(),
+    #         self.take == other.take,
+    #         self.stop == other.stop,
+    #     ])
 
     def __mul__(self, num):
         """
