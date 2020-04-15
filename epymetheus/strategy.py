@@ -139,6 +139,16 @@ class TradeStrategy(metaclass=ABCMeta):
         return trades
 
     @property
+    def name(self):
+        """Return name of the strategy."""
+        return self.__class__.__name__
+
+    @property
+    def description(self):
+        """Return detailed description of the strategy."""
+        return cleandoc(self.__class__.__doc__)
+
+    @property
     def params(self):
         """
         Return parameters of self as `dict`.
