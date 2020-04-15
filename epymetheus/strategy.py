@@ -38,9 +38,13 @@ class TradeStrategy(metaclass=ABCMeta):
     --------
     Define strategy by subclassing:
     >>> class MyTradeStrategy(TradeStrategy):
-    ...     '''This is my favorite strategy.'''
+    ...     '''
+    ...     This is my favorite strategy.
+    ...     '''
+    ...     def __init__(self, my_parameter):
+    ...         self.my_parameter = my_parameter
     ...
-    ...     def logic(universe, my_parameter):
+    ...     def logic(self, universe):
     ...         ...
     ...         yield Trade(...)
 
@@ -63,14 +67,16 @@ class TradeStrategy(metaclass=ABCMeta):
     @abstractmethod
     def logic(self, universe):
         """
-        Logic to return iterable of ``Trade`` from ``Universe``.
+        Logic to generate `Trade` from `Universe`.
 
         Parameters
         ----------
         - universe : Universe
             Universe to apply the logic.
-        - kwargs
-            Parameters of the trade strategy.
+
+        Yields
+        ------
+        trade : Trade
         """
 
     def run(self, universe, verbose=True, save={}):
@@ -283,4 +289,3 @@ class TradeStrategy(metaclass=ABCMeta):
     @property
     def abs_exposure(self):
         return pipe.abs_exposure(self)
-
