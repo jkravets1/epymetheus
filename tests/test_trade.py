@@ -85,22 +85,22 @@ def test_truediv(n_orders, a):
             trade1 = trade0 / a
 
 
-def test_error():
-    with pytest.raises(ValueError):
-        trade = Trade(asset=['Asset0', 'Asset1'], lot=1, open_bar='Bar0')
-        print(trade)
+# def test_error():
+#     with pytest.raises(ValueError):
+#         trade = Trade(asset=['Asset0', 'Asset1'], lot=1, open_bar='Bar0')
+#         print(trade)
 
-    with pytest.raises(ValueError):
-        trade = Trade(asset=['Asset0', 'Asset1'], lot=[1], open_bar='Bar0')
-        print(trade)
+#     with pytest.raises(ValueError):
+#         trade = Trade(asset=['Asset0', 'Asset1'], lot=[1], open_bar='Bar0')
+#         print(trade)
 
-    with pytest.raises(ValueError):
-        trade = Trade(asset='Asset0', lot=[1, 2], open_bar='Bar0')
-        print(trade)
+#     with pytest.raises(ValueError):
+#         trade = Trade(asset='Asset0', lot=[1, 2], open_bar='Bar0')
+#         print(trade)
 
-    with pytest.raises(ValueError):
-        trade = Trade(asset=['Asset0'], lot=[1, 2], open_bar='Bar0')
-        print(trade)
+#     with pytest.raises(ValueError):
+#         trade = Trade(asset=['Asset0'], lot=[1, 2], open_bar='Bar0')
+#         print(trade)
 
 # @pytest.mark.parametrize('n_orders', params_n_orders)
 # @pytest.mark.parametrize('a', params_a)
