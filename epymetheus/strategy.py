@@ -79,16 +79,16 @@ class TradeStrategy(metaclass=ABCMeta):
         trade : Trade
         """
 
-    def run(self, universe, verbose=True, save={}):
+    def run(self, universe, verbose=True):
         """
         Run a backtesting of strategy.
-        Set attributes `history`, `transaction` and `wealth`.
 
         Parameters
         ----------
         - universe : Universe
-        - verbose : bool
-        - save : dict
+            Universe with which self is run.
+        - verbose : bool, default True
+            Vermose mode.
 
         Returns
         -------
@@ -162,18 +162,10 @@ class TradeStrategy(metaclass=ABCMeta):
         return self.__dict__
 
     @property
-    def name(self):
-        """Return name of the strategy."""
-        return self.__class__.__name__
-
-    @property
-    def description(self):
-        """Return detailed description of the strategy."""
-        return cleandoc(self.__class__.__doc__)
-
-    @property
     def is_run(self):
         return getattr(self, '__is_run', False)
+
+    # ---
 
     @property
     def n_trades(self):
