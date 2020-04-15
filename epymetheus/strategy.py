@@ -4,6 +4,7 @@ from time import time
 
 import numpy as np
 
+from epymetheus.exceptions import NoTradeError
 from epymetheus.history import History
 from epymetheus.transaction import Transaction
 from epymetheus.wealth import Wealth
@@ -134,7 +135,7 @@ class TradeStrategy(metaclass=ABCMeta):
         trades = list(iter_trades(verbose))
 
         if len(trades) == 0:
-            raise RuntimeError('No trades')
+            raise NoTradeError('No trades')
 
         return trades
 
