@@ -112,7 +112,7 @@ class Trade:
         return np.array(self.lot).reshape(-1)
 
     @property
-    def _n_orders(self):
+    def n_orders(self):
         return self._array_lot.size
 
     def _lot_vector(self, universe):
