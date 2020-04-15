@@ -9,8 +9,8 @@ class Trade:
 
     Parameters
     ----------
-    - asset : str
-        Name of asset.
+    - asset : str or array of str
+        Name of assets.
     - open_bar : object or None, default None
         Bar to open the trade.
     - shut_bar : object or None, default None
@@ -22,26 +22,26 @@ class Trade:
     - stop : float < 0 or None, default None
         Threshold of stop-loss.
 
-    Attributes
-    ----------
-    - n_orders : int
-        Number of assets to bet.
-
     Examples
     --------
-    Long position:
+    A long position:
     >>> od = datetime.date(2018, 1, 1)
     >>> cd = datetime.date(2018, 2, 1)
     >>> trade = Trade(
-    ...     asset='AAPL', lot=123.4, open_bar=od, shut_bar=cd,
+    ...     asset='AAPL',
+    ...     lot=123.4,
+    ...     open_bar=od,
+    ...     shut_bar=cd,
     ... )
 
-    Short position:
+    A short position:
     >>> trade = -45.6 * Trade(
-    ...     asset='AAPL', open_bar=od, shut_bar=cd,
+    ...     asset='AAPL',
+    ...     open_bar=od,
+    ...     shut_bar=cd,
     ... )
 
-    Long-short position:
+    A long-short position:
     >>> trade = Trade(
     ...     asset=['AAPL', 'MSFT'],
     ...     lot=[12.3, -45.6],
@@ -114,15 +114,41 @@ class Trade:
         >>> trade.lot
         -2.4
         """
-        trade = deepcopy(self)
-        trade.lot *= num
-        return trade
+        self.lot = num * self._array_lot
+        return self
 
     def __rmul__(self, num):
+        """
+        Multiply lot of self.
+
+        Examples
+        --------
+        >>> trade = Trade(..., lot=1.2) * (-2.0)
+        >>> trade.lot
+        -2.4
+        """
         return self.__mul__(num)
 
     def __neg__(self):
+        """
+        Invert the lot of self.
+
+        Examples
+        --------
+        >>> trade = -Trade(..., lot=1.2)
+        >>> trade.lot
+        -1.2
+        """
         return self.__mul__(-1.0)
 
     def __truediv__(self, num):
+        """
+        Divide the lot of self.
+
+        Examples
+        --------
+        >>> trade = Trade(..., lot=1.2) / 2
+        >>> trade.lot
+        0.6
+        """
         return self.__mul__(1.0 / num)
