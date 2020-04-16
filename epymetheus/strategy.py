@@ -99,14 +99,14 @@ class TradeStrategy(metaclass=ABCMeta):
         -------
         self
         """
-        self.verbose = verbose
-
         if verbose:
             begin_time = time()
             print('Running ... ')
 
-        self.universe = universe
-        self.trades = self.__generate_trades(verbose=verbose)
+        # self.universe = universe
+        self.__generate_trades(universe=universe, verbose=verbose)
+        self.__execute_trades(universe=universe, verbose=verbose)
+
         self.__is_run = True
 
         if verbose:
@@ -114,34 +114,50 @@ class TradeStrategy(metaclass=ABCMeta):
 
         return self
 
-    def __generate_trades(self, verbose=True):
+    def __generate_trades(self, universe, verbose=True):
         """
+        Generate trades according to `self.logic`.
+        It sets `self.trades`.
+
         Parameters
         ----------
         - verbose : bool
 
         Returns
         -------
-        - list of Trade
+        self : TradeStrategy
         """
         def iter_trades(verbose):
             if verbose:
                 begin_time = time()
-                for i, trade in enumerate(self.logic(self.universe) or []):
+                for i, trade in enumerate(self.logic(universe) or []):
                     msg = f'Generating {i + 1} trades'
                     print(f'\r{msg:<22} ({trade.open_bar}) ...', end='')
                     yield trade
                 print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
             else:
-                for trade in self.logic(self.universe) or []:
+                for trade in self.logic(universe) or []:
                     yield trade
 
-        trades = list(iter_trades(verbose))
+        self.trades = list(iter_trades(verbose))
 
         if len(trades) == 0:
             raise NoTradeError('No trades')
 
         return trades
+
+    def __execute_trades(self, universe, verbose=True):
+        """
+        Execute trades.
+
+        Returns
+        -------
+        self : TradeStrategy
+        """
+        for trade in self.trades:
+            trade.execute(univeres)
+
+        return self
 
     @property
     def name(self):
