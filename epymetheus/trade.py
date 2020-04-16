@@ -22,6 +22,12 @@ class Trade:
     - stop : float < 0 or None, default None
         Threshold of stop-loss.
 
+    Attributes
+    ----------
+    - close_bar : object
+        Bar to close the trade.
+        It is set by the method `self.execute`.
+
     Examples
     --------
     A long position:
@@ -114,6 +120,72 @@ class Trade:
     @property
     def n_orders(self):
         return self._array_lot.size
+
+    def value(self, universe):
+        """
+        Return value of the position.
+
+        Returns
+        -------
+        value : numpy.array, shape (n_bars, )
+
+        Examples
+        --------
+        >>> strategy.universe.prices
+               Asset0  Asset1
+        01-01       1      10
+        01-02       2      20
+        01-03       3      30
+        01-04       4      40
+        01-05       5      50
+        >>> trade = Trade(asset=['Asset0', 'Asset1'], lot=[-1.0, 1.0], ...)
+        >>> trade.value
+        array([ 9, 18, 27, 36, 45])
+        """
+        return np.dot(
+            self.array_lot,
+            universe.prices.iloc[:, universe.get_asset_indexer(self.asset)]
+        )
+
+    def execute(self, universe):
+        """
+        Execute trade according to `take`, `stop` and `shut_bar`.
+        It sets `self.close_bar`.
+
+        Parameters
+        ----------
+        universe : Universe
+
+        Returns
+        -------
+        self : Trade
+        """
+        open_bar_index = universe.get_bar_indexer(self.open_bar)
+        shut_bar_index = universe.get_bar_indexer(self.shut_bar)
+
+        position_value = self.value
+        pnl = position_value - position_value[open_bar_index]
+
+        # array of shape (n_bars, ); True when trade has opened
+        opening = np.array([i >= open_bar_index for i in range(universe.n_bars)])
+
+        # array of shape (n_bars, ); True at shut_bar
+        signal_shut = np.array([i >= shut_bar_index for i in range(universe.n_bars)])
+        # array of shape (n_bars, ); True when pnl > take
+        signal_take = (pnl > (self.take or np.inf))
+        # array of shape (n_bars, ); True when pnl < stop
+        signal_stop = (pnl < (self.stop or -np.inf))
+
+        signal = opening and (signal_shut or signal_take or signal_stop)
+
+        close_bar_index = catch_first_index(signal)
+
+        if close_bar_index == -1:
+            close_bar_index = universe.n_bars - 1
+
+        self.close_bar = universe.bars[close_bar_index]
+
+        return self
 
     def _lot_vector(self, universe):
         """
