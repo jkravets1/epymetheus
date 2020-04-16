@@ -44,6 +44,9 @@ class History(TradeResult):
         -------
         history : History
         """
+        if not strategy.is_run:
+            raise NotRunError('Strategy has not been run')
+
         if verbose:
             msg = 'Evaluating history'
             print(f'{msg:<22} ... ', end='')

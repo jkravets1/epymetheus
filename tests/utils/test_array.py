@@ -9,7 +9,7 @@ from epymetheus.utils.array import (
     row,
     cross_up,
     cross_down,
-    catch_first,
+    catch_first_index,
 )
 
 params_seed = [42, 1, 2, 3]

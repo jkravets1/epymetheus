@@ -1,7 +1,7 @@
 import numpy as np
 
 from epymetheus.utils.array import (
-    catch_first,
+    catch_first_index,
     cross_up,
     cross_down,
     true_at,
