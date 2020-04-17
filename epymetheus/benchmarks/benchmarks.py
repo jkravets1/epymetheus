@@ -5,20 +5,22 @@ import numpy as np
 from epymetheus import Trade, TradeStrategy
 
 
-class SingleTradeStrategy(TradeStrategy):
+class DeterminedTrader(TradeStrategy):
     """
-    Yield a single trade.
+    Yield given trades.
 
     Parameters
     ----------
-    trade : Trade
-        Trade to yield.
+    trade : iterable of Trade
+        Trades to yield.
     """
-    def __init__(self, trade):
-        self.trade = trade
+    def __init__(self, trades):
+        self.trades = trades
 
     def logic(self, universe):
-        yield self.trade
+        for trade in self.trades:
+            yield trade
+         yield self.trade
 
 
 class RandomTrader(TradeStrategy):
