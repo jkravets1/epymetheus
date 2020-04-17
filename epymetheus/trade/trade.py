@@ -1,6 +1,6 @@
-from copy import deepcopy
-
 import numpy as np
+
+from epymetheus.utils.array import catch_first_index
 
 
 class Trade:
@@ -76,7 +76,7 @@ class Trade:
     #         raise ValueError('Numbers of asset and lot should be equal')
 
     @property
-    def _array_asset(self):
+    def array_asset(self):
         """
         Return asset as `numpy.array`.
 
@@ -97,7 +97,7 @@ class Trade:
         return np.array(self.asset).reshape(-1)
 
     @property
-    def _array_lot(self):
+    def array_lot(self):
         """
         Return lot as `numpy.array`.
 
@@ -119,7 +119,36 @@ class Trade:
 
     @property
     def n_orders(self):
-        return self._array_lot.size
+        return self.array_asset.size
+
+    def array_value(self, universe):
+        """
+        Return value of the position for each asset.
+
+        Returns
+        -------
+        value : numpy.array, shape (n_bars, n_orders)
+
+        Examples
+        --------
+        >>> strategy.universe.prices
+               Asset0  Asset1
+        01-01       1      10
+        01-02       2      20
+        01-03       3      30
+        01-04       4      40
+        01-05       5      50
+        >>> trade = Trade(asset=['Asset0', 'Asset1'], lot=[-1.0, 1.0], ...)
+        >>> trade.value
+        array([[ -1  10]
+               [ -2  20]
+               [ -3  30]
+               [ -4  40]
+               [ -5  50])]
+        """
+        p = universe.prices.iloc[:, universe.get_asset_indexer(self.asset)].values
+        # (n_orders, ) * (n_bars, n_orders) -> (n_bars, n_orders)
+        return self.lot * p
 
     def value(self, universe):
         """
@@ -142,15 +171,15 @@ class Trade:
         >>> trade.value
         array([ 9, 18, 27, 36, 45])
         """
-        return np.dot(
-            self.array_lot,
-            universe.prices.iloc[:, universe.get_asset_indexer(self.asset)]
-        )
+        return self.array_value(universe).sum(axis=1)
 
     def execute(self, universe):
         """
-        Execute trade according to `take`, `stop` and `shut_bar`.
-        It sets `self.close_bar`.
+        Execute trade according to `take`, `stop` and `shut_bar`.  It sets:
+        - self.close_bar
+            Bar at which self is closed.
+        - self.pnl
+            Profit and loss of self for each order.
 
         Parameters
         ----------
@@ -159,62 +188,73 @@ class Trade:
         Returns
         -------
         self : Trade
-        """
-        open_bar_index = universe.get_bar_indexer(self.open_bar)
-        shut_bar_index = universe.get_bar_indexer(self.shut_bar)
-
-        position_value = self.value
-        pnl = position_value - position_value[open_bar_index]
-
-        # array of shape (n_bars, ); True when trade has opened
-        opening = np.array([i >= open_bar_index for i in range(universe.n_bars)])
-
-        # array of shape (n_bars, ); True at shut_bar
-        signal_shut = np.array([i >= shut_bar_index for i in range(universe.n_bars)])
-        # array of shape (n_bars, ); True when pnl > take
-        signal_take = (pnl > (self.take or np.inf))
-        # array of shape (n_bars, ); True when pnl < stop
-        signal_stop = (pnl < (self.stop or -np.inf))
-
-        signal = opening and (signal_shut or signal_take or signal_stop)
-
-        close_bar_index = catch_first_index(signal)
-
-        if close_bar_index == -1:
-            close_bar_index = universe.n_bars - 1
-
-        self.close_bar = universe.bars[close_bar_index]
-
-        return self
-
-    def _lot_vector(self, universe):
-        """
-        Return 1d array of lot to trade each asset.
-
-        Returns
-        -------
-        lot_vector : array, shape (n_assets, )
 
         Examples
         --------
-        >>> universe.assets
-        Index(['AAPL', 'MSFT', 'AMZN'], dtype='object')
-        >>> trade = Trade(['AAPL', 'MSFT'], lot=[1, -2], ...)
-        >>> trade._lot_vector(universe)
-        array([1, -2,  0])
+        >>> universe.prices
+              Asset0  Asset1
+        Bar0    10.1     0.1
+        Bar1    11.1     0.1
+        Bar2    12.1     0.1
+        Bar3    13.1     0.1
+        Bar4    14.1     0.1
+        >>> trade = Trade(
+        ...     asset=['Asset0', 'Asset1'],
+        ...     lot=[1.0, -1.0],
+        ...     open_bar='Bar1',
+        ...     take=1.9,
+        ... )
+        >>> trade.execute(universe)
+        >>> trade.close_bar
+        'Bar3'
+        >>> trade.pnl
+        array([2.0  0.0])
         """
-        asset_id = universe.assets.get_indexer(self.asset)
-        asset_onehot = universe._asset_onehot(asset_id)
-        return np.dot(self.lot, asset_onehot)
+        array_value = self.array_value(universe)
 
-    # def __eq__(self, other):
-    #     return all([
-    #         (self.array_asset == other.array_asset).all(),
-    #         self.open_bar == other.open_bar,
-    #         (self.array_lot == other.array_lot).all(),
-    #         self.take == other.take,
-    #         self.stop == other.stop,
-    #     ])
+        open_bar_index = universe.get_bar_indexer(self.open_bar)[0]
+        close_bar_index = self.__get_close_bar_index(universe, array_value)
+
+        self.close_bar = universe.bars[close_bar_index]
+        self.pnl = (
+            array_value[close_bar_index, :]
+            - array_value[open_bar_index, :]
+        )
+
+        return self
+
+    def __get_close_bar_index(self, universe, array_value):
+        """
+        Used in self.execute
+
+        Returns
+        -------
+        close_bar_index : int
+        """
+        if self.shut_bar is not None:
+            timeout_index = universe.get_bar_indexer(self.shut_bar)[0]
+        else:
+            timeout_index = universe.n_bars - 1
+
+        if self.take is None and self.stop is None:
+            return timeout_index
+        else:
+            open_bar_index = universe.get_bar_indexer(self.open_bar)[0]
+
+            value = array_value.sum(axis=1)  # Don't use self.value; save time
+            profit = value - value[open_bar_index]
+            profit[:open_bar_index] = 0
+
+            signal_take = profit >= (self.take or np.inf)
+            signal_stop = profit <= (self.stop or -np.inf)
+            close_bar_index = catch_first_index(
+                np.logical_or(signal_take, signal_stop)
+            )
+
+            if close_bar_index == -1 or close_bar_index > timeout_index:
+                return timeout_index
+            else:
+                return close_bar_index
 
     def __mul__(self, num):
         """
@@ -226,7 +266,7 @@ class Trade:
         >>> trade.lot
         -2.4
         """
-        self.lot = num * self._array_lot
+        self.lot = num * self.array_lot
         return self
 
     def __rmul__(self, num):
