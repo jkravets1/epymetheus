@@ -37,8 +37,8 @@ def make_randomwalk(
     data /= data[0, :]
 
     bars = bars or list(range(n_bars))
-    assets = assets or [f'Asset{i}' for i in range(n_assets)]
+    assets = assets or [str(i) for i in range(n_assets)]
 
-    prices = pd.DataFrame(data)
+    prices = pd.DataFrame(data, index=bars, columns=assets)
 
-    return Universe(prices, name=name, bars=bars, assets=assets)
+    return Universe(prices, name=name)
