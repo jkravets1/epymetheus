@@ -194,7 +194,7 @@ class TradeStrategy(metaclass=ABCMeta):
 
     @property
     def is_run(self):
-        return getattr(self, '__is_run', False)
+        return self.__is_run or False
 
     # ---
 
