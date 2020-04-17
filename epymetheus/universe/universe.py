@@ -61,10 +61,10 @@ class Universe:
         - self.__asset_to_index : callable
             Callable from asset to index.
         """
-        self._hash_bar = dict(self.bars, list(range(self.bars.size)))
-        self._hash_asset = dict(self.assets, list(range(self.assets.size)))
-        self._bar_to_index = np.vectorize(partial(getitem, self._hash_bar))
-        self._asset_to_index = np.vectorize(partial(getitem, self._hash_asset))
+        self._hash_bar = dict(zip(self.bars, list(range(self.bars.size))))
+        self._hash_asset = dict(zip(self.assets, list(range(self.assets.size))))
+        self._bar_to_index = np.vectorize(lambda bar: self._hash_bar.get(bar, -1))
+        self._asset_to_index = np.vectorize(lambda asset: self._hash_asset.get(asset, -1))
 
     @property
     def bars(self):
@@ -123,11 +123,11 @@ class Universe:
         >>> universe.bars
         Index(['2000-01-01', '2000-01-02', '2000-01-03'], dtype='object')
         >>> universe.get_bar_indexer('2000-01-02')
-        array(1)
+        array([1])
         >>> universe.get_bar_indexer(['2000-01-02', '2000-01-01'])
         array([1, 0])
         """
-        return self._bar_to_index(bar)
+        return self._bar_to_index(bar).reshape(-1)
 
     def get_asset_indexer(self, asset):
         """
@@ -148,11 +148,11 @@ class Universe:
         >>> universe.assets
         Index(['AAPL', 'MSFT', 'AMZN'], dtype='object')
         >>> universe.get_asset_indexer('MSFT')
-        array(1)
+        array([1])
         >>> universe.get_asset_indexer(['MSFT', 'AAPL'])
         array([1, 0])
         """
-        return self._asset_to_index(asset)
+        return self._asset_to_index(asset).reshape(-1)
 
     # def _bar_onehot(self, bar_ids):
     #     """
