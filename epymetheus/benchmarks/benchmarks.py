@@ -20,7 +20,6 @@ class DeterminedTrader(TradeStrategy):
     def logic(self, universe):
         for trade in self.trades:
             yield trade
-         yield self.trade
 
 
 class RandomTrader(TradeStrategy):
