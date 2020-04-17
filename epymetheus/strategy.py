@@ -141,10 +141,10 @@ class TradeStrategy(metaclass=ABCMeta):
 
         self.trades = list(iter_trades(verbose))
 
-        if len(trades) == 0:
+        if len(self.trades) == 0:
             raise NoTradeError('No trades')
 
-        return trades
+        return self
 
     def __execute_trades(self, universe, verbose=True):
         """
@@ -155,7 +155,7 @@ class TradeStrategy(metaclass=ABCMeta):
         self : TradeStrategy
         """
         for trade in self.trades:
-            trade.execute(univeres)
+            trade.execute(universe)
 
         return self
 
