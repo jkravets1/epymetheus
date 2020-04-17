@@ -62,8 +62,8 @@ class History(TradeResult):
             close_bar=cls._get_close_bar(strategy),
             shut_bar=cls._get_shut_bar(strategy),
             take=cls._get_take(strategy),
-            stop=cls._stop(strategy),
-            # gain=cls._get_gain(strategy),
+            stop=cls._get_stop(strategy),
+            pnl=cls._get_pnl(strategy),
         )
 
         if verbose:
@@ -148,35 +148,43 @@ class History(TradeResult):
             trade.array_lot for trade in strategy.trades
         ])
 
+    @staticmethod
     def _get_open_bar(strategy):
         return np.repeat(
-            np.arange(strategy.n_trades),
-            [trade.open_bar for trade in strategy.trades]
+            [trade.open_bar for trade in strategy.trades],
+            [trade.n_orders for trade in strategy.trades],
         )
 
+    @staticmethod
     def _get_close_bar(strategy):
         return np.repeat(
-            np.arange(strategy.n_trades),
-            [trade.close_bar for trade in strategy.trades]
+            [trade.close_bar for trade in strategy.trades],
+            [trade.n_orders for trade in strategy.trades],
         )
 
+    @staticmethod
     def _get_shut_bar(strategy):
         return np.repeat(
-            np.arange(strategy.n_trades),
-            [trade.close_bar for trade in strategy.trades]
+            [trade.shut_bar for trade in strategy.trades],
+            [trade.n_orders for trade in strategy.trades],
         )
 
+    @staticmethod
     def _get_take(strategy):
         return np.repeat(
-            np.arange(strategy.n_trades),
-            [trade.take for trade in strategy.trades]
+            [trade.take for trade in strategy.trades],
+            np.arange(strategy.n_trades)
         )
 
+    @staticmethod
     def _get_stop(strategy):
         return np.repeat(
+            [trade.stop for trade in strategy.trades],
             np.arange(strategy.n_trades),
-            [trade.stop for trade in strategy.trades]
         )
 
-    # def _get_gain(strategy):
-    #     return
+    @staticmethod
+    def _get_pnl(strategy):
+        return np.concatenate([
+            trade.pnl for trade in strategy.trades
+        ])
