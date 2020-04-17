@@ -2,6 +2,7 @@ from time import time
 
 import numpy as np
 
+from epymetheus.exceptions import NotRunError
 from epymetheus.utils import TradeResult
 
 
@@ -52,24 +53,18 @@ class History(TradeResult):
             print(f'{msg:<22} ... ', end='')
             begin_time = time()
 
-        history = cls()
-        history.trade_index = cls._get_trade_index(strategy)
-        history.order_index = cls._get_order_index(strategy)
-
-        history.asset = cls._get_asset(strategy)
-        history.lot = cls._get_lot(strategy)
-
-        history.open_bars = strategy.open_bars
-        history.shut_bars = strategy.shut_bars
-        history.takes = strategy.takes
-        history.stops = strategy.stops
-
-        history.close_bars = strategy.close_bars
-
-        history.durations = strategy.durations
-        history.open_prices = strategy.open_prices
-        history.close_prices = strategy.close_prices
-        history.gains = strategy.gains
+        history = cls(
+            trade_index=cls._get_trade_index(strategy),
+            order_index=cls._get_order_index(strategy),
+            asset=cls._get_asset(strategy),
+            lot=cls._get_lot(strategy),
+            open_bar=cls._get_open_bar(strategy),
+            close_bar=cls._get_close_bar(strategy),
+            shut_bar=cls._get_shut_bar(strategy),
+            take=cls._get_take(strategy),
+            stop=cls._stop(strategy),
+            # gain=cls._get_gain(strategy),
+        )
 
         if verbose:
             print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
@@ -126,34 +121,10 @@ class History(TradeResult):
         return np.arange(strategy.n_orders)
 
     @staticmethod
-    def _get_asset_id(strategy):
-        """
-        Return asset id of each order.
-
-        Returns
-        -------
-        asset_id : array, shape (n_orders, )
-
-        Examples
-        --------
-        >>> strategy.universe.assets
-        >>> Index(['Asset0', 'Asset1', 'Asset2', ...])
-        >>> strategy.trades = [
-        ...     Trade(asset=['Asset0', 'Asset1'], ...),
-        ...     Trade(asset=['Asset2'], ...),
-        ... ]
-        >>> strategy.assets
-        array([ 0, 1, 2])
-        """
-        return strategy.universe.assets.get_indexer(
-            np.concatenate([
-                trade.asset for trade in strategy.trades
-            ])
-        )
-
-    @staticmethod
     def _get_asset(strategy):
-        return strategy.universe.assets[strategy.asset_id]
+        return np.concatenate([
+            trade.array_asset for trade in strategy.trades
+        ])
 
     @staticmethod
     def _get_lot(strategy):
@@ -174,48 +145,38 @@ class History(TradeResult):
         array([  1, -2,  3])
         """
         return np.concatenate([
-            trade.lot for trade in strategy.trades
+            trade.array_lot for trade in strategy.trades
         ])
 
-    # TODO
-    # @staticmethod
-    # def _get_open_bar_id(strategy):
-    #     """
-    #     Return open_bar of each trade/order.
+    def _get_open_bar(strategy):
+        return np.repeat(
+            np.arange(strategy.n_trades),
+            [trade.open_bar for trade in strategy.trades]
+        )
 
-    #     Parameters
-    #     ----------
-    #     - strategy
-    #     - columns : {'trades', 'orders'}, default 'trades'
+    def _get_close_bar(strategy):
+        return np.repeat(
+            np.arange(strategy.n_trades),
+            [trade.close_bar for trade in strategy.trades]
+        )
 
-    #     Returns
-    #     -------
-    #     If columns = 'trades' :
-    #         open_bar_ids : array, shape (n_trades, )
-    #     If columns = 'orders' :
-    #         open_bar_ids : array, shape (n_orders, )
+    def _get_shut_bar(strategy):
+        return np.repeat(
+            np.arange(strategy.n_trades),
+            [trade.close_bar for trade in strategy.trades]
+        )
 
-    #     Examples
-    #     --------
-    #     >>> strategy.universe.bars
-    #     Index(['01-01', '01-02', '01-03', ...])
-    #     >>> strategy.trades = [
-    #     ...     Trade(open_bar='01-01', asset=['Asset0', 'Asset1'], ...),
-    #     ...     Trade(open_bar='01-02', asset=['Asset2'], ...),
-    #     ... ]
-    #     >>> strategy.open_bar_ids
-    #     array([ 1, 2])
-    #     """
-    #     if columns == 'orders':
-    #         return np.repeat(
-    #             open_bar_ids(strategy, columns='trades'),
-    #             [trade.n_orders for trade in strategy.trades],
-    #         )
+    def _get_take(strategy):
+        return np.repeat(
+            np.arange(strategy.n_trades),
+            [trade.take for trade in strategy.trades]
+        )
 
-    #     def ifnonefirst(bar):
-    #         if bar is None:
-    #             return strategy.universe.bars[0]
-    #         else:
-    #             return bar
-    #     open_bars = [ifnonefirst(trade.open_bar) for trade in strategy.trades]
-    #     return strategy.universe._bar_id(open_bars)
+    def _get_stop(strategy):
+        return np.repeat(
+            np.arange(strategy.n_trades),
+            [trade.stop for trade in strategy.trades]
+        )
+
+    # def _get_gain(strategy):
+    #     return
