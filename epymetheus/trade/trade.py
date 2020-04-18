@@ -71,10 +71,6 @@ class Trade:
         self.take = take
         self.stop = stop
 
-    # def __check_params(self):
-    #     if self.asset.size != self.lot.size:
-    #         raise ValueError('Numbers of asset and lot should be equal')
-
     @property
     def array_asset(self):
         """
@@ -120,6 +116,46 @@ class Trade:
     @property
     def n_orders(self):
         return self.array_asset.size
+
+    def series_pnl(self, universe, open_bar=None, close_bar=None):
+        """
+        Return value of the position.
+
+        Returns
+        -------
+        value : numpy.array, shape (n_bars, )
+
+        Examples
+        --------
+        >>> universe.prices
+              Asset0  Asset1
+        Bar0    10.1     0.1
+        Bar1    11.1     0.1
+        Bar2    12.1     0.1
+        Bar3    13.1     0.1
+        Bar4    14.1     0.1
+        >>> trade.asset
+        ['Asset0', 'Asset1']
+        >>> trade.lot
+        [1.0, -1.0]
+        >>> trade.open_bar
+        'Bar1'
+        >>> trade.close_bar
+        'Bar3'
+        >>> trade.series_pnl
+        array([  0.0  1.0  2.0  2.0  2.0])
+        """
+        open_bar = open_bar if open_bar is not None else self.open_bar
+        close_bar = close_bar if close_bar is not None else self.close_bar
+
+        open_bar_index = universe.get_bar_indexer(open_bar)[0]
+        close_bar_index = universe.get_bar_indexer(close_bar)[0]
+
+        series_value = self.series_value
+        series_pnl = series_value - series_value[open_bar_index]
+        series_pnl[close_bar_index:] = series_pnl[close_bar_index]
+
+        return series_pnl
 
     def array_value(self, universe):
         """
@@ -243,8 +279,9 @@ class Trade:
         else:
             open_bar_index = universe.get_bar_indexer(self.open_bar)[0]
 
-            value = array_value.sum(axis=1)  # Don't use self.value; save time
-            profit = value - value[open_bar_index]
+            # Don't use self.series_value; save time
+            series_value = array_value.sum(axis=1)
+            profit = series_value - series_value[open_bar_index]
             profit[:open_bar_index] = 0
 
             signal_take = profit >= (self.take or np.inf)
