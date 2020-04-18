@@ -12,9 +12,9 @@ class History(TradeResult):
 
     Attributes
     ----------
-    - order_index : numpy.array, shape (n_orders, )
+    - order_id : numpy.array, shape (n_orders, )
         Indices of orders.
-    - trade_index : numpy.array, shape (n_orders, )
+    - trade_id : numpy.array, shape (n_orders, )
         Indices of trades.
         If multiple orders has been made in a single trade, the same index
         will be assigned for these orders.
@@ -54,8 +54,8 @@ class History(TradeResult):
             begin_time = time()
 
         history = cls(
-            order_index=cls._get_order_index(strategy),
-            trade_index=cls._get_trade_index(strategy),
+            order_id=cls._get_order_id(strategy),
+            trade_id=cls._get_trade_id(strategy),
             asset=cls._get_asset(strategy),
             lot=cls._get_lot(strategy),
             open_bar=cls._get_open_bar(strategy),
@@ -71,14 +71,30 @@ class History(TradeResult):
 
         return history
 
-    @staticmethod
-    def _get_order_index(strategy):
+    def to_dataframe(self, copy=False):
         """
-        Return order_index of each order.
+        Represent self as `pandas.DataFrame`.
+
+        Parameters
+        ----------
+        - copy : bool, default False
+            Copy input data.
 
         Returns
         -------
-        array_order_index : array, shape (n_orders, )
+        df_wealth : pandas.DataFrame
+        """
+        return pd.DataFrame(self, copy=copy).set_index('order_id')
+
+
+    @staticmethod
+    def _get_order_id(strategy):
+        """
+        Return order_id of each order.
+
+        Returns
+        -------
+        array_order_id : array, shape (n_orders, )
             array([0, 1, ..., n_orders - 1])
 
         Examples
@@ -87,19 +103,19 @@ class History(TradeResult):
         ...     Trade(asset=['Asset0', 'Asset1'], ...),
         ...     Trade(asset=['Asset2'], ...),
         ... ]
-        >>> History()._get_order_index(strategy)
+        >>> History()._get_order_id(strategy)
         array([  0  1  2])
         """
         return np.arange(strategy.n_orders)
 
     @staticmethod
-    def _get_trade_index(strategy):
+    def _get_trade_id(strategy):
         """
-        Return trade_index of each order.
+        Return trade_id of each order.
 
         Returns
         -------
-        array_trade_index : array, shape (n_orders, )
+        array_trade_id : array, shape (n_orders, )
 
         Examples
         --------
@@ -107,7 +123,7 @@ class History(TradeResult):
         ...     Trade(asset=['Asset0', 'Asset1'], ...),
         ...     Trade(asset=['Asset2'], ...),
         ... ]
-        >>> History()._get_trade_index(strategy)
+        >>> History()._get_trade_id(strategy)
         array([  0  0  1])
         """
         return np.repeat(
