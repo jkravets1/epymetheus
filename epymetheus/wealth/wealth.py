@@ -64,7 +64,7 @@ class Wealth(TradeResult):
         """
         return pd.Series(self.wealth, index=self.bars, name=name, copy=copy)
 
-    def to_dataframe(self):
+    def to_dataframe(self, copy=False):
         """
         Represent self as `pandas.DataFrame`.
 
@@ -77,4 +77,4 @@ class Wealth(TradeResult):
         -------
         df_wealth : pandas.DataFrame
         """
-        return pd.DataFrame(self).set_index('bars')
+        return pd.DataFrame(self, copy=copy).set_index('bars')
