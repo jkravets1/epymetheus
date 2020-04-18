@@ -6,7 +6,7 @@ import numpy as np
 
 from epymetheus.exceptions import NoTradeError
 from epymetheus.history import History
-from epymetheus.transaction import Transaction
+# from epymetheus.transaction import Transaction
 from epymetheus.wealth import Wealth
 from epymetheus import pipe
 
@@ -215,9 +215,9 @@ class TradeStrategy(metaclass=ABCMeta):
         return History(strategy=self)
 
     @property
-    def transaction(self):
-        return Transaction(strategy=self)
-
-    @property
     def wealth(self):
         return Wealth(strategy=self)
+
+    # @property
+    # def transaction(self):
+    #     return Transaction(strategy=self)
