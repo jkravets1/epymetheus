@@ -1,5 +1,3 @@
-from operator import getitem
-from functools import partial
 import numpy as np
 
 
@@ -61,10 +59,18 @@ class Universe:
         - self.__asset_to_index : callable
             Callable from asset to index.
         """
-        self._hash_bar = dict(zip(self.bars, list(range(self.bars.size))))
-        self._hash_asset = dict(zip(self.assets, list(range(self.assets.size))))
-        self._bar_to_index = np.vectorize(lambda bar: self._hash_bar.get(bar, -1))
-        self._asset_to_index = np.vectorize(lambda asset: self._hash_asset.get(asset, -1))
+        self._hash_bar = dict(
+            zip(self.bars, list(range(self.bars.size)))
+        )
+        self._hash_asset = dict(
+            zip(self.assets, list(range(self.assets.size)))
+        )
+        self._bar_to_index = np.vectorize(
+            lambda bar: self._hash_bar.get(bar, -1)
+        )
+        self._asset_to_index = np.vectorize(
+            lambda asset: self._hash_asset.get(asset, -1)
+        )
 
     @property
     def bars(self):

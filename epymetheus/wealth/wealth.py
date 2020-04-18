@@ -1,5 +1,4 @@
 from functools import reduce
-from time import time
 
 import numpy as np
 import pandas as pd
@@ -13,11 +12,13 @@ class Wealth(TradeResult):
 
     Attributes
     ----------
-    - wealth : numpy.array, shape (n_bars, )
     - bars : numpy.array, shape (n_bars, )
+        Bar of universe.
+    - wealth : numpy.array, shape (n_bars, )
+        Time-series of wealth.
     """
     @classmethod
-    def from_strategy(cls, strategy, verbose=True):
+    def from_strategy(cls, strategy):
         """
         Initialize wealth from strategy.
 
@@ -26,19 +27,10 @@ class Wealth(TradeResult):
         - strategy : TradeStrategy
         - verbose : bool
         """
-        if verbose:
-            print(f'Evaluating wealth ... ', end='')
-            begin_time = time()
-
-        wealth = cls(
+        return cls(
             bars=cls._get_bars(strategy),
             wealth=cls._get_wealth(strategy),
         )
-
-        if verbose:
-            print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
-
-        return wealth
 
     @staticmethod
     def _get_bars(strategy):

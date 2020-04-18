@@ -2,13 +2,10 @@ from abc import ABCMeta, abstractmethod
 from inspect import cleandoc
 from time import time
 
-import numpy as np
-
 from epymetheus.exceptions import NoTradeError
 from epymetheus.history import History
-from epymetheus.transaction import Transaction
+# from epymetheus.transaction import Transaction
 from epymetheus.wealth import Wealth
-from epymetheus import pipe
 
 
 class TradeStrategy(metaclass=ABCMeta):
@@ -131,7 +128,8 @@ class TradeStrategy(metaclass=ABCMeta):
             if verbose:
                 begin_time = time()
                 for i, trade in enumerate(self.logic(universe) or []):
-                    print(f'\rGenerating {i + 1} trades ({trade.open_bar}) ... ', end='')
+                    print(f'\rGenerating {i + 1} trades '
+                          '({trade.open_bar}) ... ', end='')
                     yield trade
                 print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
             else:
@@ -215,9 +213,9 @@ class TradeStrategy(metaclass=ABCMeta):
         return History(strategy=self)
 
     @property
-    def transaction(self):
-        return Transaction(strategy=self)
-
-    @property
     def wealth(self):
         return Wealth(strategy=self)
+
+    # @property
+    # def transaction(self):
+    #     return Transaction(strategy=self)

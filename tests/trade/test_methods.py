@@ -103,7 +103,7 @@ def test_execute_0_1(seed):
 
 
 @pytest.mark.parametrize('seed', params_seed)
-def test_execute_0_1(seed):
+def test_execute(seed):
     """
     Test `trade.execute` sets `trade.close_bar` correctly.
 

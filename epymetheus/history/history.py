@@ -1,5 +1,3 @@
-from time import time
-
 import numpy as np
 import pandas as pd
 
@@ -17,30 +15,29 @@ class History(TradeResult):
         Indices of orders.
     - trade_id : numpy.array, shape (n_orders, )
         Indices of trades.
-        If multiple orders has been made in a single trade, the same index
-        will be assigned for these orders.
-    - assets : numpy.array, shape (n_orders, )
-    - lots : numpy.array, shape (n_orders, )
-    - open_bars : numpy.array, shape (n_orders, )
-    - close_bars : numpy.array, shape (n_orders, )
-    - durations : numpy.array, shape (n_orders, )
-    - open_prices : numpy.array, shape (n_orders, )
-    - close_prices : numpy.array, shape (n_orders, )
-    - gains : numpy.array, shape (n_orders, )
-
-    Examples
-    --------
-    >>> ...
+    - asset : numpy.array, shape (n_orders, )
+        Assets to trade.
+    - lot : numpy.array, shape (n_orders, )
+        Lots to trade.
+    - open_bar : numpy.array, shape (n_orders, )
+        Bar to open each trade.
+    - close_bar : numpy.array, shape (n_orders, )
+        Bar to close each trade.
+    - take : numpy.array, shape (n_orders, )
+        Profit-take of each trade.
+    - stop : numpy.array, shape (n_orders, )
+        Stop-loss of each trade.
+    - pnl : numpy.array, shape (n_orders, )
+        Profit loss of each order.
     """
     @classmethod
-    def from_strategy(cls, strategy, verbose=True):
+    def from_strategy(cls, strategy):
         """
         Initialize self from strategy.
 
         Parameters
         ----------
         - strategy : TradeStrategy
-        - verbose : bool
 
         Returns
         -------
@@ -49,12 +46,7 @@ class History(TradeResult):
         if not strategy.is_run:
             raise NotRunError('Strategy has not been run')
 
-        if verbose:
-            msg = 'Evaluating history'
-            print(f'{msg:<22} ... ', end='')
-            begin_time = time()
-
-        history = cls(
+        return cls(
             order_id=cls._get_order_id(strategy),
             trade_id=cls._get_trade_id(strategy),
             asset=cls._get_asset(strategy),
@@ -66,11 +58,6 @@ class History(TradeResult):
             stop=cls._get_stop(strategy),
             pnl=cls._get_pnl(strategy),
         )
-
-        if verbose:
-            print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
-
-        return history
 
     def to_dataframe(self, copy=False):
         """

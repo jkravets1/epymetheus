@@ -1,16 +1,9 @@
-import pytest
+import pytest  # noqa: F401
 
 import numpy as np
 
-from epymetheus.utils.array import (
-    # true_since,
-    # true_until,
-    # true_at,
-    # row,
-    # cross_up,
-    # cross_down,
-    catch_first_index,
-)
+from epymetheus.utils.array import catch_first_index
+
 
 # params_seed = [42, 1, 2, 3]
 # params_n_samples = [10, 100, 1000]
@@ -126,5 +119,3 @@ def test_catch_first_index():
 #     print(np.concatenate([signal, signal_expected], axis=1))
 
 #     assert (signal == signal_expected).all()
-
-
