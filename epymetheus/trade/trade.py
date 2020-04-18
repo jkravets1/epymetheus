@@ -132,44 +132,46 @@ class Trade:
         Examples
         --------
         >>> strategy.universe.prices
-               Asset0  Asset1
-        01-01       1      10
-        01-02       2      20
-        01-03       3      30
-        01-04       4      40
-        01-05       5      50
+              Asset0  Asset1
+        Bar0       1      10
+        Bar1       2      20
+        Bar2       3      30
+        Bar3       4      40
+        Bar4       5      50
         >>> trade = Trade(asset=['Asset0', 'Asset1'], lot=[-1.0, 1.0], ...)
-        >>> trade.value
-        array([[ -1  10]
-               [ -2  20]
-               [ -3  30]
-               [ -4  40]
-               [ -5  50])]
+        >>> trade.array_value
+        array([[  -1   10]
+               [  -2   20]
+               [  -3   30]
+               [  -4   40]
+               [  -5   50])]
         """
-        p = universe.prices.iloc[:, universe.get_asset_indexer(self.asset)].values
+        p = universe.prices.iloc[
+            :, universe.get_asset_indexer(self.asset)
+        ].values
         # (n_orders, ) * (n_bars, n_orders) -> (n_bars, n_orders)
         return self.lot * p
 
-    def value(self, universe):
+    def series_value(self, universe):
         """
-        Return value of the position.
+        Return time-series of value of the position.
 
         Returns
         -------
-        value : numpy.array, shape (n_bars, )
+        series_value : numpy.array, shape (n_bars, )
 
         Examples
         --------
         >>> strategy.universe.prices
-               Asset0  Asset1
-        01-01       1      10
-        01-02       2      20
-        01-03       3      30
-        01-04       4      40
-        01-05       5      50
+              Asset0  Asset1
+        Bar0       1      10
+        Bar1       2      20
+        Bar2       3      30
+        Bar3       4      40
+        Bar4       5      50
         >>> trade = Trade(asset=['Asset0', 'Asset1'], lot=[-1.0, 1.0], ...)
-        >>> trade.value
-        array([ 9, 18, 27, 36, 45])
+        >>> trade.series_value
+        array([   9  18  27  36  45])
         """
         return self.array_value(universe).sum(axis=1)
 
