@@ -49,6 +49,7 @@ def fetch_usstocks(
             )[column],
             begin_date=begin_date,
         )
-    for ticker in tickers[:n_assets]})
+        for ticker in tickers[:n_assets]
+    })
 
     return Universe(prices)
