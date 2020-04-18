@@ -129,7 +129,7 @@ class TradeStrategy(metaclass=ABCMeta):
                 begin_time = time()
                 for i, trade in enumerate(self.logic(universe) or []):
                     print(f'\rGenerating {i + 1} trades '
-                          '({trade.open_bar}) ... ', end='')
+                          f'({trade.open_bar}) ... ', end='')
                     yield trade
                 print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
             else:
