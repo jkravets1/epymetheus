@@ -17,20 +17,20 @@ class History(TradeResult):
         Indices of orders.
     - trade_id : numpy.array, shape (n_orders, )
         Indices of trades.
-        If multiple orders has been made in a single trade, the same index
-        will be assigned for these orders.
-    - assets : numpy.array, shape (n_orders, )
-    - lots : numpy.array, shape (n_orders, )
-    - open_bars : numpy.array, shape (n_orders, )
-    - close_bars : numpy.array, shape (n_orders, )
-    - durations : numpy.array, shape (n_orders, )
-    - open_prices : numpy.array, shape (n_orders, )
-    - close_prices : numpy.array, shape (n_orders, )
-    - gains : numpy.array, shape (n_orders, )
-
-    Examples
-    --------
-    >>> ...
+    - asset : numpy.array, shape (n_orders, )
+        Assets to trade.
+    - lot : numpy.array, shape (n_orders, )
+        Lots to trade.
+    - open_bar : numpy.array, shape (n_orders, )
+        Bar to open each trade.
+    - close_bar : numpy.array, shape (n_orders, )
+        Bar to close each trade.
+    - take : numpy.array, shape (n_orders, )
+        Profit-take of each trade.
+    - stop : numpy.array, shape (n_orders, )
+        Stop-loss of each trade.
+    - pnl : numpy.array, shape (n_orders, )
+        Profit loss of each order.
     """
     @classmethod
     def from_strategy(cls, strategy, verbose=True):
