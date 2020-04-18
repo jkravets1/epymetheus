@@ -86,7 +86,6 @@ class History(TradeResult):
         """
         return pd.DataFrame(self, copy=copy).set_index('order_id')
 
-
     @staticmethod
     def _get_order_id(strategy):
         """
