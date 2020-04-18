@@ -2,15 +2,13 @@ from abc import ABCMeta, abstractmethod
 from inspect import cleandoc
 from time import time
 
+import numpy as np
+
+from epymetheus.exceptions import NoTradeError
 from epymetheus.history import History
 from epymetheus.transaction import Transaction
 from epymetheus.wealth import Wealth
 from epymetheus import pipe
-
-try:
-    from functools import cached_property
-except ImportError:
-    cached_property = property
 
 
 class TradeStrategy(metaclass=ABCMeta):
@@ -41,9 +39,13 @@ class TradeStrategy(metaclass=ABCMeta):
     --------
     Define strategy by subclassing:
     >>> class MyTradeStrategy(TradeStrategy):
-    ...     '''This is my favorite strategy.'''
+    ...     '''
+    ...     This is my favorite strategy.
+    ...     '''
+    ...     def __init__(self, my_parameter):
+    ...         self.my_parameter = my_parameter
     ...
-    ...     def logic(universe, my_parameter):
+    ...     def logic(self, universe):
     ...         ...
     ...         yield Trade(...)
 
@@ -59,34 +61,39 @@ class TradeStrategy(metaclass=ABCMeta):
     Run:
     >>> universe = Universe(...)
     >>> my_strategy.run(universe)
+
+    Todo
+    ----
+    - dump trades in a light data structure
     """
-    def __init__(self, **params):
-        self.params = params
-        self.is_runned = False
+    def __init__(self):
+        """Initialize self."""
 
     @abstractmethod
-    def logic(self, universe, **kwargs):
+    def logic(self, universe):
         """
-        Logic to return iterable of ``Trade`` from ``Universe``.
+        Logic to generate `Trade` from `Universe`.
 
         Parameters
         ----------
         - universe : Universe
             Universe to apply the logic.
-        - kwargs
-            Parameters of the trade strategy.
+
+        Yields
+        ------
+        trade : Trade
         """
 
-    def run(self, universe, verbose=True, save={}):
+    def run(self, universe, verbose=True):
         """
         Run a backtesting of strategy.
-        Set attributes `history`, `transaction` and `wealth`.
 
         Parameters
         ----------
         - universe : Universe
-        - verbose : bool
-        - save : dict
+            Universe with which self is run.
+        - verbose : bool, default True
+            Vermose mode.
 
         Returns
         -------
@@ -97,14 +104,64 @@ class TradeStrategy(metaclass=ABCMeta):
             print('Running ... ')
 
         self.universe = universe
-        self.trades = self.__generate_trades(verbose=verbose)
-        self.history = History(strategy=self, verbose=verbose)
-        self.transaction = Transaction(strategy=self, verbose=verbose)
-        self.wealth = Wealth(strategy=self, verbose=verbose)
-        self.is_runned = True
+        self.__generate_trades(universe=universe, verbose=verbose)
+        self.__execute_trades(universe=universe, verbose=verbose)
+
+        self._is_run = True
 
         if verbose:
             print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
+
+        return self
+
+    def __generate_trades(self, universe, verbose=True):
+        """
+        Generate trades according to `self.logic`.
+        It sets `self.trades`.
+
+        Parameters
+        ----------
+        - verbose : bool
+
+        Returns
+        -------
+        self : TradeStrategy
+        """
+        def iter_trades(verbose):
+            if verbose:
+                begin_time = time()
+                for i, trade in enumerate(self.logic(universe) or []):
+                    print(f'\rGenerating {i + 1} trades ({trade.open_bar}) ... ', end='')
+                    yield trade
+                print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
+            else:
+                for trade in self.logic(universe) or []:
+                    yield trade
+
+        self.trades = list(iter_trades(verbose))
+
+        if len(self.trades) == 0:
+            raise NoTradeError('No trades')
+
+        return self
+
+    def __execute_trades(self, universe, verbose=True):
+        """
+        Execute trades.
+
+        Returns
+        -------
+        self : TradeStrategy
+        """
+        if verbose:
+            begin_time = time()
+            for i, trade in enumerate(self.trades):
+                print(f'\rExecuting {i + 1} trades ... ', end='')
+                trade.execute(universe)
+            print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
+        else:
+            for trade in self.trades:
+                trade.execute(universe)
 
         return self
 
@@ -118,136 +175,49 @@ class TradeStrategy(metaclass=ABCMeta):
         """Return detailed description of the strategy."""
         return cleandoc(self.__class__.__doc__)
 
-    @cached_property
+    @property
+    def params(self):
+        """
+        Return parameters of self as `dict`.
+
+        Returns
+        -------
+        parameters : dict
+            Names and values of parameters.
+
+        Examples
+        --------
+        >>> class MyStrategy:
+        ...     def __init__(self, param1, param2):
+        ...         self.param1 = param1
+        ...         self.param2 = param2
+        ...
+        >>> my_strategy = MyStrategy(param1=1.2, param2=3.4)
+        >>> my_strategy.params
+        {'param1': 1.2, 'param2': 3.4}
+        """
+        return self.__dict__
+
+    @property
+    def is_run(self):
+        return getattr(self, '_is_run', False)
+
+    @property
     def n_trades(self):
         return len(self.trades)
 
-    @cached_property
+    @property
     def n_orders(self):
         return sum(trade.n_orders for trade in self.trades)
 
     @property
-    def n_bars(self):
-        return self.universe.n_bars
+    def history(self):
+        return History(strategy=self)
 
     @property
-    def n_assets(self):
-        return self.universe.n_assets
-
-    @cached_property
-    def trade_index(self):
-        return pipe.trade_index(self)
-
-    @cached_property
-    def order_index(self):
-        return pipe.order_index(self)
-
-    @cached_property
-    def asset_ids(self):
-        return pipe.asset_ids(self)
+    def transaction(self):
+        return Transaction(strategy=self)
 
     @property
-    def assets(self):
-        return self.universe.assets[self.asset_ids]
-
-    @cached_property
-    def lots(self):
-        return pipe.lots(self)
-
-    @cached_property
-    def open_bar_ids(self):
-        return pipe.open_bar_ids(self, columns='orders')
-
-    @property
-    def open_bars(self):
-        return self.universe.bars[self.open_bar_ids]
-
-    @cached_property
-    def shut_bar_ids(self):
-        return pipe.shut_bar_ids(self, columns='orders')
-
-    @property
-    def shut_bars(self):
-        return self.universe.bars[self.shut_bar_ids]
-
-    @cached_property
-    def close_bar_ids(self):
-        return pipe._close_bar_ids_from_signals(self, columns='orders')
-
-    @property
-    def close_bars(self):
-        return self.universe.bars[self.close_bar_ids]
-
-    @cached_property
-    def atakes(self):
-        return pipe.atakes(self, columns='orders')
-
-    @cached_property
-    def acuts(self):
-        return pipe.acuts(self, columns='orders')
-
-    @cached_property
-    def durations(self):
-        return pipe.durations(self)
-
-    @cached_property
-    def open_prices(self):
-        return pipe.open_prices(self)
-
-    @cached_property
-    def close_prices(self):
-        return pipe.close_prices(self)
-
-    @cached_property
-    def gains(self):
-        return pipe.gains(self)
-
-    @cached_property
-    def wealth_(self):
-        return pipe.wealth(self)
-
-    @cached_property
-    def transaction_matrix(self):
-        return pipe.transaction_matrix(self)
-
-    @property
-    def net_exposure(self):
-        return pipe.net_exposure(self)
-
-    @property
-    def abs_exposure(self):
-        return pipe.abs_exposure(self)
-
-    def __generate_trades(self, verbose=True):
-        """
-        Parameters
-        ----------
-        - self
-            TradeStrategy; necessary attributes:
-            * universe
-        - verbose : bool
-
-        Returns
-        -------
-        - list of Trade
-        """
-        iter_trades = self.logic(self.universe, **self.params) or []
-
-        def iter_trades_verbose():
-            begin_time = time()
-            for i, trade in enumerate(iter_trades):
-                msg = f'Generating {i + 1} trades'
-                print(f'\r{msg:<22} ... ', end='')
-                yield trade
-            print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
-
-        if verbose:
-            trades = list(iter_trades_verbose())
-            if len(trades) == 0:
-                raise RuntimeError('No trade yielded')
-            return trades
-        else:
-            trades = list(iter_trades)
-            if len(trades) == 0:
-                raise RuntimeError('No trade yielded')
-            return trades
+    def wealth(self):
+        return Wealth(strategy=self)
