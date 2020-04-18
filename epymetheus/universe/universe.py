@@ -82,28 +82,6 @@ class Universe:
     def n_assets(self):
         return self.assets.size
 
-    # def _asset_onehot(self, asset_id):
-    #     """
-    #     Return one-hot vectors of assers from asset names.
-
-    #     Parameters
-    #     ----------
-    #     - assets : array-like, shape (n, )
-
-    #     Returns
-    #     -------
-    #     asset_onehot : array, shape (n, n_assets)
-
-    #     Examples
-    #     --------
-    #     >>> universe.assets
-    #     Index(['AAPL', 'MSFT', 'AMZN'], dtype='object')
-    #     >>> universe._asset_onehot(['MSFT', 'AAPL'])
-    #     array([[0., 1., 0.]
-    #            [1., 0., 0.]])
-    #     """
-    #     return np.eye(self.n_assets)[asset_id]
-
     def get_bar_indexer(self, bar):
         """
         Return bar indices from names of bars.
@@ -153,51 +131,3 @@ class Universe:
         array([1, 0])
         """
         return self._asset_to_index(asset).reshape(-1)
-
-    # def _bar_onehot(self, bar_ids):
-    #     """
-    #     Return one-hot vectors from bar names.
-
-    #     Parameters
-    #     ----------
-    #     - bar_ids : array-like, shape (n, )
-
-    #     Returns
-    #     -------
-    #     onehot_bars : array, shape (n, n_bars)
-
-    #     Examples
-    #     --------
-    #     >>> universe.bars
-    #     Index(['2000-01-01', '2000-01-02', '2000-01-03'], dtype='object')
-    #     >>> universe._bar_onehot(['2000-01-02', '2000-01-01'])
-    #     array([[0., 1., 0.]
-    #            [1., 0., 0.]])
-    #     """
-    #     return np.eye(self.n_bars)[bar_ids]
-
-    # def _pick_prices(self, bar_ids, asset_id):
-    #     """
-    #     Return prices from bar names and asset names.
-
-    #     Parameters
-    #     ----------
-    #     - bar_ids : array-like, shape (n, )
-    #     - asset_ds : array-like, shape (n, )
-
-    #     Returns
-    #     -------
-    #     prices : array, shape (n, )
-
-    #     Examples
-    #     --------
-    #     >>> universe.prices
-    #            AAPL  MSFT  AMZN
-    #     01-01     1    10   100
-    #     01-02     2    20   200
-    #     01-03     3    30   300
-    #     01-04     4    40   400
-    #     >>> universe._pick_prices(['AAPL', 'MSFT'], ['01-02', '01-03'])
-    #     array([ 2, 30])
-    #     """
-    #     return self.prices.values[bar_ids, asset_id]
