@@ -40,9 +40,9 @@ def set_seed():
 
 
 @pytest.mark.parametrize('seed', params_seed)
-def test_value(seed):
+def test_series_value(seed):
     """
-    Test `trade.value` returns the correct value.
+    Test `trade.series_value` returns the correct value.
     """
     universe = make_randomwalk(seed=seed)
     trade = make_random_trade(universe, seed=seed)
@@ -52,7 +52,7 @@ def test_value(seed):
         for lot, asset in zip(trade.lot, trade.asset)
     ])
 
-    assert np.allclose(trade.value(universe), value_expected)
+    assert np.allclose(trade.series_value(universe), value_expected)
 
 
 @pytest.mark.parametrize('seed', params_seed)
