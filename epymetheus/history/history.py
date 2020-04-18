@@ -49,12 +49,7 @@ class History(TradeResult):
         if not strategy.is_run:
             raise NotRunError('Strategy has not been run')
 
-        if verbose:
-            msg = 'Evaluating history'
-            print(f'{msg:<22} ... ', end='')
-            begin_time = time()
-
-        history = cls(
+        return cls(
             order_id=cls._get_order_id(strategy),
             trade_id=cls._get_trade_id(strategy),
             asset=cls._get_asset(strategy),
@@ -66,11 +61,6 @@ class History(TradeResult):
             stop=cls._get_stop(strategy),
             pnl=cls._get_pnl(strategy),
         )
-
-        if verbose:
-            print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
-
-        return history
 
     def to_dataframe(self, copy=False):
         """
