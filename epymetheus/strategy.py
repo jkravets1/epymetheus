@@ -196,8 +196,6 @@ class TradeStrategy(metaclass=ABCMeta):
     def is_run(self):
         return self.__is_run or False
 
-    # ---
-
     @property
     def n_trades(self):
         return len(self.trades)
@@ -205,14 +203,6 @@ class TradeStrategy(metaclass=ABCMeta):
     @property
     def n_orders(self):
         return sum(trade.n_orders for trade in self.trades)
-
-    @property
-    def n_bars(self):
-        return self.universe.n_bars
-
-    @property
-    def n_assets(self):
-        return self.universe.n_assets
 
     @property
     def history(self):
@@ -225,113 +215,3 @@ class TradeStrategy(metaclass=ABCMeta):
     @property
     def wealth(self):
         return Wealth(strategy=self)
-
-    # @property
-    # def asset_id(self):
-    #     """
-    #     Return asset id of each order.
-
-    #     Returns
-    #     -------
-    #     asset_id : array, shape (n_orders, )
-
-    #     Examples
-    #     --------
-    #     >>> strategy.universe.assets
-    #     >>> Index(['Asset0', 'Asset1', 'Asset2', ...])
-    #     >>> strategy.trades = [
-    #     ...     Trade(asset=['Asset0', 'Asset1'], ...),
-    #     ...     Trade(asset=['Asset2'], ...),
-    #     ... ]
-    #     >>> strategy.assets
-    #     array([ 0, 1, 2])
-    #     """
-    #     return self.universe.assets.get_indexer(
-    #         np.concatenate([
-    #             trade.asset for trade in self.trades
-    #         ])
-    #     )
-
-    # @property
-    # def lot(self):
-    #     """
-    #     Return lot of each order.
-
-    #     Returns
-    #     -------
-    #     lot : array, shape (n_orders, )
-
-    #     Examples
-    #     --------
-    #     >>> strategy.trades = [
-    #     ...     Trade(lot=[1, -2], ...),
-    #     ...     Trade(lot=[3], ...),
-    #     ... ]
-    #     >>> strategy.lots
-    #     array([  1, -2,  3])
-    #     """
-    #     return np.concatenate([trade.lot for trade in self.trades])
-
-    # @property
-    # def open_bar_ids(self):
-    #     return pipe.open_bar_ids(self, columns='orders')
-
-    # @property
-    # def open_bars(self):
-    #     return self.universe.bars[self.open_bar_ids]
-
-    # @property
-    # def shut_bar_ids(self):
-    #     return pipe.shut_bar_ids(self, columns='orders')
-
-    # @property
-    # def shut_bars(self):
-    #     return self.universe.bars[self.shut_bar_ids]
-
-    # @property
-    # def close_bar_ids(self):
-    #     return pipe._close_bar_ids_from_signals(self, columns='orders')
-
-    # @property
-    # def close_bars(self):
-    #     return self.universe.bars[self.close_bar_ids]
-
-    # @property
-    # def takes(self):
-    #     return pipe.takes(self, columns='orders')
-
-    # @property
-    # def stops(self):
-    #     return pipe.stops(self, columns='orders')
-
-    # @property
-    # def durations(self):
-    #     return pipe.durations(self)
-
-    # @property
-    # def open_prices(self):
-    #     return pipe.open_prices(self)
-
-    # @property
-    # def close_prices(self):
-    #     return pipe.close_prices(self)
-
-    # @property
-    # def gains(self):
-    #     return pipe.gains(self)
-
-    # @property
-    # def wealth_(self):
-    #     return pipe.wealth(self)
-
-    # @property
-    # def transaction_matrix(self):
-    #     return pipe.transaction_matrix(self)
-
-    # @property
-    # def net_exposure(self):
-    #     return pipe.net_exposure(self)
-
-    # @property
-    # def abs_exposure(self):
-    #     return pipe.abs_exposure(self)
