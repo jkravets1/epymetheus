@@ -151,7 +151,7 @@ class Trade:
         open_bar_index = universe.get_bar_indexer(open_bar)[0]
         close_bar_index = universe.get_bar_indexer(close_bar)[0]
 
-        series_value = self.series_value
+        series_value = self.series_value(universe)
         series_pnl = series_value - series_value[open_bar_index]
         series_pnl[close_bar_index:] = series_pnl[close_bar_index]
 

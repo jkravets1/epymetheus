@@ -103,7 +103,7 @@ class TradeStrategy(metaclass=ABCMeta):
             begin_time = time()
             print('Running ... ')
 
-        # self.universe = universe
+        self.universe = universe
         self.__generate_trades(universe=universe, verbose=verbose)
         self.__execute_trades(universe=universe, verbose=verbose)
 

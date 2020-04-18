@@ -1,5 +1,7 @@
+from functools import reduce
 from time import time
 
+import numpy as np
 import pandas as pd
 
 from epymetheus.utils import TradeResult
@@ -30,7 +32,7 @@ class Wealth(TradeResult):
             begin_time = time()
 
         wealth = cls(
-            bar=cls._get_bars(strategy),
+            bars=cls._get_bars(strategy),
             wealth=cls._get_wealth(strategy),
         )
 
@@ -46,7 +48,8 @@ class Wealth(TradeResult):
     @staticmethod
     def _get_wealth(strategy):
         return reduce(np.add, (
-            trade.array_pnl() for trade in strategy.trades
+            trade.series_pnl(strategy.universe)
+            for trade in strategy.trades
         ))
 
     def to_series(self, name='wealth', copy=False):
