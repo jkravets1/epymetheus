@@ -1,6 +1,7 @@
 from time import time
 
 import numpy as np
+import pandas as pd
 
 from epymetheus.exceptions import NotRunError
 from epymetheus.utils import TradeResult
@@ -264,7 +265,7 @@ class History(TradeResult):
         """
         return np.repeat(
             [trade.take for trade in strategy.trades],
-            np.arange(strategy.n_trades)
+            [trade.n_orders for trade in strategy.trades],
         )
 
     @staticmethod
@@ -287,7 +288,7 @@ class History(TradeResult):
         """
         return np.repeat(
             [trade.stop for trade in strategy.trades],
-            np.arange(strategy.n_trades),
+            [trade.n_orders for trade in strategy.trades],
         )
 
     @staticmethod
