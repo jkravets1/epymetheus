@@ -1,4 +1,4 @@
-import pytest  # noqa
+import pytest  # noqa: F401
 
 from pandas_datareader._utils import RemoteDataError
 

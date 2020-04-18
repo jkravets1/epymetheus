@@ -38,4 +38,3 @@ def test_n_bars(universe):
 @pytest.mark.parametrize('universe', params_universe)
 def test_n_assets(universe):
     assert universe.n_assets == 3
-

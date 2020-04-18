@@ -1,4 +1,4 @@
-import pytest
+import pytest  # noqa: F401
 
 import numpy as np
 from numpy import array_equal

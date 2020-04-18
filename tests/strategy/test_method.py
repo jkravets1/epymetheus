@@ -2,7 +2,7 @@ import pytest
 
 import pandas as pd
 
-from epymetheus import Trade, TradeStrategy, Universe
+from epymetheus import Trade, Universe
 from epymetheus.benchmarks import DeterminedTrader
 
 

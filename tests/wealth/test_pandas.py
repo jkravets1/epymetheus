@@ -3,7 +3,7 @@ import pytest  # noqa: F401
 import numpy as np
 from numpy import array_equal
 import pandas as pd
-from pandas.testing import assert_index_equal, assert_series_equal
+from pandas.testing import assert_index_equal
 
 from epymetheus import Wealth
 from epymetheus.datasets import make_randomwalk
@@ -66,6 +66,7 @@ def test_dataframe_index():
     df_wealth = wealth.to_dataframe()
 
     assert_index_equal(df_wealth.index, universe.bars, check_names=False)
+
 
 def test_dataframe_value():
     """
