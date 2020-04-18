@@ -153,6 +153,7 @@ class Trade:
 
         series_value = self.series_value(universe)
         series_pnl = series_value - series_value[open_bar_index]
+        series_pnl[:open_bar_index] = 0
         series_pnl[close_bar_index:] = series_pnl[close_bar_index]
 
         return series_pnl

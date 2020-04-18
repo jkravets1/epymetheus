@@ -27,8 +27,7 @@ class Wealth(TradeResult):
         - verbose : bool
         """
         if verbose:
-            msg = 'Evaluating wealth'
-            print(f'{msg:<22} ... ', end='')
+            print(f'Evaluating wealth ... ', end='')
             begin_time = time()
 
         wealth = cls(

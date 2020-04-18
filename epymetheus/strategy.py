@@ -131,8 +131,7 @@ class TradeStrategy(metaclass=ABCMeta):
             if verbose:
                 begin_time = time()
                 for i, trade in enumerate(self.logic(universe) or []):
-                    msg = f'Generating {i + 1} trades'
-                    print(f'\r{msg:<22} ({trade.open_bar}) ...', end='')
+                    print(f'\rGenerating {i + 1} trades ({trade.open_bar}) ... ', end='')
                     yield trade
                 print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
             else:
@@ -154,8 +153,15 @@ class TradeStrategy(metaclass=ABCMeta):
         -------
         self : TradeStrategy
         """
-        for trade in self.trades:
-            trade.execute(universe)
+        if verbose:
+            begin_time = time()
+            for i, trade in enumerate(self.trades):
+                print(f'\rExecuting {i + 1} trades ... ', end='')
+                trade.execute(universe)
+            print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
+        else:
+            for trade in self.trades:
+                trade.execute(universe)
 
         return self
 
