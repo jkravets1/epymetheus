@@ -33,14 +33,13 @@ class History(TradeResult):
         Profit loss of each order.
     """
     @classmethod
-    def from_strategy(cls, strategy, verbose=True):
+    def from_strategy(cls, strategy):
         """
         Initialize self from strategy.
 
         Parameters
         ----------
         - strategy : TradeStrategy
-        - verbose : bool
 
         Returns
         -------
