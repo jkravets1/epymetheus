@@ -107,7 +107,7 @@ class TradeStrategy(metaclass=ABCMeta):
         self.__generate_trades(universe=universe, verbose=verbose)
         self.__execute_trades(universe=universe, verbose=verbose)
 
-        self.__is_run = True
+        self._is_run = True
 
         if verbose:
             print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
@@ -194,7 +194,7 @@ class TradeStrategy(metaclass=ABCMeta):
 
     @property
     def is_run(self):
-        return self.__is_run or False
+        return getattr(self, '_is_run', False)
 
     @property
     def n_trades(self):
