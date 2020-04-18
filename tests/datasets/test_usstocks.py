@@ -9,6 +9,15 @@ from epymetheus.datasets import fetch_usstocks
 # --------------------------------------------------------------------------------
 
 
+def test_toomanyasset():
+    """
+    Test if fetch_usstocks raises ValueError
+    when n_asset is too many.
+    """
+    with pytest.raises(ValueError):
+        fetch_usstocks(n_assets=1000)
+
+
 def test_usstocks():
     try:
         universe = fetch_usstocks(n_assets=2)
