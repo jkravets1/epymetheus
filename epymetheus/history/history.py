@@ -54,8 +54,8 @@ class History(TradeResult):
             begin_time = time()
 
         history = cls(
-            trade_index=cls._get_trade_index(strategy),
             order_index=cls._get_order_index(strategy),
+            trade_index=cls._get_trade_index(strategy),
             asset=cls._get_asset(strategy),
             lot=cls._get_lot(strategy),
             open_bar=cls._get_open_bar(strategy),
