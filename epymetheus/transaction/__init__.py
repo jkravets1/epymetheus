@@ -1,3 +1,3 @@
 # flake8: noqa
 
-from .transaction import Transaction
+# from .transaction import Transaction
