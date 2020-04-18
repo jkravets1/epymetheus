@@ -29,11 +29,23 @@ Let's construct your own strategy by subclassing `TradeStrategy`.
 ```python
 from epymetheus import Trade, TradeStrategy
 
-class MyStrategy(TradeStrategy):
 
-    def logic(self, universe, my_parameter):
+class MyStrategy(TradeStrategy):
+    """
+    This is my favorite strategy.
+    
+    Parameters
+    ----------
+    - my_parameter : float
+        My awesome parameter.
+    """
+    def __init__(self, my_parameter):
+        self.my_parameter = my_parameter
+        
+    def logic(self, universe):
         ...
         yield Trade(...)
+
 
 strategy = MyStrategy(my_parameter=0.1)
 ```
@@ -41,20 +53,25 @@ strategy = MyStrategy(my_parameter=0.1)
 The strategy can be readily applied to any `Universe`.
 
 ```python
-import pandas as pd
 from epymetheus import Universe
 
 prices = ...  # Fetch historical prices of US equities
-universe = Universe(prices, name='US Equities')
+universe = Universe(prices)
 
 strategy.run(universe)
+# Running ... 
+# Generating 454 trades (2018-12-31) ... Done. (Runtime : 0.45 sec)
+# Executing 454 trades ... Done. (Runtime : 0.73 sec)
+# Done. (Runtime : 1.17 sec)
 ```
 
-Now the result is stored as the attributes of `strategy`.
+Now the result can be evaluated as the attributes of `strategy`.
 You can plot the wealth right away:
 
 ```python
-pd.DataFrame(strategy.wealth).plot()
+df_wealth = strategy.wealth.to_dataframe()
+
+df_wealth.plot()
 ```
 
 ![wealth](examples/howto/wealth.png)
@@ -66,20 +83,22 @@ net_exposure = pd.Series(strategy.net_exposure)
 net_exposure.plot()
 ```
 
-![wealth](examples/howto/exposure.png)
+![exposure](examples/howto/exposure.png)
 
 Profit-loss distribution can be accessed by:
 
 ```python
-plt.hist(strategy.history.gains)
+plt.hist(strategy.history.pnl)
 ```
 
-![wealth](examples/howto/gains.png)
+![pnl](examples/howto/gains.png)
 
 Detailed trade history can be viewed as:
 
 ```python
-pd.DataFrame(strategy.history)
+strategy.history.to_dataframe()
+
+# or: pandas.DataFrame(strategy.history)
 ```
 
 index|assets|lots|open_dates|close_dates|durations|open_prices|gains
