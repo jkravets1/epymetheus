@@ -68,8 +68,8 @@ def test_trade_keys(trades, initializer):
     history = init_history(strategy, initializer=initializer)
 
     assert list(history.keys()) == [
-        'order_index',
-        'trade_index',
+        'order_id',
+        'trade_id',
         'asset',
         'lot',
         'open_bar',
@@ -83,22 +83,22 @@ def test_trade_keys(trades, initializer):
 
 @pytest.mark.parametrize('trades', [trades])
 @pytest.mark.parametrize('initializer', ['init', 'method'])
-def test_trade_index(trades, initializer):
+def test_trade_id(trades, initializer):
     strategy = DeterminedTrader(trades=trades)
     strategy.run(universe)  # Run to prevent NotRunError
     history = init_history(strategy, initializer=initializer)
 
-    assert np.array_equal(history.trade_index, [0, 0, 1, 1])
+    assert np.array_equal(history.trade_id, [0, 0, 1, 1])
 
 
 @pytest.mark.parametrize('trades', [trades])
 @pytest.mark.parametrize('initializer', ['init', 'method'])
-def test_order_index(trades, initializer):
+def test_order_id(trades, initializer):
     strategy = DeterminedTrader(trades=trades)
     strategy.run(universe)  # Run to prevent NotRunError
     history = init_history(strategy, initializer=initializer)
 
-    assert np.array_equal(history.order_index, [0, 1, 2, 3])
+    assert np.array_equal(history.order_id, [0, 1, 2, 3])
 
 
 @pytest.mark.parametrize('trades', [trades])
