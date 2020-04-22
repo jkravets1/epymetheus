@@ -91,7 +91,7 @@ Profit-loss distribution can be accessed by:
 plt.hist(strategy.history.pnl)
 ```
 
-![pnl](examples/howto/gains.png)
+![pnl](examples/howto/pnl.png)
 
 Detailed trade history can be viewed as:
 
