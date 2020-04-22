@@ -33,7 +33,7 @@ from epymetheus import Trade, TradeStrategy
 class MyStrategy(TradeStrategy):
     """
     This is my favorite strategy.
-    
+
     Parameters
     ----------
     - my_parameter : float
@@ -41,7 +41,7 @@ class MyStrategy(TradeStrategy):
     """
     def __init__(self, my_parameter):
         self.my_parameter = my_parameter
-        
+
     def logic(self, universe):
         ...
         yield Trade(...)
@@ -59,7 +59,7 @@ prices = ...  # Fetch historical prices of US equities
 universe = Universe(prices)
 
 strategy.run(universe)
-# Running ... 
+# Running ...
 # Generating 454 trades (2018-12-31) ... Done. (Runtime : 0.45 sec)
 # Executing 454 trades ... Done. (Runtime : 0.73 sec)
 # Done. (Runtime : 1.17 sec)
@@ -101,11 +101,11 @@ strategy.history.to_dataframe()
 # or: pandas.DataFrame(strategy.history)
 ```
 
-index|assets|lots|open_dates|close_dates|durations|open_prices|gains
------|------|----|----------|-----------|---------|-----------|-----
-0|MSFT|301.99|2000-02-01|2000-03-01|29 days|33.11|-1177.90
-1|WMT|245.40|2000-02-01|2000-03-01|29 days|40.74|-1650.68
-2|BRK-A|0.22|2000-03-01|2000-04-01|31 days|44700|0,2796.42
-3|WMT|293.91|2000-03-01|2000-04-01|31 days|34.02|1545.11
-4|JNJ|480.09|2000-04-01|2000-05-01|30 days|20.82|1770.46
-...|...|...|...|...|...|...|...
+|   order_id |   trade_id | asset   |           lot | open_bar    | close_bar   | shut_bar    |   take |   stop |          pnl |
+|-----------:|-----------:|:--------|--------------:|:------------|:------------|:------------|-------:|-------:|-------------:|
+|          0 |          0 | BRK-A   |     0.227273  | 2000-02-29  | 2000-08-29  | 2000-08-29  |   5000 |  -1000 |  3113.64     |
+|          1 |          1 | JNJ     |   471.411     | 2000-02-29  | 2000-08-29  | 2000-08-29  |   5000 |  -1000 |  3097.16     |
+|          2 |          2 | PG      |   657.239     | 2000-03-31  | 2000-09-30  | 2000-09-30  |   5000 |  -1000 |  2061.64     |
+|          3 |          3 | AMZN    |   149.254     | 2000-03-31  | 2000-04-12  | 2000-09-30  |   5000 |  -1000 | -1585.82     |
+|          4 |          4 | MSFT    |   446.908     | 2000-04-28  | 2000-05-25  | 2000-10-28  |   5000 |  -1000 | -1182.8      |
+
