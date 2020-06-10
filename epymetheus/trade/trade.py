@@ -55,14 +55,9 @@ class Trade:
     ...     shut_bar=cd,
     ... )
     """
+
     def __init__(
-        self,
-        asset,
-        lot=1.0,
-        open_bar=None,
-        shut_bar=None,
-        take=None,
-        stop=None,
+        self, asset, lot=1.0, open_bar=None, shut_bar=None, take=None, stop=None,
     ):
         self.asset = asset
         self.lot = lot
@@ -183,9 +178,7 @@ class Trade:
                [  -4   40]
                [  -5   50])]
         """
-        p = universe.prices.iloc[
-            :, universe.get_asset_indexer(self.asset)
-        ].values
+        p = universe.prices.iloc[:, universe.get_asset_indexer(self.asset)].values
         # (n_orders, ) * (n_bars, n_orders) -> (n_bars, n_orders)
         return self.lot * p
 
@@ -255,10 +248,7 @@ class Trade:
         close_bar_index = self.__get_close_bar_index(universe, array_value)
 
         self.close_bar = universe.bars[close_bar_index]
-        self.pnl = (
-            array_value[close_bar_index, :]
-            - array_value[open_bar_index, :]
-        )
+        self.pnl = array_value[close_bar_index, :] - array_value[open_bar_index, :]
 
         return self
 
@@ -287,9 +277,7 @@ class Trade:
 
             signal_take = profit >= (self.take or np.inf)
             signal_stop = profit <= (self.stop or -np.inf)
-            close_bar_index = catch_first_index(
-                np.logical_or(signal_take, signal_stop)
-            )
+            close_bar_index = catch_first_index(np.logical_or(signal_take, signal_stop))
 
             if close_bar_index == -1 or close_bar_index > timeout_index:
                 return timeout_index

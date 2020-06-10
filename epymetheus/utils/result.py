@@ -11,6 +11,7 @@ class TradeResult(Bunch):
     - from_strategy
         Initialize TradeResult from strategy.
     """
+
     def __init__(self, strategy=None, **kwargs):
         if strategy is not None:
             super().__init__(**self.from_strategy(strategy))

@@ -17,6 +17,7 @@ class Wealth(TradeResult):
     - wealth : numpy.array, shape (n_bars, )
         Time-series of wealth.
     """
+
     @classmethod
     def from_strategy(cls, strategy):
         """
@@ -27,10 +28,7 @@ class Wealth(TradeResult):
         - strategy : TradeStrategy
         - verbose : bool
         """
-        return cls(
-            bars=cls._get_bars(strategy),
-            wealth=cls._get_wealth(strategy),
-        )
+        return cls(bars=cls._get_bars(strategy), wealth=cls._get_wealth(strategy),)
 
     @staticmethod
     def _get_bars(strategy):
@@ -38,12 +36,11 @@ class Wealth(TradeResult):
 
     @staticmethod
     def _get_wealth(strategy):
-        return reduce(np.add, (
-            trade.series_pnl(strategy.universe)
-            for trade in strategy.trades
-        ))
+        return reduce(
+            np.add, (trade.series_pnl(strategy.universe) for trade in strategy.trades)
+        )
 
-    def to_series(self, name='wealth', copy=False):
+    def to_series(self, name="wealth", copy=False):
         """
         Represent self as `pandas.Series`.
 
@@ -73,4 +70,4 @@ class Wealth(TradeResult):
         -------
         df_wealth : pandas.DataFrame
         """
-        return pd.DataFrame(self, copy=copy).set_index('bars')
+        return pd.DataFrame(self, copy=copy).set_index("bars")

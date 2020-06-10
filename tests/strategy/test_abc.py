@@ -7,6 +7,7 @@ class StrategyWithoutLogic(TradeStrategy):
     """
     Strategy without logic.
     """
+
     def __init__(self, param=None):
         self.param = None
 

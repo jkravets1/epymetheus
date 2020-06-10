@@ -4,6 +4,7 @@ from time import time
 
 from epymetheus.exceptions import NoTradeError
 from epymetheus.history import History
+
 # from epymetheus.transaction import Transaction
 from epymetheus.wealth import Wealth
 
@@ -63,6 +64,7 @@ class TradeStrategy(metaclass=ABCMeta):
     ----
     - dump trades in a light data structure
     """
+
     def __init__(self):
         """Initialize self."""
 
@@ -98,7 +100,7 @@ class TradeStrategy(metaclass=ABCMeta):
         """
         if verbose:
             begin_time = time()
-            print('Running ... ')
+            print("Running ... ")
 
         self.universe = universe
         self.__generate_trades(universe=universe, verbose=verbose)
@@ -107,7 +109,7 @@ class TradeStrategy(metaclass=ABCMeta):
         self._is_run = True
 
         if verbose:
-            print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
+            print(f"Done. (Runtime : {time() - begin_time:.2f} sec)")
 
         return self
 
@@ -124,14 +126,17 @@ class TradeStrategy(metaclass=ABCMeta):
         -------
         self : TradeStrategy
         """
+
         def iter_trades(verbose):
             if verbose:
                 begin_time = time()
                 for i, trade in enumerate(self.logic(universe) or []):
-                    print(f'\rGenerating {i + 1} trades '
-                          '({trade.open_bar}) ... ', end='')
+                    print(
+                        f"\rGenerating {i + 1} trades " f"({trade.open_bar}) ... ",
+                        end="",
+                    )
                     yield trade
-                print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
+                print(f"Done. (Runtime : {time() - begin_time:.2f} sec)")
             else:
                 for trade in self.logic(universe) or []:
                     yield trade
@@ -139,7 +144,7 @@ class TradeStrategy(metaclass=ABCMeta):
         self.trades = list(iter_trades(verbose))
 
         if len(self.trades) == 0:
-            raise NoTradeError('No trades')
+            raise NoTradeError("No trades")
 
         return self
 
@@ -154,9 +159,9 @@ class TradeStrategy(metaclass=ABCMeta):
         if verbose:
             begin_time = time()
             for i, trade in enumerate(self.trades):
-                print(f'\rExecuting {i + 1} trades ... ', end='')
+                print(f"\rExecuting {i + 1} trades ... ", end="")
                 trade.execute(universe)
-            print(f'Done. (Runtime : {time() - begin_time:.2f} sec)')
+            print(f"Done. (Runtime : {time() - begin_time:.2f} sec)")
         else:
             for trade in self.trades:
                 trade.execute(universe)
@@ -198,7 +203,7 @@ class TradeStrategy(metaclass=ABCMeta):
 
     @property
     def is_run(self):
-        return getattr(self, '_is_run', False)
+        return getattr(self, "_is_run", False)
 
     @property
     def n_trades(self):

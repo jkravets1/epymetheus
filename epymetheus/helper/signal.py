@@ -6,11 +6,7 @@ from typing import Union, Iterable
 from epymetheus.core.api import Universe
 
 
-def trade_begin_dates(
-    universe: Universe,
-    train_period,
-    trade_period
-):
+def trade_begin_dates(universe: Universe, train_period, trade_period):
     """Yield begin dates of trade periods."""
     d = universe.begin_date + train_period
     while d + trade_period <= universe.end_date:
@@ -18,10 +14,7 @@ def trade_begin_dates(
         d += trade_period
 
 
-def cross(
-    array: Union[pd.Series, pd.DataFrame],
-    direction='up'
-):
+def cross(array: Union[pd.Series, pd.DataFrame], direction="up"):
     """
     True if the value crosses 0 upward or downward.
     Parameters
@@ -31,24 +24,21 @@ def cross(
         Cross upward or downward.
     """
     if isinstance(array, pd.core.series.Series):
-        if direction == 'up':
+        if direction == "up":
             return (array > 0) & (array.shift() <= 0)
-        if direction == 'down':
+        if direction == "down":
             return (array < 0) & (array.shift() >= 0)
-        raise ValueError("direction must be in {'up', 'down'},"
-                         "but {} given".format(direction))
+        raise ValueError(
+            "direction must be in {'up', 'down'}," "but {} given".format(direction)
+        )
     if isinstance(array, pd.core.frame.DataFrame):
-        return pd.DataFrame({
-            c: cross(array[c], direction=direction)
-            for c in array.columns
-        })
+        return pd.DataFrame(
+            {c: cross(array[c], direction=direction) for c in array.columns}
+        )
     raise TypeError
 
 
-def timing(
-    series_open: pd.Series,
-    series_close: pd.Series
-):
+def timing(series_open: pd.Series, series_close: pd.Series):
     """
     Return list of (begin date, end date) from open and close signals.
     Parameters
@@ -106,10 +96,7 @@ def timing(
             return timing
 
 
-def timing_flag(
-    opens: Iterable[pd.Series],
-    closes: Iterable[pd.Series]
-):
+def timing_flag(opens: Iterable[pd.Series], closes: Iterable[pd.Series]):
     """
     Return timings and which signals were caught.
     Returns
@@ -126,12 +113,8 @@ def timing_flag(
         [(date, flag) for date in compress(series.index, series)]
         for flag, series in enumerate(closes)
     )
-    signal_open = iter(sorted(
-        list(signal_open), key=lambda date_flag: date_flag[0]
-    ))
-    signal_close = iter(sorted(
-        list(signal_close), key=lambda date_flag: date_flag[0]
-    ))
+    signal_open = iter(sorted(list(signal_open), key=lambda date_flag: date_flag[0]))
+    signal_close = iter(sorted(list(signal_close), key=lambda date_flag: date_flag[0]))
 
     sentinel = (datetime.date(datetime.MINYEAR, 1, 1), None)
 
@@ -143,9 +126,7 @@ def timing_flag(
         if opening:
             (date_next, flag_close) = next(signal_close, sentinel)
             if date_next > date_now:
-                timing_flag.append(
-                    (date_now, date_next, flag_open, flag_close)
-                )
+                timing_flag.append((date_now, date_next, flag_open, flag_close))
                 date_now = date_next
                 opening = False
         else:

@@ -22,7 +22,8 @@ class ThreeFactorAnalizer:
         Excess return
     coef_ : array of shape (3, ) or (n_targets, 3)
     """
-    def __init__(self, mkt, smb, hml, rf=.0, freq='1D'):
+
+    def __init__(self, mkt, smb, hml, rf=0.0, freq="1D"):
         """Initialize self."""
         self.rf = rf
         self.mkt = mkt
@@ -35,11 +36,9 @@ class ThreeFactorAnalizer:
         # TODO begin and end date
         # TODO freq
         lin_reg = LinearRegression()
-        X = np.array([
-            self.mkt.pct_change(),
-            self.smb.pct_change(),
-            self.hml.pct_change(),
-        ])
+        X = np.array(
+            [self.mkt.pct_change(), self.smb.pct_change(), self.hml.pct_change(),]
+        )
         y = price.pct_change()
 
         lin_reg.fit(X, y)

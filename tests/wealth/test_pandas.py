@@ -28,7 +28,7 @@ def test_series_value():
     wealth = Wealth(strategy)
     series_wealth = wealth.to_series()
 
-    assert np.array_equal(series_wealth, wealth['wealth'])
+    assert np.array_equal(series_wealth, wealth["wealth"])
 
 
 def test_dataframe_type():
@@ -52,8 +52,8 @@ def test_dataframe_columns():
     wealth = Wealth(strategy)
     df_wealth = wealth.to_dataframe()
 
-    assert df_wealth.index.name == 'bars'
-    assert_index_equal(df_wealth.columns, pd.Index(['wealth']))
+    assert df_wealth.index.name == "bars"
+    assert_index_equal(df_wealth.columns, pd.Index(["wealth"]))
 
 
 def test_dataframe_index():
@@ -77,4 +77,4 @@ def test_dataframe_value():
     wealth = Wealth(strategy)
     df_wealth = wealth.to_dataframe()
 
-    assert array_equal(df_wealth['wealth'].values, wealth.wealth)
+    assert array_equal(df_wealth["wealth"].values, wealth.wealth)
