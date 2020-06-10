@@ -8,7 +8,7 @@ def make_randomwalk(
     n_bars=1000,
     n_assets=10,
     volatility=0.01,
-    name='RandomWalk',
+    name="RandomWalk",
     bars=None,
     assets=None,
     seed=None,
@@ -31,9 +31,9 @@ def make_randomwalk(
     -------
     Universe
     """
-    data = np.random.lognormal(
-        sigma=volatility, size=(n_bars, n_assets)
-    ).cumprod(axis=0)
+    data = np.random.lognormal(sigma=volatility, size=(n_bars, n_assets)).cumprod(
+        axis=0
+    )
     data /= data[0, :]
 
     bars = bars or list(range(n_bars))

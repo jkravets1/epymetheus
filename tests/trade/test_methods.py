@@ -34,12 +34,12 @@ def make_random_trade(universe, seed):
 # --------------------------------------------------------------------------------
 
 
-@pytest.fixture(scope='function', autouse=True)
+@pytest.fixture(scope="function", autouse=True)
 def set_seed():
     np.random.seed(42)
 
 
-@pytest.mark.parametrize('seed', params_seed)
+@pytest.mark.parametrize("seed", params_seed)
 def test_series_value(seed):
     """
     Test `trade.series_value` returns the correct value.
@@ -47,15 +47,14 @@ def test_series_value(seed):
     universe = make_randomwalk(seed=seed)
     trade = make_random_trade(universe, seed=seed)
 
-    value_expected = np.add.reduce([
-        lot * universe.prices[asset]
-        for lot, asset in zip(trade.lot, trade.asset)
-    ])
+    value_expected = np.add.reduce(
+        [lot * universe.prices[asset] for lot, asset in zip(trade.lot, trade.asset)]
+    )
 
     assert np.allclose(trade.series_value(universe), value_expected)
 
 
-@pytest.mark.parametrize('seed', params_seed)
+@pytest.mark.parametrize("seed", params_seed)
 def test_execute_0_0(seed):
     """
     Test `trade.execute` sets `trade.close_bar` correctly.
@@ -78,7 +77,7 @@ def test_execute_0_0(seed):
     assert trade.close_bar == trade.shut_bar
 
 
-@pytest.mark.parametrize('seed', params_seed)
+@pytest.mark.parametrize("seed", params_seed)
 def test_execute_0_1(seed):
     """
     Test `trade.execute` sets `trade.close_bar` correctly.
@@ -102,7 +101,7 @@ def test_execute_0_1(seed):
     assert trade.close_bar == universe.bars[-1]
 
 
-@pytest.mark.parametrize('seed', params_seed)
+@pytest.mark.parametrize("seed", params_seed)
 def test_execute(seed):
     """
     Test `trade.execute` sets `trade.close_bar` correctly.
@@ -141,46 +140,38 @@ def test_execute(seed):
 
 
 def test_execute_take():
-    universe = Universe(
-        prices=pd.DataFrame({
-            'Asset0': np.arange(100, 200)
-        })
-    )
+    universe = Universe(prices=pd.DataFrame({"Asset0": np.arange(100, 200)}))
 
-    trade = Trade('Asset0', lot=1.0, take=1.9, open_bar=1, shut_bar=5)
+    trade = Trade("Asset0", lot=1.0, take=1.9, open_bar=1, shut_bar=5)
     trade.execute(universe)
     assert trade.close_bar == 3
     assert np.array_equal(trade.pnl, [103 - 101])
 
-    trade = Trade('Asset0', lot=2.0, take=3.8, open_bar=1, shut_bar=5)
+    trade = Trade("Asset0", lot=2.0, take=3.8, open_bar=1, shut_bar=5)
     trade.execute(universe)
     assert trade.close_bar == 3
     assert np.array_equal(trade.pnl, [2 * (103 - 101)])
 
-    trade = Trade('Asset0', lot=1.0, take=1000, open_bar=1, shut_bar=5)
+    trade = Trade("Asset0", lot=1.0, take=1000, open_bar=1, shut_bar=5)
     trade.execute(universe)
     assert trade.close_bar == 5
     assert np.array_equal(trade.pnl, [105 - 101])
 
 
 def test_execute_stop():
-    universe = Universe(
-        prices=pd.DataFrame({
-            'Asset0': np.arange(100, 0, -1)
-        })
-    )
+    universe = Universe(prices=pd.DataFrame({"Asset0": np.arange(100, 0, -1)}))
 
-    trade = Trade('Asset0', lot=1.0, stop=-1.9, open_bar=1, shut_bar=5)
+    trade = Trade("Asset0", lot=1.0, stop=-1.9, open_bar=1, shut_bar=5)
     trade.execute(universe)
     assert trade.close_bar == 3
     assert np.array_equal(trade.pnl, [97 - 99])
 
-    trade = Trade('Asset0', lot=2.0, stop=-3.8, open_bar=1, shut_bar=5)
+    trade = Trade("Asset0", lot=2.0, stop=-3.8, open_bar=1, shut_bar=5)
     trade.execute(universe)
     assert trade.close_bar == 3
     assert np.array_equal(trade.pnl, [2 * (97 - 99)])
 
-    trade = Trade('Asset0', lot=1.0, stop=-1000, open_bar=1, shut_bar=5)
+    trade = Trade("Asset0", lot=1.0, stop=-1000, open_bar=1, shut_bar=5)
     trade.execute(universe)
     assert trade.close_bar == 5
     assert np.array_equal(trade.pnl, [95 - 99])

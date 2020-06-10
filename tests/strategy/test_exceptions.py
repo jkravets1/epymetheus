@@ -9,6 +9,7 @@ class NoTradeStrategy(TradeStrategy):
     """
     Yields no strategy.
     """
+
     def logic(self, universe):
         pass
 
@@ -19,7 +20,7 @@ params_verbose = [True, False]
 # --------------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize('verbose', params_verbose)
+@pytest.mark.parametrize("verbose", params_verbose)
 def test_notradeerror(verbose):
     strategy = NoTradeStrategy()
     universe = make_randomwalk()

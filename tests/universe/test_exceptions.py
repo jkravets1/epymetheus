@@ -12,8 +12,8 @@ params_n_assets = [1, 100]
 # --------------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize('n_bars', params_n_bars)
-@pytest.mark.parametrize('n_assets', params_n_assets)
+@pytest.mark.parametrize("n_bars", params_n_bars)
+@pytest.mark.parametrize("n_assets", params_n_assets)
 def test_error_nan(n_bars, n_assets):
     """
     Universe should raise ValueError when `universe.prices`
@@ -26,8 +26,8 @@ def test_error_nan(n_bars, n_assets):
         universe = Universe(prices)  # noqa: F841
 
 
-@pytest.mark.parametrize('n_bars', params_n_bars)
-@pytest.mark.parametrize('n_assets', params_n_assets)
+@pytest.mark.parametrize("n_bars", params_n_bars)
+@pytest.mark.parametrize("n_assets", params_n_assets)
 def test_error_inf(n_bars, n_assets):
     """
     Universe should raise ValueError when `universe.prices`
@@ -55,11 +55,11 @@ def test_error_inf(n_bars, n_assets):
 #         print(universe)
 
 
-@pytest.mark.parametrize('n_bars', params_n_bars)
-@pytest.mark.parametrize('n_assets', params_n_assets)
+@pytest.mark.parametrize("n_bars", params_n_bars)
+@pytest.mark.parametrize("n_assets", params_n_assets)
 def test_error_nonunique_bar(n_bars, n_assets):
-    bars = [f'MyBar{i}' for i in range(n_bars)]
-    bars[n_bars // 2] = 'MyBar0'
+    bars = [f"MyBar{i}" for i in range(n_bars)]
+    bars[n_bars // 2] = "MyBar0"
 
     prices = make_randomwalk(n_bars, n_assets).prices
     prices.index = bars
@@ -68,11 +68,11 @@ def test_error_nonunique_bar(n_bars, n_assets):
         universe = Universe(prices)  # noqa: F841
 
 
-@pytest.mark.parametrize('n_bars', params_n_bars[-1:])
-@pytest.mark.parametrize('n_assets', params_n_assets[-1:])
+@pytest.mark.parametrize("n_bars", params_n_bars[-1:])
+@pytest.mark.parametrize("n_assets", params_n_assets[-1:])
 def test_error_nonunique_assets(n_bars, n_assets):
-    assets = [f'MyAsset{i}' for i in range(n_assets)]
-    assets[n_assets // 2] = 'MyAsset0'
+    assets = [f"MyAsset{i}" for i in range(n_assets)]
+    assets[n_assets // 2] = "MyAsset0"
     print(assets)
 
     prices = make_randomwalk(n_bars, n_assets).prices

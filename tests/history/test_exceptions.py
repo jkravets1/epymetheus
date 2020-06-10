@@ -8,6 +8,7 @@ class SampleStragegy(TradeStrategy):
     """
     A sample strategy.
     """
+
     def __init__(self):
         pass
 

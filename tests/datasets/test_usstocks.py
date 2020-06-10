@@ -23,4 +23,4 @@ def test_usstocks():
         universe = fetch_usstocks(n_assets=2)
         assert not np.isnan(universe.prices.values).any(axis=None)
     except RemoteDataError as e:
-        print('Skip', e)
+        print("Skip", e)

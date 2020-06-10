@@ -9,17 +9,19 @@ from epymetheus import History
 from epymetheus.datasets import make_randomwalk
 from epymetheus.benchmarks import RandomTrader
 
-columns = pd.Index([
-    'trade_id',
-    'asset',
-    'lot',
-    'open_bar',
-    'close_bar',
-    'shut_bar',
-    'take',
-    'stop',
-    'pnl',
-])
+columns = pd.Index(
+    [
+        "trade_id",
+        "asset",
+        "lot",
+        "open_bar",
+        "close_bar",
+        "shut_bar",
+        "take",
+        "stop",
+        "pnl",
+    ]
+)
 
 
 # --------------------------------------------------------------------------------
@@ -46,7 +48,7 @@ def test_columns():
 
     df_history = History(strategy).to_dataframe()
 
-    assert df_history.index.name == 'order_id'
+    assert df_history.index.name == "order_id"
     assert_index_equal(df_history.columns, columns)
 
 
@@ -60,7 +62,7 @@ def test_index():
     history = History(strategy)
     df_history = history.to_dataframe()
 
-    index_expected = pd.Index(range(df_history.index.size), name='order_id')
+    index_expected = pd.Index(range(df_history.index.size), name="order_id")
     assert_index_equal(df_history.index, index_expected)
 
 

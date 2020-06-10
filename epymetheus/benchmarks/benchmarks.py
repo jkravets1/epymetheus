@@ -14,6 +14,7 @@ class DeterminedTrader(TradeStrategy):
     trade : iterable of Trade
         Trades to yield.
     """
+
     def __init__(self, trades):
         self.trades = trades
 
@@ -39,13 +40,9 @@ class RandomTrader(TradeStrategy):
     - seed : int, default None
         Seed of randomness. If None, seed is not set.
     """
+
     def __init__(
-        self,
-        n_trades=100,
-        max_n_orders=5,
-        max_lot=100,
-        min_lot=-100,
-        seed=None,
+        self, n_trades=100, max_n_orders=5, max_lot=100, min_lot=-100, seed=None,
     ):
         self.__n_trades = n_trades
         self.max_n_orders = max_n_orders
@@ -62,10 +59,9 @@ class RandomTrader(TradeStrategy):
             n_orders = np.random.randint(1, self.max_n_orders + 1, size=1)[0]
 
             asset = random.sample(list(universe.assets), n_orders)
-            lot = (self.max_lot - self.min_lot) \
-                * np.random.rand(n_orders) - self.min_lot
+            lot = (self.max_lot - self.min_lot) * np.random.rand(
+                n_orders
+            ) - self.min_lot
             open_bar, shut_bar = sorted(random.sample(list(universe.bars), 2))
 
-            yield Trade(
-                asset=asset, lot=lot, open_bar=open_bar, shut_bar=shut_bar
-            )
+            yield Trade(asset=asset, lot=lot, open_bar=open_bar, shut_bar=shut_bar)

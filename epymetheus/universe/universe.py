@@ -27,6 +27,7 @@ class Universe:
     --------
     >>> ...
     """
+
     def __init__(self, prices, name=None):
         self.prices = prices
         self.name = name
@@ -36,13 +37,13 @@ class Universe:
 
     def __check_prices(self):
         if np.isnan(self.prices).any(None):
-            raise ValueError('Price has NA.')
+            raise ValueError("Price has NA.")
         if np.isinf(self.prices).any(None):
-            raise ValueError('Price has INF.')
+            raise ValueError("Price has INF.")
         if not self.bars.is_unique:
-            raise ValueError('Bars are not unique.')
+            raise ValueError("Bars are not unique.")
         if not self.assets.is_unique:
-            raise ValueError('Assets are not unique.')
+            raise ValueError("Assets are not unique.")
 
     def __init_hash(self):
         """
@@ -59,15 +60,9 @@ class Universe:
         - self.__asset_to_index : callable
             Callable from asset to index.
         """
-        self._hash_bar = dict(
-            zip(self.bars, list(range(self.bars.size)))
-        )
-        self._hash_asset = dict(
-            zip(self.assets, list(range(self.assets.size)))
-        )
-        self._bar_to_index = np.vectorize(
-            lambda bar: self._hash_bar.get(bar, -1)
-        )
+        self._hash_bar = dict(zip(self.bars, list(range(self.bars.size))))
+        self._hash_asset = dict(zip(self.assets, list(range(self.assets.size))))
+        self._bar_to_index = np.vectorize(lambda bar: self._hash_bar.get(bar, -1))
         self._asset_to_index = np.vectorize(
             lambda asset: self._hash_asset.get(asset, -1)
         )

@@ -30,6 +30,7 @@ class History(TradeResult):
     - pnl : numpy.array, shape (n_orders, )
         Profit loss of each order.
     """
+
     @classmethod
     def from_strategy(cls, strategy):
         """
@@ -44,7 +45,7 @@ class History(TradeResult):
         history : History
         """
         if not strategy.is_run:
-            raise NotRunError('Strategy has not been run')
+            raise NotRunError("Strategy has not been run")
 
         return cls(
             order_id=cls._get_order_id(strategy),
@@ -72,7 +73,7 @@ class History(TradeResult):
         -------
         df_wealth : pandas.DataFrame
         """
-        return pd.DataFrame(self, copy=copy).set_index('order_id')
+        return pd.DataFrame(self, copy=copy).set_index("order_id")
 
     @staticmethod
     def _get_order_id(strategy):
@@ -114,8 +115,7 @@ class History(TradeResult):
         array([  0  0  1])
         """
         return np.repeat(
-            np.arange(strategy.n_trades),
-            [trade.n_orders for trade in strategy.trades]
+            np.arange(strategy.n_trades), [trade.n_orders for trade in strategy.trades]
         )
 
     @staticmethod
@@ -136,9 +136,7 @@ class History(TradeResult):
         >>> History()._get_asset(strategy)
         array([  'Asset0'  'Asset1'  'Asset2'])
         """
-        return np.concatenate([
-            trade.array_asset for trade in strategy.trades
-        ])
+        return np.concatenate([trade.array_asset for trade in strategy.trades])
 
     @staticmethod
     def _get_lot(strategy):
@@ -158,9 +156,7 @@ class History(TradeResult):
         >>> History()._get_lot(strategy)
         array([  1 -2  3])
         """
-        return np.concatenate([
-            trade.array_lot for trade in strategy.trades
-        ])
+        return np.concatenate([trade.array_lot for trade in strategy.trades])
 
     @staticmethod
     def _get_open_bar(strategy):
@@ -280,6 +276,4 @@ class History(TradeResult):
 
     @staticmethod
     def _get_pnl(strategy):
-        return np.concatenate([
-            trade.pnl for trade in strategy.trades
-        ])
+        return np.concatenate([trade.pnl for trade in strategy.trades])

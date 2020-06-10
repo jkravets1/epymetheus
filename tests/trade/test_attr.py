@@ -4,8 +4,8 @@ import numpy as np
 from epymetheus import Trade
 
 
-trade_1 = Trade(asset='AAPL', lot=1.0)
-trade_2 = Trade(asset=['AAPL', 'MSFT'], lot=[1.0, 2.0])
+trade_1 = Trade(asset="AAPL", lot=1.0)
+trade_2 = Trade(asset=["AAPL", "MSFT"], lot=[1.0, 2.0])
 
 
 # --------------------------------------------------------------------------------
@@ -13,11 +13,11 @@ trade_2 = Trade(asset=['AAPL', 'MSFT'], lot=[1.0, 2.0])
 
 def test_array_asset():
     trade = trade_1
-    array_asset_expected = ['AAPL']
+    array_asset_expected = ["AAPL"]
     assert np.array_equal(trade.array_asset, array_asset_expected)
 
     trade = trade_2
-    array_asset_expected = ['AAPL', 'MSFT']
+    array_asset_expected = ["AAPL", "MSFT"]
     assert np.array_equal(trade.array_asset, array_asset_expected)
 
 

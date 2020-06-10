@@ -18,13 +18,9 @@ def ffill_and_cut(series, begin_date):
     2000-01-05  3
     """
     return (
-        series
-        .reindex(
-            pd.date_range(series.index[0], series.index[-1]),
-            method='ffill',
+        series.reindex(
+            pd.date_range(series.index[0], series.index[-1]), method="ffill",
         )
         .ffill()
-        .reindex(
-            pd.date_range(begin_date, series.index[-1])
-        )
+        .reindex(pd.date_range(begin_date, series.index[-1]))
     )
