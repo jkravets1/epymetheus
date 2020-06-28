@@ -1,4 +1,4 @@
-# Epymetheus
+# Epymetheus: Python library for multi-asset backtesting
 
 [![version](https://img.shields.io/pypi/v/epymetheus.svg)](https://pypi.org/project/epymetheus/)
 [![Build Status](https://travis-ci.com/simaki/epymetheus.svg?branch=master)](https://travis-ci.com/simaki/epymetheus)
@@ -6,19 +6,25 @@
 [![dl](https://img.shields.io/pypi/dm/epymetheus)](https://pypi.org/project/epymetheus/)
 [![LICENSE](https://img.shields.io/github/license/simaki/epymetheus)](LICENSE)
 
-Python library for multi-asset backtesting.
-
 ![wealth](examples/howto/wealth.png)
+
+## Introduction
+
+This library provides simple and efficient framework of backtesting.
+
+### Features
+
+1. **Simple and Intuitive API**: The API is minimally organized so that you can focus on your idea. Trade strategy can be easily coded in a `TradeStrategy` class and backtest is consistently carried out by its `run()`, `evaluate()` methods.
+2. **Seamless to Pandas**: Input historical data is based on Pandas DataFrame and backtesting results - trade history, cumulated wealth, drawdown, exposure and so forth - can be converted to Pandas format by the methods `to_series()` or `to_dataframe()` right away. You can view, manipulate and plot your data by the familliar pandas methods.
+3. **Extensible with Other Frameworks**: Epymetheus only provides a framework, so that it can be readily integrated with other libraries for machine learning, econometrics, technical indicators, derivative pricing models and so forth.
+4. **Efficient Computation**: Backtesting engine are boosted by numpy. You can quickly give your own idea a try.
+5. **Fully tested**: The library is thoroughly tested with 100% test coverage for multiple Python versions.
 
 ## Installation
 
 ```sh
 $ pip install epymetheus
 ```
-
-## Features
-
-- Multi-asset backtesting
 
 ## How to use
 
@@ -109,3 +115,11 @@ strategy.history.to_dataframe()
 |          3 |          3 | AMZN    |   149.254     | 2000-03-31  | 2000-04-12  | 2000-09-30  |   5000 |  -1000 | -1585.82     |
 |          4 |          4 | MSFT    |   446.908     | 2000-04-28  | 2000-05-25  | 2000-10-28  |   5000 |  -1000 | -1182.8      |
 
+## Integrations
+
+Strategies may be integrated with:
+
+- **Machine Learning**: [scikit-learn](https://github.com/scikit-learn/scikit-learn), [TensorFlow](https://github.com/tensorflow/tensorflow), [PyTorch](https://github.com/pytorch/pytorch), etc.
+- **Econometrics**: [statsmodels](https://github.com/statsmodels/statsmodels), etc.
+- **Technical Indicators**: [TA-Lib](https://github.com/mrjbq7/ta-lib), etc.
+- **Derivative Pricing**: [TF Quant Finance](https://github.com/google/tf-quant-finance), etc.
