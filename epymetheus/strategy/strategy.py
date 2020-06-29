@@ -221,6 +221,13 @@ class Strategy(metaclass=ABCMeta):
     def wealth(self):
         return Wealth(strategy=self)
 
-    # @property
-    # def transaction(self):
-    #     return Transaction(strategy=self)
+    def evaluate(self, metric):
+        """
+        Returns the value of a metric of self.
+
+        Parameters
+        ----------
+        - metric : Metric or str
+            Metric to evaluate.
+        """
+        return metric.result(self)
