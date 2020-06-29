@@ -1,7 +1,7 @@
-# Epymetheus: Python library for multi-asset backtesting
+# Epymetheus: Python Library for Multi-asset Backtesting
 
 [![version](https://img.shields.io/pypi/v/epymetheus.svg)](https://pypi.org/project/epymetheus/)
-[![Build Status](https://travis-ci.com/simaki/epymetheus.svg?branch=master)](https://travis-ci.com/simaki/epymetheus)
+[![build status](https://travis-ci.com/simaki/epymetheus.svg?branch=master)](https://travis-ci.com/simaki/epymetheus)
 [![codecov](https://codecov.io/gh/simaki/epymetheus/branch/master/graph/badge.svg)](https://codecov.io/gh/simaki/epymetheus)
 [![dl](https://img.shields.io/pypi/dm/epymetheus)](https://pypi.org/project/epymetheus/)
 [![LICENSE](https://img.shields.io/github/license/simaki/epymetheus)](LICENSE)
@@ -10,15 +10,23 @@
 
 ## Introduction
 
-This library provides simple and efficient framework of backtesting.
+Epymetheus is a Python library for multi-asset backtesting.
+It provides end-to-end framework that lets analysts build and try out their trade strategy right away.
 
 ### Features
 
-1. **Simple and Intuitive API**: The API is minimally organized so that you can focus on your idea. Trade strategy can be easily coded in a `TradeStrategy` class and backtest is consistently carried out by its `run()`, `evaluate()` methods.
-2. **Seamless to Pandas**: Input historical data is based on Pandas DataFrame and backtesting results - trade history, cumulated wealth, drawdown, exposure and so forth - can be converted to Pandas format by the methods `to_series()` or `to_dataframe()` right away. You can view, manipulate and plot your data by the familliar pandas methods.
-3. **Extensible with Other Frameworks**: Epymetheus only provides a framework, so that it can be readily integrated with other libraries for machine learning, econometrics, technical indicators, derivative pricing models and so forth.
-4. **Efficient Computation**: Backtesting engine are boosted by numpy. You can quickly give your own idea a try.
-5. **Fully tested**: The library is thoroughly tested with 100% test coverage for multiple Python versions.
+1. **Simple and Intuitive API**: The API is minimally organized so that you can focus on your idea. Trade `Strategy` can be readily coded and its backtesting is consistently carried out by its methods `run()` and `evaluate()`.
+2. **Seamless connection to [Pandas](https://github.com/pandas-dev/pandas)**: You can just put in pandas DataFrame as an input historical data. Backtesting results can be quickly converted to Pandas format so that you can view, analyze and plot results by the familliar Pandas methods.
+3. **Extensiblity with Other Frameworks**: Epymetheus only provides a framework. Strategy can be readily built with other libraries for machine learning, econometrics, technical indicators, derivative pricing models and so forth.
+4. **Efficient Computation**: Backtesting engine is boosted by numpy. You can give your own idea a quick try.
+5. **Full Test Coverage**: Library is thoroughly tested with 100% test coverage for multiple Python versions.
+
+### Modules
+
+1. **[Strategy](https://github.com/simaki/epymetheus/tree/master/epymetheus/strategy)**: A strategy encodes your own trading rules. The [`benchmarks`](https://github.com/simaki/epymetheus/tree/master/epymetheus/benchmarks) provide standard strategies to be compared with.
+2. **[Universe](https://github.com/simaki/epymetheus/tree/master/epymetheus/universe)**: A universe stores historical prices of a set of securities. The [`datasets`](https://github.com/simaki/epymetheus/tree/master/epymetheus/datasets) provides sample universe like Brownian stock prices and blue chips in US.
+3. **[History](https://github.com/simaki/epymetheus/tree/master/epymetheus/history)**: A history stores the assets, lots, profit/loss of each trade yielded. Easily converted into Pandas DataFrame.
+4. **[Metric](https://github.com/simaki/epymetheus/tree/master/epymetheus/metric)**: A metric is a function to assess the performance of your strategy. Available metrics include: final wealth, maximum drawdown, Sharpe ratio and so forth.
 
 ## Installation
 
@@ -28,15 +36,15 @@ $ pip install epymetheus
 
 ## How to use
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/simaki/fracdiff/blob/master/examples/howto/howto.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/simaki/epymetheus/blob/master/examples/howto/howto.ipynb)
 
-Let's construct your own strategy by subclassing `TradeStrategy`.
+Let's construct your own `Strategy`.
 
 ```python
-from epymetheus import Trade, TradeStrategy
+from epymetheus import Trade, Strategy
 
 
-class MyStrategy(TradeStrategy):
+class MyStrategy(Strategy):
     """
     This is my favorite strategy.
 
@@ -56,12 +64,12 @@ class MyStrategy(TradeStrategy):
 strategy = MyStrategy(my_parameter=0.1)
 ```
 
-The strategy can be readily applied to any `Universe`.
+Now your strategy can be applied to any `Universe`.
 
 ```python
 from epymetheus import Universe
 
-prices = ...  # Fetch historical prices of US equities
+prices = ...  # Fetch historical prices of US equities as pandas.DataFrame
 universe = Universe(prices)
 
 strategy.run(universe)
@@ -71,7 +79,7 @@ strategy.run(universe)
 # Done. (Runtime : 1.17 sec)
 ```
 
-Now the result can be evaluated as the attributes of `strategy`.
+Now the results can be accessed as the attributes of `strategy`.
 You can plot the wealth right away:
 
 ```python
