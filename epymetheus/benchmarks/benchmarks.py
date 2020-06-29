@@ -2,10 +2,10 @@ import random
 
 import numpy as np
 
-from epymetheus import Trade, TradeStrategy
+from epymetheus import Trade, Strategy
 
 
-class DeterminedTrader(TradeStrategy):
+class DeterminedTrader(Strategy):
     """
     Yield given trades.
 
@@ -23,7 +23,7 @@ class DeterminedTrader(TradeStrategy):
             yield trade
 
 
-class RandomTrader(TradeStrategy):
+class RandomTrader(Strategy):
     """
     Yield trades randomly.
 

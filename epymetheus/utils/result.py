@@ -4,7 +4,7 @@ from .bunch import Bunch
 
 class TradeResult(Bunch):
     """
-    Bunch that can be initialized from TradeStrategy.
+    Bunch that can be initialized from Strategy.
 
     Abstractmethod
     --------------
@@ -26,7 +26,7 @@ class TradeResult(Bunch):
 
         Parameters
         ----------
-        - strategy : TradeStrategy
+        - strategy : Strategy
         - verbose : bool
 
         Returns

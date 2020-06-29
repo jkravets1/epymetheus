@@ -36,7 +36,7 @@ class Strategy(metaclass=ABCMeta):
     Examples
     --------
     Define strategy by subclassing:
-    >>> class MyTradeStrategy(TradeStrategy):
+    >>> class MyStrategy(Strategy):
     ...     '''
     ...     This is my favorite strategy.
     ...     '''
@@ -48,9 +48,9 @@ class Strategy(metaclass=ABCMeta):
     ...         yield Trade(...)
 
     Initialize:
-    >>> my_strategy = MyTradeStrategy(my_parameter=0.1)
+    >>> my_strategy = MyStrategy(my_parameter=0.1)
     >>> my_strategy.name
-    'MyTradeStrategy'
+    'MyStrategy'
     >>> my_strategy.description
     'This is my favorite strategy.'
     >>> my_strategy.params
@@ -124,7 +124,7 @@ class Strategy(metaclass=ABCMeta):
 
         Returns
         -------
-        self : TradeStrategy
+        self : Strategy
         """
 
         def iter_trades(verbose):
@@ -154,7 +154,7 @@ class Strategy(metaclass=ABCMeta):
 
         Returns
         -------
-        self : TradeStrategy
+        self : Strategy
         """
         if verbose:
             begin_time = time()

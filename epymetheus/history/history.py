@@ -38,7 +38,7 @@ class History(TradeResult):
 
         Parameters
         ----------
-        - strategy : TradeStrategy
+        - strategy : Strategy
 
         Returns
         -------
