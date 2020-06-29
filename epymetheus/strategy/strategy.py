@@ -9,7 +9,7 @@ from epymetheus.history import History
 from epymetheus.wealth import Wealth
 
 
-class TradeStrategy(metaclass=ABCMeta):
+class Strategy(metaclass=ABCMeta):
     """
     Represents a strategy to trade.
 
