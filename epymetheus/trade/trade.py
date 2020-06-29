@@ -114,11 +114,11 @@ class Trade:
 
     def series_pnl(self, universe, open_bar=None, close_bar=None):
         """
-        Return value of the position.
+        Return net exposure of the position.
 
         Returns
         -------
-        value : numpy.array, shape (n_bars, )
+        net_exposure : numpy.array, shape (n_bars, )
 
         Examples
         --------
@@ -146,16 +146,16 @@ class Trade:
         open_bar_index = universe.get_bar_indexer(open_bar)[0]
         close_bar_index = universe.get_bar_indexer(close_bar)[0]
 
-        series_value = self.series_value(universe)
-        series_pnl = series_value - series_value[open_bar_index]
+        series_exposure = self.series_exposure(universe)
+        series_pnl = series_exposure - series_exposure[open_bar_index]
         series_pnl[:open_bar_index] = 0
         series_pnl[close_bar_index:] = series_pnl[close_bar_index]
 
         return series_pnl
 
-    def array_value(self, universe):
+    def array_exposure(self, universe):
         """
-        Return value of the position for each asset.
+        Return exposure of the position for each asset.
 
         Returns
         -------
@@ -164,14 +164,14 @@ class Trade:
         Examples
         --------
         >>> strategy.universe.prices
-              Asset0  Asset1
-        Bar0       1      10
-        Bar1       2      20
-        Bar2       3      30
-        Bar3       4      40
-        Bar4       5      50
-        >>> trade = Trade(asset=['Asset0', 'Asset1'], lot=[-1.0, 1.0], ...)
-        >>> trade.array_value
+              Asset0  Asset1  Asset2
+        Bar0       1       1      10
+        Bar1       1       2      20
+        Bar2       1       3      30
+        Bar3       1       4      40
+        Bar4       1       5      50
+        >>> trade = Trade(asset=['Asset1', 'Asset2'], lot=[-1.0, 1.0], ...)
+        >>> trade.array_exposure
         array([[  -1   10]
                [  -2   20]
                [  -3   30]
@@ -182,13 +182,20 @@ class Trade:
         # (n_orders, ) * (n_bars, n_orders) -> (n_bars, n_orders)
         return self.lot * p
 
-    def series_value(self, universe):
+    def series_exposure(self, universe, net=True):
         """
         Return time-series of value of the position.
 
+        Parameters
+        ----------
+        - universe : Universe
+        - net : bool, default True
+            If True, return net exposure.
+            If False, return absolute exposure.
+
         Returns
         -------
-        series_value : numpy.array, shape (n_bars, )
+        series_exposure : numpy.array, shape (n_bars, )
 
         Examples
         --------
@@ -200,10 +207,15 @@ class Trade:
         Bar3       4      40
         Bar4       5      50
         >>> trade = Trade(asset=['Asset0', 'Asset1'], lot=[-1.0, 1.0], ...)
-        >>> trade.series_value
+        >>> trade.series_exposure
         array([   9  18  27  36  45])
         """
-        return self.array_value(universe).sum(axis=1)
+        if net:
+            exposure = self.array_exposure(universe).sum(axis=1)
+        else:
+            exposure = np.abs(self.array_exposure(universe)).sum(axis=1)
+
+        return exposure
 
     def execute(self, universe):
         """
@@ -242,17 +254,19 @@ class Trade:
         >>> trade.pnl
         array([2.0  0.0])
         """
-        array_value = self.array_value(universe)
+        array_exposure = self.array_exposure(universe)
 
         open_bar_index = universe.get_bar_indexer(self.open_bar)[0]
-        close_bar_index = self.__get_close_bar_index(universe, array_value)
+        close_bar_index = self.__get_close_bar_index(universe, array_exposure)
 
         self.close_bar = universe.bars[close_bar_index]
-        self.pnl = array_value[close_bar_index, :] - array_value[open_bar_index, :]
+        self.pnl = (
+            array_exposure[close_bar_index, :] - array_exposure[open_bar_index, :]
+        )
 
         return self
 
-    def __get_close_bar_index(self, universe, array_value):
+    def __get_close_bar_index(self, universe, array_exposure):
         """
         Used in self.execute
 
@@ -270,9 +284,9 @@ class Trade:
         else:
             open_bar_index = universe.get_bar_indexer(self.open_bar)[0]
 
-            # Don't use self.series_value; save time
-            series_value = array_value.sum(axis=1)
-            profit = series_value - series_value[open_bar_index]
+            # Don't use self.series_exposure; save time
+            series_exposure = array_exposure.sum(axis=1)
+            profit = series_exposure - series_exposure[open_bar_index]
             profit[:open_bar_index] = 0
 
             signal_take = profit >= (self.take or np.inf)
