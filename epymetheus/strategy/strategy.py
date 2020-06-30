@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 from inspect import cleandoc
 from time import time
 
-from epymetheus.exceptions import NoTradeError
+from epymetheus.exceptions import NoTradeError, NotRunError
 from epymetheus.history import History
 
 from epymetheus.wealth import Wealth
@@ -82,7 +82,7 @@ class Strategy(metaclass=ABCMeta):
         trade : Trade
         """
 
-    def run(self, universe, verbose=True):
+    def run(self, universe, metrics=[], budget=0.0, verbose=True):
         """
         Run a backtesting of strategy.
 
@@ -90,13 +90,20 @@ class Strategy(metaclass=ABCMeta):
         ----------
         - universe : Universe
             Universe with which self is run.
+        - metrics : List[metrics]
+            List of metrics to be evaluated for the strategy during running.
+            See epymetheus.metrics.
+        - budget : float, default 0.0
+            Initial budget.
         - verbose : bool, default True
-            Vermose mode.
+            Verbose mode.
 
         Returns
         -------
         self
         """
+        self.__compile(metrics=metrics, budget=budget)
+
         if verbose:
             begin_time = time()
             print("Running ... ")
@@ -111,6 +118,10 @@ class Strategy(metaclass=ABCMeta):
             print(f"Done. (Runtime : {time() - begin_time:.2f} sec)")
 
         return self
+
+    def __compile(self, metrics, budget):
+        self.metrics = metrics
+        self.budget = budget
 
     def __generate_trades(self, universe, verbose=True):
         """
@@ -202,6 +213,7 @@ class Strategy(metaclass=ABCMeta):
 
     @property
     def is_run(self):
+        # Don't use "__is_run"; it cannot be accessed by getattr.
         return getattr(self, "_is_run", False)
 
     @property
@@ -229,4 +241,6 @@ class Strategy(metaclass=ABCMeta):
         - metric : Metric or str
             Metric to evaluate.
         """
+        if not self.is_run:
+            raise NotRunError('Strategy has not been run')
         return metric.result(self)
