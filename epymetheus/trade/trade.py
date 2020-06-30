@@ -346,3 +346,14 @@ class Trade:
         0.6
         """
         return self.__mul__(1.0 / num)
+
+    def __repr__(self):
+        params = ', '.join([
+            'asset=' + repr(self.asset),
+            'open_bar=' + repr(self.open_bar),
+            'shut_bar=' + repr(self.shut_bar),
+            'lot=' + repr(self.lot),
+            'take=' + repr(self.take),
+            'stop=' + repr(self.stop),
+        ])
+        return 'Trade(' + params + ')'
