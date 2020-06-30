@@ -52,12 +52,11 @@ class Return(Metric):
         return "return"
 
     def result(self, strategy):
-        array_wealth = strategy.wealth.wealth.values
+        array_wealth = strategy.budget + strategy.wealth.wealth
 
+        result = np.diff(array_wealth, prepend=strategy.budget)
         if self.rate:
-            result = np.diff(array_wealth) / array_wealth[:-1]
-        else:
-            result = np.diff(array_wealth)
+            result /= np.roll(array_wealth, 1)
 
         return result
 
@@ -82,7 +81,7 @@ class FinalWealth(Metric):
         return "final_wealth"
 
     def result(self, strategy):
-        array_wealth = strategy.wealth.wealth.values
+        array_wealth = strategy.wealth.wealth
         result = array_wealth[-1]
 
         return result
