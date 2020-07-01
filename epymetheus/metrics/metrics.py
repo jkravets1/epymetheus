@@ -246,6 +246,33 @@ class SharpeRatio(Metric):
         return result
 
 
+class TradewiseSharpeRatio(Metric):
+    """
+    Evaluate Sharpe ratio for profit-loss of each trade.
+
+    Returns
+    -------
+    tradewise_sharpe_ratio : float
+    """
+
+    EPSILON = 10 ** -10
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    @property
+    def name(self):
+        return "tradewise_sharpe_ratio"
+
+    def result(self, strategy):
+        array_pnl = strategy.history.to_dataframe().groupby("trade_id").agg(sum)["pnl"]
+        avg_pnl = np.mean(array_pnl)
+        std_pnl = np.std(array_pnl)  # TODO parameter ddof
+        result = avg_pnl / max(std_pnl, self.EPSILON)
+
+        return result
+
+
 class NetExposure(Metric):
     """
     Evaluate net exposure.

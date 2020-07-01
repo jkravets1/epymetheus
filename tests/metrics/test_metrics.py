@@ -7,7 +7,9 @@ from epymetheus import Universe, Trade
 from epymetheus.exceptions import NotRunError
 from epymetheus.benchmarks import RandomTrader, DeterminedTrader
 from epymetheus.datasets import make_randomwalk
-from epymetheus.metrics import Return, FinalWealth
+from epymetheus.metrics import Return
+from epymetheus.metrics import FinalWealth
+from epymetheus.metrics import TradewiseSharpeRatio
 
 params_metric = [FinalWealth]
 
@@ -59,3 +61,16 @@ class TestFinalWealth:
         expected = strategy.wealth.wealth[-1]
 
         assert result == expected
+
+
+class TestTradewiseSharpeRatio:
+
+    def test_result(self):
+        metric = TradewiseSharpeRatio()
+        universe = make_randomwalk()
+        strategy = RandomTrader().run(universe)
+        result = metric.result(strategy)
+
+        # TODO
+
+        # assert False
