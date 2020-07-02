@@ -9,10 +9,24 @@ from epymetheus.benchmarks import RandomTrader, DeterminedTrader
 from epymetheus.datasets import make_randomwalk
 from epymetheus.metrics import Return
 from epymetheus.metrics import FinalWealth
+from epymetheus.metrics import Drawdown
+from epymetheus.metrics import MaxDrawdown
+from epymetheus.metrics import Volatility
+from epymetheus.metrics import SharpeRatio
 from epymetheus.metrics import TradewiseSharpeRatio
+from epymetheus.metrics import Exposure
 from epymetheus.metrics import _metric_from_name
 
-params_metric = [FinalWealth]
+params_metric = [
+    Return,
+    # FinalWealth,
+    # Drawdown,
+    # MaxDrawdown,
+    # Volatility,
+    # SharpeRatio,
+    # TradewiseSharpeRatio,
+    # Exposure,
+]
 
 
 class TestBase:
@@ -20,7 +34,9 @@ class TestBase:
     def test_result(self, MetricClass):
         m = MetricClass()
         strategy = RandomTrader().run(make_randomwalk())
-        assert m.result(strategy) == strategy.evaluate(m)
+        result0 = np.array(m.result(strategy))  # from metric method
+        result1 = np.array(strategy.evaluate(m))  # from strategy method
+        assert np.equal(result0, result1).all()
 
     @pytest.mark.parametrize("MetricClass", params_metric)
     def test_notrunerror(self, MetricClass):
@@ -34,7 +50,9 @@ class TestBase:
     def test_call(self, MetricClass):
         m = MetricClass()
         strategy = RandomTrader().run(make_randomwalk())
-        assert m.result(strategy) == m(strategy)
+        result0 = np.array(m.result(strategy))  # from `result` method
+        result1 = np.array(m(strategy))  # from __call__
+        assert np.equal(result0, result1).all()
 
     @pytest.mark.parametrize("MetricClass", params_metric)
     def test_metric_from_name(self, MetricClass):
