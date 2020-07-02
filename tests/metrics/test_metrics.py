@@ -71,6 +71,4 @@ class TestTradewiseSharpeRatio:
         strategy = RandomTrader().run(universe)
         result = metric.result(strategy)
 
-        # TODO
-
-        # assert False
+        # TODO assert
