@@ -30,6 +30,15 @@ It provides end-to-end framework that lets analysts build and try out their trad
 3. **[History](https://github.com/simaki/epymetheus/tree/master/epymetheus/history)**: A history stores the assets, lots, profit/loss of each trade yielded. Easily converted into Pandas DataFrame.
 4. **[Metric](https://github.com/simaki/epymetheus/tree/master/epymetheus/metric)**: A metric is a function to assess the performance of your strategy. Available metrics include: final wealth, maximum drawdown, Sharpe ratio and so forth.
 
+### Integrations
+
+Strategies may be integrated with:
+
+- **Machine Learning**: [scikit-learn](https://github.com/scikit-learn/scikit-learn), [TensorFlow](https://github.com/tensorflow/tensorflow), [PyTorch](https://github.com/pytorch/pytorch), etc.
+- **Econometrics**: [statsmodels](https://github.com/statsmodels/statsmodels), etc.
+- **Technical Indicators**: [TA-Lib](https://github.com/mrjbq7/ta-lib), etc.
+- **Derivative Pricing**: [TF Quant Finance](https://github.com/google/tf-quant-finance), etc.
+
 ## Installation
 
 ```sh
@@ -124,12 +133,3 @@ strategy.history.to_dataframe()
 |          2 |          2 | PG      |   657.239     | 2000-03-31  | 2000-09-30  | 2000-09-30  |   5000 |  -1000 |  2061.64     |
 |          3 |          3 | AMZN    |   149.254     | 2000-03-31  | 2000-04-12  | 2000-09-30  |   5000 |  -1000 | -1585.82     |
 |          4 |          4 | MSFT    |   446.908     | 2000-04-28  | 2000-05-25  | 2000-10-28  |   5000 |  -1000 | -1182.8      |
-
-## Integrations
-
-Strategies may be integrated with:
-
-- **Machine Learning**: [scikit-learn](https://github.com/scikit-learn/scikit-learn), [TensorFlow](https://github.com/tensorflow/tensorflow), [PyTorch](https://github.com/pytorch/pytorch), etc.
-- **Econometrics**: [statsmodels](https://github.com/statsmodels/statsmodels), etc.
-- **Technical Indicators**: [TA-Lib](https://github.com/mrjbq7/ta-lib), etc.
-- **Derivative Pricing**: [TF Quant Finance](https://github.com/google/tf-quant-finance), etc.
