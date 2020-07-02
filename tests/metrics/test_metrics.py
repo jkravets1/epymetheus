@@ -16,12 +16,10 @@ params_metric = [FinalWealth]
 
 
 class TestBase:
-
     @pytest.mark.parametrize("MetricClass", params_metric)
     def test_result(self, MetricClass):
         m = MetricClass()
-        universe = make_randomwalk()
-        strategy = RandomTrader().run(universe)
+        strategy = RandomTrader().run(make_randomwalk())
         assert m.result(strategy) == strategy.evaluate(m)
 
     @pytest.mark.parametrize("MetricClass", params_metric)
@@ -33,15 +31,25 @@ class TestBase:
             strategy.evaluate(m)
 
     @pytest.mark.parametrize("MetricClass", params_metric)
-    def test_init_from_name(self, MetricClass):
+    def test_call(self, MetricClass):
+        m = MetricClass()
+        strategy = RandomTrader().run(make_randomwalk())
+        assert m.result(strategy) == m(strategy)
+
+    @pytest.mark.parametrize("MetricClass", params_metric)
+    def test_metric_from_name(self, MetricClass):
         m = MetricClass()
         assert _metric_from_name(m.name).__class__ == m.__class__
 
+    def test_metric_from_name_nonexistent(self):
+        with pytest.raises(ValueError):
+            _metric_from_name("nonexistent_metric")
 
 class TestReturn:
     """
     Test if `Return` works as expected.
     """
+    MetricClass = Return
 
     def test_result_zero(self):
         series_wealth = np.zeros(100)
@@ -61,29 +69,15 @@ class TestReturn:
             expected = np.array([0, -2, 3, -3, 4, 4, -7], dtype=float)
         assert np.equal(result, expected).all()
 
-    def test_result(self):
-        universe = make_randomwalk()
-        strategy = RandomTrader().run(universe)
-        series_wealth = strategy.wealth.wealth
-        result = self.metric.result(strategy)
-        result_from_wealth = self.metric._result_from_wealth(series_wealth)
-        assert np.equal(result, result_from_wealth).all()
-
     @pytest.mark.parametrize("rate", [True, False])
-    def test_result(self, rate):
-        universe = Universe(prices=pd.DataFrame({"Asset0": np.arange(100, 200)}))
-        trade = Trade(asset="Asset0", lot=1.0, open_bar=1, shut_bar=5)
-        strategy = DeterminedTrader([trade]).run(universe, budget=1.0)
-
-        expected = np.zeros(universe.n_bars)
-        expected[trade.open_bar + 1 : trade.shut_bar + 1] = 1.0
-        if rate:
-            expected /= np.cumsum(expected)
-            expected = np.nan_to_num(expected)
-
-        metric = Return(rate=rate)
-        result = metric.result(strategy)
-        assert np.allclose(result, expected)
+    def test_result_from_wealth(self, rate):
+        m = self.MetricClass(rate=rate)
+        budget = 100
+        strategy = RandomTrader().run(make_randomwalk(), budget=budget)
+        series_wealth = budget + strategy.wealth.wealth
+        result = m.result(strategy)
+        result_from_wealth = m._result_from_wealth(series_wealth)
+        assert np.allclose(result, result_from_wealth)
 
 
 class TestFinalWealth:
