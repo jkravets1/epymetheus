@@ -12,9 +12,39 @@ import numpy as np
 # - beta
 
 
+def metric_from_name(name, **kwargs):
+    """
+    Initialize metric from a name.
+
+    Parameters
+    ----------
+    - name : str
+        Name of the metric to initialize.
+
+    Returns
+    -------
+    metric : Metric
+    """
+    dict_metric = {
+        "return": Return,
+        "final_wealth": FinalWealth,
+        "drawdown": Drawdown,
+        "max_drawdown": MaxDrawdown,
+        "volatility": Volatility,
+        "sharpe_ratio": SharpeRatio,
+        "tradewise_sharpe_ratio": TradewiseSharpeRatio,
+        "net_exposure": NetExposure,
+        "abs_exposure": AbsExposure,
+    }
+    if name not in dict_metric.keys():
+        raise ValueError
+
+    return dict_metric[name](**kwargs)
+
+
 class Metric(metaclass=ABCMeta):
     """
-    Metric of backtesting.
+    Base class of Metric.
     """
 
     @property
