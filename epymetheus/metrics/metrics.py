@@ -33,9 +33,9 @@ def metric_from_name(name, **kwargs):
         "volatility": Volatility,
         "sharpe_ratio": SharpeRatio,
         "tradewise_sharpe_ratio": TradewiseSharpeRatio,
-        "net_exposure": NetExposure,
-        "abs_exposure": AbsExposure,
+        "exposure": Exposure,
     }
+
     if name not in dict_metric.keys():
         raise ValueError
 
@@ -303,20 +303,24 @@ class TradewiseSharpeRatio(Metric):
         return result
 
 
-class NetExposure(Metric):
+class Exposure(Metric):
     """
     Evaluate net exposure.
 
     Parameters
     ----------
+    - net : bool, default False
+        If True, evaluate net exposure.
+        If False, evaluate absolute exposure.
 
     Returns
     -------
-    net_exposure : numpy.array, shape (n_bars, )
+    exposure : numpy.array, shape (n_bars, )
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, net=True, **kwargs):
         super().__init__(**kwargs)
+        self.net = net
 
     @property
     def name(self):
@@ -324,33 +328,7 @@ class NetExposure(Metric):
 
     def result(self, strategy):
         exposures = (
-            trade.series_exposure(universe, net=True) for trade in strategy.trades
-        )
-        return reduce(np.add, exposures)
-
-
-class AbsExposure(Metric):
-    """
-    Evaluate net exposure.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-    net_exposure : numpy.array, shape (n_bars, )
-    """
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    @property
-    def name(self):
-        return "abs_exposure"
-
-    def result(self, strategy):
-        exposures = (
-            trade.series_exposure(universe, net=False) for trade in strategy.trades
+            trade.series_exposure(universe, net=self.net) for trade in strategy.trades
         )
         return reduce(np.add, exposures)
 
