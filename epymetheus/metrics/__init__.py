@@ -7,6 +7,6 @@ from .metrics import MaxDrawdown
 from .metrics import Volatility
 from .metrics import SharpeRatio
 from .metrics import TradewiseSharpeRatio
-from .metrics import NetExposure
-from .metrics import AbsExposure
-from .metrics import NetExposure
+from .metrics import Exposure
+
+from .metrics import _metric_from_name

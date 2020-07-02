@@ -12,7 +12,7 @@ import numpy as np
 # - beta
 
 
-def metric_from_name(name, **kwargs):
+def _metric_from_name(name, **kwargs):
     """
     Initialize metric from a name.
 
@@ -81,14 +81,18 @@ class Return(Metric):
     def name(self):
         return "return"
 
-    def result(self, strategy):
-        array_wealth = strategy.budget + strategy.wealth.wealth
+    def _result_from_wealth(self, series_wealth):
+        result = np.diff(series_wealth, prepend=series_wealth[0])
 
-        result = np.diff(array_wealth, prepend=strategy.budget)
         if self.rate:
-            result /= np.roll(array_wealth, 1)
+            # TODO raise ValueError if initial budget = 0
+            result /= np.roll(series_wealth, 1)  # array_wealth[0] = 0.0
 
         return result
+
+    def result(self, strategy):
+        series_wealth = strategy.budget + strategy.wealth.wealth
+        return self._result_from_wealth(series_wealth)
 
 
 class FinalWealth(Metric):
@@ -110,11 +114,12 @@ class FinalWealth(Metric):
     def name(self):
         return "final_wealth"
 
-    def result(self, strategy):
-        array_wealth = strategy.wealth.wealth
-        result = array_wealth[-1]
+    def _result_from_wealth(self, series_wealth):
+        return series_wealth[-1]
 
-        return result
+    def result(self, strategy):
+        series_wealth = strategy.budget + strategy.wealth.wealth
+        return self._result_from_wealth(series_wealth)
 
 
 class Drawdown(Metric):
@@ -151,19 +156,18 @@ class Drawdown(Metric):
     def name(self):
         return "drawdown"
 
-    def result(self, strategy):
-        array_wealth = strategy.wealth.wealth.values
-
-        array_wealth_cummax = np.maximum.accumulate(array_wealth)
-        drawdown = array_wealth - array_wealth_cummax
+    def _result_from_wealth(self, series_wealth):
+        series_wealth_cummax = np.maximum.accumulate(series_wealth)
+        result = series_wealth - series_wealth_cummax
 
         if self.rate:
-            # TODO This avoidance of divergence is too naive
             result = drawdown / (array_wealth_cummax + self.EPSILON)
-        else:
-            result = drawdown
 
         return result
+
+    def result(self, strategy):
+        series_wealth = strategy.budget + strategy.wealth.wealth
+        return serlf._result_from_wealth(self, series_wealth)
 
 
 class MaxDrawdown(Metric):
@@ -200,10 +204,7 @@ class MaxDrawdown(Metric):
         return "max_drawdown"
 
     def result(self, strategy):
-        array_drawdown = Drawdown(rate=self.rate).result(strategy)
-        result = np.min(array_drawdown)
-
-        return result
+        return np.min(Drawdown(rate=self.rate).result(strategy))
 
 
 class Volatility(Metric):
