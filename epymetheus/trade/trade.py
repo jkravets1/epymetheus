@@ -139,6 +139,45 @@ class Trade:
         """
         return self.array_asset.size
 
+    def execute(self, universe):
+        """
+        Execute trade and set `self.close_bar`.
+
+        Parameters
+        ----------
+        universe : Universe
+
+        Returns
+        -------
+        self : Trade
+
+        Examples
+        --------
+        >>> from pandas import DataFrame
+        >>> from epymetheus import Universe
+        >>> universe = Universe(DataFrame({
+        ...     "A0": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        ...     "A1": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+        ...     "A2": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        ... }, dtype=float))
+        >>> trade0 = Trade(asset="A0", lot=1.0, open_bar=1, shut_bar=8)
+        >>> trade0 = trade0.execute(universe)
+        >>> trade0.close_bar
+        8
+        >>> trade1 = Trade(asset="A0", lot=1.0, open_bar=1, shut_bar=8, take=2)
+        >>> trade1 = trade1.execute(universe)
+        >>> trade1.close_bar
+        3
+        >>> trade2 = Trade(asset="A0", lot=-1.0, open_bar=1, shut_bar=8, stop=-2)
+        >>> trade2 = trade2.execute(universe)
+        >>> trade2.close_bar
+        3
+        """
+        self.close_bar = self.__get_close_bar(universe)
+        self._is_executed = True
+
+        return self
+
     def series_pnl(self, universe):
         """
         Return profit-loss of self.
@@ -283,45 +322,6 @@ class Trade:
             exposure = np.abs(self.array_exposure(universe)).sum(axis=1)
 
         return exposure
-
-    def execute(self, universe):
-        """
-        Execute trade and set `self.close_bar`.
-
-        Parameters
-        ----------
-        universe : Universe
-
-        Returns
-        -------
-        self : Trade
-
-        Examples
-        --------
-        >>> from pandas import DataFrame
-        >>> from epymetheus import Universe
-        >>> universe = Universe(DataFrame({
-        ...     "A0": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        ...     "A1": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-        ...     "A2": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-        ... }, dtype=float))
-        >>> trade0 = Trade(asset="A0", lot=1.0, open_bar=1, shut_bar=8)
-        >>> trade0 = trade0.execute(universe)
-        >>> trade0.close_bar
-        8
-        >>> trade1 = Trade(asset="A0", lot=1.0, open_bar=1, shut_bar=8, take=2)
-        >>> trade1 = trade1.execute(universe)
-        >>> trade1.close_bar
-        3
-        >>> trade2 = Trade(asset="A0", lot=-1.0, open_bar=1, shut_bar=8, stop=-2)
-        >>> trade2 = trade2.execute(universe)
-        >>> trade2.close_bar
-        3
-        """
-        self.close_bar = self.__get_close_bar(universe)
-        self._is_executed = True
-
-        return self
 
     def __get_close_bar(self, universe):
         """
