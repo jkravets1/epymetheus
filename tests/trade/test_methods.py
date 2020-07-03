@@ -39,19 +39,38 @@ def set_seed():
     np.random.seed(42)
 
 
-@pytest.mark.parametrize("seed", params_seed)
-def test_series_exposure(seed):
-    """
-    Test `trade.series_exposure` returns the correct exposure.
-    """
-    universe = make_randomwalk(seed=seed)
-    trade = make_random_trade(universe, seed=seed)
+class TestSeriesExposure:
+    @pytest.mark.parametrize("net", [True, False])
+    def test_hand(self, net):
+        universe = Universe(
+            pd.DataFrame(
+                {"A0": [1, 2, 3, 4, 5], "A1": [2, 3, 4, 5, 6],},
+                index=range(5),
+                dtype=float,
+            )
+        )
+        trade = Trade(asset=["A0", "A1"], lot=[2, -3], open_bar=1, shut_bar=4)
+        result = trade.series_exposure(net=net, universe=universe)
+        if net:
+            expected = [-4, -5, -6, -7, -8]
+        else:
+            expected = [8, 13, 18, 23, 28]
 
-    value_expected = np.add.reduce(
-        [lot * universe.prices[asset] for lot, asset in zip(trade.lot, trade.asset)]
-    )
+        assert np.allclose(result, expected)
 
-    assert np.allclose(trade.series_exposure(universe), value_expected)
+    @pytest.mark.parametrize("seed", params_seed)
+    def test_random(self, seed):
+        """
+        Test `trade.series_exposure` returns the correct exposure.
+        """
+        universe = make_randomwalk(seed=seed)
+        trade = make_random_trade(universe, seed=seed)
+
+        value_expected = np.add.reduce(
+            [lot * universe.prices[asset] for lot, asset in zip(trade.lot, trade.asset)]
+        )
+
+        assert np.allclose(trade.series_exposure(universe), value_expected)
 
 
 @pytest.mark.parametrize("seed", params_seed)

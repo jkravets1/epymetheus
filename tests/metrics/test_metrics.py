@@ -17,6 +17,8 @@ from epymetheus.metrics import TradewiseSharpeRatio
 from epymetheus.metrics import Exposure
 from epymetheus.metrics import _metric_from_name
 
+# TODO fix seed
+
 params_metric = [
     Return,
     FinalWealth,
@@ -99,6 +101,24 @@ class TestReturn:
 
 
 class TestFinalWealth:
+    MetricClass = FinalWealth
+
+    def test_result_zero(self):
+        series_wealth = np.zeros(100, dtype=float)
+
+        result = self.MetricClass()._result_from_wealth(series_wealth)
+        expected = 0.0
+
+        assert result == expected
+
+    @pytest.mark.parametrize('seed', range(10))
+    def test_result_random(self, seed):
+        np.random.seed(seed)
+        series_wealth = np.random.rand(100)
+        result = self.MetricClass()._result_from_wealth(series_wealth)
+        expected = series_wealth[-1]
+        assert result == expected
+
     def test_result(self):
         metric = FinalWealth()
         universe = make_randomwalk()
