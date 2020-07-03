@@ -77,12 +77,12 @@ class Trade:
 
         Examples
         --------
-        >>> trade = Trade(asset='AAPL', ...)
-        >>> trade.a_asset
+        >>> trade = Trade(asset='AAPL')
+        >>> trade.array_asset
         array(['AAPL'])
 
         >>> trade = Trade(asset=['AAPL', 'MSFT'])
-        >>> trade.a_asset
+        >>> trade.array_asset
         array(['AAPL', 'MSFT'])
         """
         return np.array(self.asset).reshape(-1)
@@ -98,18 +98,34 @@ class Trade:
 
         Examples
         --------
-        >>> trade = Trade(lot=1.2, ...)
-        >>> trade.a_lot
-        array([1.2])
-
-        >>> trade = Trade(asset=[1.2, 3.4])
-        >>> trade.a_asset
-        array([1.2, 3.4])
+        >>> trade = Trade(asset='AAPL', lot=0.2)
+        >>> trade.array_lot
+        array([0.2])
+        >>> trade = Trade(asset=['AAPL', 'MSFT'], asset=[0.2, 0.4])
+        >>> trade.array_lot
+        array([0.2, 0.4])
         """
         return np.array(self.lot).reshape(-1)
 
     @property
     def n_orders(self):
+        """
+        Return number of assets in self.
+
+        Returns
+        -------
+        n_orders : int
+            Number of orders.
+
+        Examples
+        --------
+        >>> trade = Trade(asset='AAPL')
+        >>> trade.n_orders
+        1
+        >>> trade = Trade(asset=['AAPL', 'MSFT'])
+        >>> trade.n_orders
+        2
+        """
         return self.array_asset.size
 
     def series_pnl(self, universe, open_bar=None, close_bar=None):
@@ -304,9 +320,12 @@ class Trade:
 
         Examples
         --------
-        >>> trade = -2.0 * Trade(..., lot=1.2)
+        >>> trade = (-2.0) * Trade(asset="A0", lot=0.2)
         >>> trade.lot
-        -2.4
+        -0.4
+        >>> trade = (-2.0) * Trade(asset=["A0", "A1"], lot=[0.2, 0.4])
+        >>> trade.lot
+        [-0.4, -0.8]
         """
         self.lot = num * self.array_lot
         return self
@@ -317,9 +336,12 @@ class Trade:
 
         Examples
         --------
-        >>> trade = Trade(..., lot=1.2) * (-2.0)
+        >>> trade = Trade(asset="A0", lot=0.2) * (-2.0)
         >>> trade.lot
-        -2.4
+        -0.4
+        >>> trade = Trade(asset=["A0", "A1"], lot=[0.2, 0.4]) * (-2.0)
+        >>> trade.lot
+        [-0.4, -0.8]
         """
         return self.__mul__(num)
 
@@ -329,9 +351,12 @@ class Trade:
 
         Examples
         --------
-        >>> trade = -Trade(..., lot=1.2)
+        >>> trade = -Trade(asset="A0", lot=0.2)
         >>> trade.lot
-        -1.2
+        -0.1
+        >>> trade = -Trade(asset=["A0", "A1"], lot=[0.2, 0.4])
+        >>> trade.lot
+        [-0.1, -0.2]
         """
         return self.__mul__(-1.0)
 
@@ -341,9 +366,12 @@ class Trade:
 
         Examples
         --------
-        >>> trade = Trade(..., lot=1.2) / 2
+        >>> trade = Trade(asset="A0", lot=0.2) / 2.0
         >>> trade.lot
-        0.6
+        0.1
+        >>> trade = Trade(asset=["A0", "A1"], lot=[0.2, 0.4]) / 2.0
+        >>> trade.lot
+        [0.1, 0.2]
         """
         return self.__mul__(1.0 / num)
 
