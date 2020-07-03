@@ -19,13 +19,13 @@ from epymetheus.metrics import _metric_from_name
 
 params_metric = [
     Return,
-    # FinalWealth,
-    # Drawdown,
-    # MaxDrawdown,
-    # Volatility,
-    # SharpeRatio,
-    # TradewiseSharpeRatio,
-    # Exposure,
+    FinalWealth,
+    Drawdown,
+    MaxDrawdown,
+    Volatility,
+    SharpeRatio,
+    TradewiseSharpeRatio,
+    Exposure,
 ]
 
 

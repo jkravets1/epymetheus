@@ -3,6 +3,8 @@ from functools import reduce
 
 import numpy as np
 
+from epymetheus.utils.constants import EPSILON
+
 
 # TODO
 # - sortino
@@ -146,8 +148,6 @@ class Drawdown(Metric):
     array([0.0, 0.0, 0.0, -1.0, -2.0])
     """
 
-    EPSILON = 10 ** -10
-
     def __init__(self, rate=False, **kwargs):
         super().__init__(**kwargs)
         self.rate = rate
@@ -161,13 +161,13 @@ class Drawdown(Metric):
         result = series_wealth - series_wealth_cummax
 
         if self.rate:
-            result = drawdown / (array_wealth_cummax + self.EPSILON)
+            result = drawdown / (array_wealth_cummax + EPSILON)
 
         return result
 
     def result(self, strategy):
         series_wealth = strategy.budget + strategy.wealth.wealth
-        return serlf._result_from_wealth(self, series_wealth)
+        return self._result_from_wealth(series_wealth)
 
 
 class MaxDrawdown(Metric):
@@ -258,8 +258,6 @@ class SharpeRatio(Metric):
     sharpe_ratio : float
     """
 
-    EPSILON = 10 ** -10
-
     def __init__(self, rate=False, risk_free_return=0.0, **kwargs):
         super().__init__(**kwargs)
         self.rate = rate
@@ -286,8 +284,6 @@ class TradewiseSharpeRatio(Metric):
     tradewise_sharpe_ratio : float
     """
 
-    EPSILON = 10 ** -10
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -299,7 +295,7 @@ class TradewiseSharpeRatio(Metric):
         array_pnl = strategy.history.to_dataframe().groupby("trade_id").agg(sum)["pnl"]
         avg_pnl = np.mean(array_pnl)
         std_pnl = np.std(array_pnl)  # TODO parameter ddof
-        result = avg_pnl / max(std_pnl, self.EPSILON)
+        result = avg_pnl / max(std_pnl, EPSILON)
 
         return result
 
@@ -325,11 +321,12 @@ class Exposure(Metric):
 
     @property
     def name(self):
-        return "net_exposure"
+        return "exposure"
 
     def result(self, strategy):
         exposures = (
-            trade.series_exposure(universe, net=self.net) for trade in strategy.trades
+            trade.series_exposure(strategy.universe, net=self.net)
+            for trade in strategy.trades
         )
         return reduce(np.add, exposures)
 
