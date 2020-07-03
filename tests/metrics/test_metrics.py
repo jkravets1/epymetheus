@@ -125,15 +125,14 @@ class TestFinalWealth:
 
         assert result == expected
 
-    @pytest.mark.parametrize("seed", range(1))
-    def test_result_random(self, seed):
-        np.random.seed(seed)
+    def test_result_random(self):
+        np.random.seed(42)
         series_wealth = np.random.rand(100)
         result = self.MetricClass()._result_from_wealth(series_wealth)
         expected = series_wealth[-1]
         assert result == expected
 
-    def test_result(self, seed):
+    def test_result(self):
         m = self.MetricClass()
         strategy = RandomTrader(seed=42).run(make_randomwalk(seed=42))
 
