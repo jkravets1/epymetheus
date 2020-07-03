@@ -8,37 +8,6 @@ from epymetheus.datasets import make_randomwalk
 from epymetheus.exceptions import NoTradeError
 
 
-trade0 = Trade(
-    asset=["Asset0", "Asset1"],
-    lot=[1, 2],
-    open_bar="Bar0",
-    shut_bar="Bar1",
-    take=3,
-    stop=4,
-)
-trade1 = Trade(
-    asset=["Asset2", "Asset3"],
-    lot=[5, 6],
-    open_bar="Bar2",
-    shut_bar="Bar3",
-    take=7,
-    stop=8,
-)
-
-trades = [trade0, trade1]
-
-universe = Universe(
-    prices=pd.DataFrame(
-        {f"A{i}": range(10) for i in range(10)}, index=[f"B{i}" for i in range(10)]
-    )
-)
-
-
-params_trades = [trades]
-params_universe = [universe]
-params_verbose = [True, False]
-
-
 class HardCodedStrategy(Strategy):
     """
     Yield hard-coded trades.
@@ -66,9 +35,6 @@ class NoTradeStrategy(Strategy):
         pass
 
 
-# --------------------------------------------------------------------------------
-
-
 class TestRun:
     """
     Test `Strategy.run()`.
@@ -76,13 +42,44 @@ class TestRun:
 
     params_verbose = [True, False]
 
+    universe = Universe(
+        prices=pd.DataFrame(
+            {f"A{i}": range(10) for i in range(10)}, index=[f"B{i}" for i in range(10)]
+        )
+    )
+
     @pytest.mark.parametrize("verbose", params_verbose)
     def test_generate(self, verbose):
-        strategy = HardCodedStrategy()
-        strategy.run(universe, verbose=verbose)
+        """
+        Test if `run()` generates correct trades for a hard-coded strategy.
+        """
+        strategy = HardCodedStrategy().run(self.universe, verbose=verbose)
         expected = [strategy.trade0, strategy.trade1]
-
         assert strategy.trades == expected
+
+    @pytest.mark.parametrize("verbose", params_verbose)
+    def test_close_bar(self, verbose):
+        """
+        Notes
+        -----
+        Correctness of execution itself is tested for Trade class.
+        """
+        strategy = HardCodedStrategy().run(self.universe, verbose=verbose)
+        result = [trade.close_bar for trade in strategy.trades]
+        expected = [trade.execute(self.universe).close_bar for trade in strategy.trades]
+        assert result == expected
+
+    @pytest.mark.parametrize("verbose", params_verbose)
+    def test_pnl(self, verbose):
+        """
+        Notes
+        -----
+        Correctness of execution itself is tested for Trade class.
+        """
+        strategy = HardCodedStrategy().run(self.universe, verbose=verbose)
+        result = [trade.pnl for trade in strategy.trades]
+        expected = [trade.execute(self.universe).pnl for trade in strategy.trades]
+        assert result == expected
 
     @pytest.mark.parametrize("verbose", params_verbose)
     def test_no_trade_error(self, verbose):
@@ -91,25 +88,5 @@ class TestRun:
             strategy.run(make_randomwalk(seed=42), verbose=verbose)
 
 
-class TestExecute:
-    """
-    Test `Strategy.execute()`.
-    """
-
-    @pytest.mark.parametrize("trades", [trades])
-    @pytest.mark.parametrize("universe", [universe])
-    @pytest.mark.parametrize("verbose", params_verbose)
-    def test_execute(self, trades, universe, verbose):
-        strategy = DeterminedTrader(trades=trades)
-        strategy.run(universe, verbose=verbose)
-
-        close_bar_expected = [
-            trade.execute(universe).close_bar for trade in strategy.trades
-        ]
-        pnl_expected = [trade.execute(universe).pnl for trade in strategy.trades]
-
-        assert [trade.close_bar for trade in strategy.trades] == close_bar_expected
-        assert [trade.pnl for trade in strategy.trades] == pnl_expected
-
-    def test_result(self):
-        pass  # TODO: is close_bar as expected?
+class TestCompile:
+    pass  # TODO
