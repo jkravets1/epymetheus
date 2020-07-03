@@ -18,7 +18,10 @@ from epymetheus.metrics import Exposure
 from epymetheus.metrics import _metric_from_name
 
 # TODO fix seed
-
+# TODO
+# SharpeRatio
+# TradewiseSharpeRatio
+# Exposure
 
 class TestBase:
     params_metric = [
@@ -35,7 +38,7 @@ class TestBase:
     @pytest.mark.parametrize("MetricClass", params_metric)
     def test_result(self, MetricClass):
         m = MetricClass()
-        strategy = RandomTrader().run(make_randomwalk())
+        strategy = RandomTrader(seed=42).run(make_randomwalk(seed=42))
         result0 = np.array(m.result(strategy))  # from metric method
         result1 = np.array(strategy.evaluate(m))  # from strategy method
         assert np.equal(result0, result1).all()
@@ -46,7 +49,7 @@ class TestBase:
         `metric.result` and `metric.__call__` give the same result
         """
         m = MetricClass()
-        strategy = RandomTrader().run(make_randomwalk())
+        strategy = RandomTrader(seed=42).run(make_randomwalk(seed=42))
         result0 = np.array(m.result(strategy))  # from `result` method
         result1 = np.array(m(strategy))  # from __call__
         assert np.equal(result0, result1).all()
@@ -72,7 +75,7 @@ class TestBase:
         """
         m = MetricClass()
         with pytest.raises(NotRunError):
-            RandomTrader().evaluate(m)
+            RandomTrader(seed=42).evaluate(m)
 
 
 class TestReturn:
@@ -104,7 +107,7 @@ class TestReturn:
     def test_result_from_wealth(self, rate):
         m = self.MetricClass(rate=rate)
         budget = 100
-        strategy = RandomTrader().run(make_randomwalk(), budget=budget)
+        strategy = RandomTrader(seed=42).run(make_randomwalk(seed=42), budget=budget)
         series_wealth = budget + strategy.wealth.wealth
         result = m.result(strategy)
         result_from_wealth = m._result_from_wealth(series_wealth)
@@ -130,10 +133,9 @@ class TestFinalWealth:
         expected = series_wealth[-1]
         assert result == expected
 
-    @pytest.mark.parametrize("seed", range(1))
     def test_result(self, seed):
         m = self.MetricClass()
-        strategy = RandomTrader(seed=seed).run(make_randomwalk(seed=seed))
+        strategy = RandomTrader(seed=42).run(make_randomwalk(seed=42))
 
         result0 = m.result(strategy)
         result1 = m._result_from_wealth(strategy.wealth.wealth)
@@ -209,18 +211,29 @@ class TestMaxDrawdown:
         assert np.allclose(result0, result1)
 
 
-# TODO
-# Volatility
-# SharpeRatio
-# TradewiseSharpeRatio
-# Exposure
+class TestVolatility:
+    MetricClass = Volatility
 
+    @pytest.mark.parametrize("rate", [True, False])
+    def test_result_zero(self, rate):
+        series_wealth = np.arange(1.0, 2.0, 0.01, dtype=float)
+        print(series_wealth)
 
-class TestTradewiseSharpeRatio:
-    def test_result(self):
-        metric = TradewiseSharpeRatio()
-        universe = make_randomwalk()
-        strategy = RandomTrader().run(universe)
-        result = metric.result(strategy)
+        if rate:
+            series_wealth = np.exp(series_wealth)
 
-        # TODO assert
+        result = self.MetricClass(rate=rate)._result_from_wealth(series_wealth)
+        expected = 0
+
+        assert np.allclose(result, expected)
+
+    @pytest.mark.parametrize("rate", [False])
+    def test_result_hand(self, rate):
+        series_wealth = np.array([3, 1, 4], dtype=float)
+
+        result = self.MetricClass(rate=rate)._result_from_wealth(series_wealth)
+        if rate:
+            expected = np.std([-2 / 3, 3 / 1])
+        else:
+            expected = np.std([-2, 3])
+        assert np.allclose(result, expected)

@@ -199,12 +199,12 @@ class MaxDrawdown(Metric):
         super().__init__(**kwargs)
         self.rate = rate
 
-    def _result_from_wealth(self, series_wealth):
-        return Drawdown(rate=self.rate)._result_from_wealth(series_wealth)[-1]
-
     @property
     def name(self):
         return "max_drawdown"
+
+    def _result_from_wealth(self, series_wealth):
+        return Drawdown(rate=self.rate)._result_from_wealth(series_wealth)[-1]
 
     def result(self, strategy):
         series_wealth = strategy.budget + strategy.wealth.wealth
@@ -229,7 +229,7 @@ class Volatility(Metric):
     volatility : float
     """
 
-    def __init__(self, rate=False, ddof=1, **kwargs):
+    def __init__(self, rate=False, ddof=0, **kwargs):
         super().__init__(**kwargs)
         self.rate = rate
         self.ddof = ddof
@@ -238,11 +238,15 @@ class Volatility(Metric):
     def name(self):
         return "volatility"
 
-    def result(self, strategy):
-        array_return = Return(rate=self.rate).result(strategy)
-        result = np.std(array_return, ddof=self.ddof)
+    def _result_from_wealth(self, series_wealth):
+        series_return = Return(rate=self.rate)._result_from_wealth(series_wealth)
+        result = np.std(series_return[1:], ddof=self.ddof)
+        print(series_return)
 
         return result
+
+    def result(self, strategy):
+        return self._result_from_wealth(strategy.wealth.wealth)
 
 
 class SharpeRatio(Metric):
