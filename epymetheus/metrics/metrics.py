@@ -157,11 +157,11 @@ class Drawdown(Metric):
         return "drawdown"
 
     def _result_from_wealth(self, series_wealth):
-        series_wealth_cummax = np.maximum.accumulate(series_wealth)
-        result = series_wealth - series_wealth_cummax
+        cummax = np.maximum.accumulate(series_wealth)
+        result = series_wealth - cummax
 
         if self.rate:
-            result = drawdown / (array_wealth_cummax + EPSILON)
+            result /= (cummax + EPSILON)
 
         return result
 
@@ -199,12 +199,16 @@ class MaxDrawdown(Metric):
         super().__init__(**kwargs)
         self.rate = rate
 
+    def _result_from_wealth(self, series_wealth):
+        return Drawdown(rate=self.rate)._result_from_wealth(series_wealth)[-1]
+
     @property
     def name(self):
         return "max_drawdown"
 
     def result(self, strategy):
-        return np.min(Drawdown(rate=self.rate).result(strategy))
+        series_wealth = strategy.budget + strategy.wealth.wealth
+        return self._result_from_wealth(series_wealth)
 
 
 class Volatility(Metric):
