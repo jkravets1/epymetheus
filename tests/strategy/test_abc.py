@@ -16,14 +16,14 @@ class StrategyWithoutLogic(TradeStrategy):
 
 
 class TestABC:
-    def test_abc_abstract():
+    def test_abc_abstract(self):
         """
         One cannot instantiate `TradeStrategy` itself.
         """
         with pytest.raises(TypeError):
             TradeStrategy()
 
-    def test_abc_nologic():
+    def test_abc_nologic(self):
         """
         One cannot instantiate strategy without logic.
         """
