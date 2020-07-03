@@ -332,6 +332,7 @@ class Exposure(Metric):
         return "exposure"
 
     def result(self, strategy):
+        # XXX: NOT CORRECT. exposure doesnt care open and close.
         exposures = (
             trade.series_exposure(strategy.universe, net=self.net)
             for trade in strategy.trades

@@ -147,6 +147,11 @@ class Trade:
         -------
         net_exposure : numpy.array, shape (n_bars, )
 
+        Raises
+        ------
+        ValueError
+            If self has not been `run`.
+
         Examples
         --------
         >>> from pandas import DataFrame
@@ -174,13 +179,49 @@ class Trade:
 
         return series_pnl
 
-    def array_exposure(self, universe):
+    def final_pnl(self, universe):
         """
-        Return exposure of the position for each asset.
+        Return final profit-loss of self.
 
         Returns
         -------
-        value : numpy.array, shape (n_bars, n_orders)
+        pnl : numpy.array, shapr (n_orders, )
+
+        Raises
+        ------
+        ValueError
+            If self has not been `run`.
+
+        Examples
+        --------
+        >>> from pandas import DataFrame
+        >>> from epymetheus import Universe
+        >>> universe = Universe(DataFrame({
+        ...     "A0": [1, 2, 3, 4, 5],
+        ...     "A1": [2, 3, 4, 5, 6],
+        ...     "A2": [3, 4, 5, 6, 7],
+        ... }, dtype=float))
+        >>> trade = Trade(asset=["A0", "A2"], lot=1, open_bar=1, shut_bar=3)
+        >>> trade = trade.execute(universe)
+        >>> trade.pnl(universe)
+        array([2., 2.])
+        """
+        if not self.is_executed:
+            raise ValueError("Trade has not been executed.")
+
+        array_exposure = self.array_exposure(universe)
+        open_bar_index = universe.get_bar_indexer(self.open_bar)[0]
+        close_bar_index = universe.get_bar_indexer(self.close_bar)[0]
+
+        return array_exposure[close_bar_index, :] - array_exposure[open_bar_index, :]
+
+    def array_exposure(self, universe):
+        """
+        Return exposure of self for each order.
+
+        Returns
+        -------
+        array_exposure : numpy.array, shape (n_bars, n_orders)
 
         Examples
         --------
@@ -200,9 +241,10 @@ class Trade:
                [  8., -18.],
                [ 10., -21.]])
         """
-        p = universe.prices.iloc[:, universe.get_asset_indexer(self.asset)].values
+        asset_index = universe.get_asset_indexer(self.asset)
+        array_prices = universe.prices.iloc[:, asset_index].values
         # (n_orders, ) * (n_bars, n_orders) -> (n_bars, n_orders)
-        return self.lot * p
+        return self.lot * array_prices
 
     def series_exposure(self, universe, net=True):
         """
@@ -244,11 +286,7 @@ class Trade:
 
     def execute(self, universe):
         """
-        Execute trade according to `take`, `stop` and `shut_bar`.  It sets:
-        - self.close_bar
-            Bar at which self is closed.
-        - self.pnl
-            Profit and loss of self for each order.
+        Execute trade and set `self.close_bar`.
 
         Parameters
         ----------
@@ -280,26 +318,18 @@ class Trade:
         >>> trade2.close_bar
         3
         """
-        array_exposure = self.array_exposure(universe)
-
-        open_bar_index = universe.get_bar_indexer(self.open_bar)[0]
-        close_bar_index = self.__get_close_bar_index(universe, array_exposure)
-
-        self.close_bar = universe.bars[close_bar_index]
-        self.pnl = (
-            array_exposure[close_bar_index, :] - array_exposure[open_bar_index, :]
-        )
+        self.close_bar = self.__get_close_bar(universe)
         self._is_executed = True
 
         return self
 
-    def __get_close_bar_index(self, universe, array_exposure):
+    def __get_close_bar(self, universe):
         """
         Used in self.execute
 
         Returns
         -------
-        close_bar_index : int
+        close_bar
         """
         if self.shut_bar is not None:
             timeout_index = universe.get_bar_indexer(self.shut_bar)[0]
@@ -307,12 +337,11 @@ class Trade:
             timeout_index = universe.n_bars - 1
 
         if self.take is None and self.stop is None:
-            return timeout_index
+            close_bar_index = timeout_index
         else:
             open_bar_index = universe.get_bar_indexer(self.open_bar)[0]
 
-            # Don't use self.series_exposure; save time
-            series_exposure = array_exposure.sum(axis=1)
+            series_exposure = self.series_exposure(universe)
             profit = series_exposure - series_exposure[open_bar_index]
             profit[:open_bar_index] = 0
 
@@ -321,9 +350,9 @@ class Trade:
             close_bar_index = catch_first_index(np.logical_or(signal_take, signal_stop))
 
             if close_bar_index == -1 or close_bar_index > timeout_index:
-                return timeout_index
-            else:
-                return close_bar_index
+                close_bar_index = timeout_index
+
+        return universe.bars[close_bar_index]
 
     def __mul__(self, num):
         """

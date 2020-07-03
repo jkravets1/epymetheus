@@ -170,17 +170,17 @@ def test_execute_take():
     trade = Trade("Asset0", lot=1.0, take=1.9, open_bar=1, shut_bar=5)
     trade.execute(universe)
     assert trade.close_bar == 3
-    assert np.array_equal(trade.pnl, [103 - 101])
+    assert np.array_equal(trade.final_pnl(universe), [103 - 101])
 
     trade = Trade("Asset0", lot=2.0, take=3.8, open_bar=1, shut_bar=5)
     trade.execute(universe)
     assert trade.close_bar == 3
-    assert np.array_equal(trade.pnl, [2 * (103 - 101)])
+    assert np.array_equal(trade.final_pnl(universe), [2 * (103 - 101)])
 
     trade = Trade("Asset0", lot=1.0, take=1000, open_bar=1, shut_bar=5)
     trade.execute(universe)
     assert trade.close_bar == 5
-    assert np.array_equal(trade.pnl, [105 - 101])
+    assert np.array_equal(trade.final_pnl(universe), [105 - 101])
 
 
 def test_execute_stop():
@@ -189,17 +189,17 @@ def test_execute_stop():
     trade = Trade("Asset0", lot=1.0, stop=-1.9, open_bar=1, shut_bar=5)
     trade.execute(universe)
     assert trade.close_bar == 3
-    assert np.array_equal(trade.pnl, [97 - 99])
+    assert np.array_equal(trade.final_pnl(universe), [97 - 99])
 
     trade = Trade("Asset0", lot=2.0, stop=-3.8, open_bar=1, shut_bar=5)
     trade.execute(universe)
     assert trade.close_bar == 3
-    assert np.array_equal(trade.pnl, [2 * (97 - 99)])
+    assert np.array_equal(trade.final_pnl(universe), [2 * (97 - 99)])
 
     trade = Trade("Asset0", lot=1.0, stop=-1000, open_bar=1, shut_bar=5)
     trade.execute(universe)
     assert trade.close_bar == 5
-    assert np.array_equal(trade.pnl, [95 - 99])
+    assert np.array_equal(trade.final_pnl(universe), [95 - 99])
 
 
 class TestSpecialMethods:

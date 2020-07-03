@@ -69,17 +69,17 @@ class TestRun:
         expected = [trade.execute(self.universe).close_bar for trade in strategy.trades]
         assert result == expected
 
-    @pytest.mark.parametrize("verbose", params_verbose)
-    def test_pnl(self, verbose):
-        """
-        Notes
-        -----
-        Correctness of execution itself is tested for Trade class.
-        """
-        strategy = HardCodedStrategy().run(self.universe, verbose=verbose)
-        result = [trade.pnl for trade in strategy.trades]
-        expected = [trade.execute(self.universe).pnl for trade in strategy.trades]
-        assert result == expected
+    # @pytest.mark.parametrize("verbose", params_verbose)
+    # def test_pnl(self, verbose):
+    #     """
+    #     Notes
+    #     -----
+    #     Correctness of execution itself is tested for Trade class.
+    #     """
+    #     strategy = HardCodedStrategy().run(self.universe, verbose=verbose)
+    #     result = [trade.pnl for trade in strategy.trades]
+    #     expected = [trade.execute(self.universe).pnl for trade in strategy.trades]
+    #     assert result == expected
 
     @pytest.mark.parametrize("verbose", params_verbose)
     def test_no_trade_error(self, verbose):
