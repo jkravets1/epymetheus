@@ -177,6 +177,32 @@ def test_execute_stop():
     assert np.array_equal(trade.pnl, [95 - 99])
 
 
+class TestSpecialMethods:
+    def test_repr(self):
+        asset = "A0"
+        open_bar = "B0"
+        shut_bar = "B1"
+        lot = 1.0
+        take = 2.0
+        stop = -2.0
+        trade = Trade(
+            asset=asset,
+            open_bar=open_bar,
+            shut_bar=shut_bar,
+            lot=lot,
+            take=take,
+            stop=stop,
+        )
+        expected = "Trade(asset='A0', open_bar='B0', shut_bar='B1', lot=1.0, take=2.0, stop=-2.0)"
+        assert repr(trade) == expected
+
+    def test_repr(self):
+        asset = "A0"
+        trade = Trade(asset=asset)
+        expected = "Trade(asset='A0', lot=1.0)"  # default value of lot = 1.0
+        assert repr(trade) == expected
+
+
 # TODO both take and stop
 # TODO short position
 # TODO multiple orders

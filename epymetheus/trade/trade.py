@@ -348,12 +348,18 @@ class Trade:
         return self.__mul__(1.0 / num)
 
     def __repr__(self):
-        params = ', '.join([
-            'asset=' + repr(self.asset),
-            'open_bar=' + repr(self.open_bar),
-            'shut_bar=' + repr(self.shut_bar),
-            'lot=' + repr(self.lot),
-            'take=' + repr(self.take),
-            'stop=' + repr(self.stop),
-        ])
-        return 'Trade(' + params + ')'
+        names = (
+            "asset",
+            "open_bar",
+            "shut_bar",
+            "lot",
+            "take",
+            "stop",
+        )
+        list_params = [
+            name + "=" + repr(getattr(self, name))
+            for name in names
+            if getattr(self, name) is not None
+        ]
+        repr_params = ", ".join(list_params)
+        return "Trade(" + repr_params + ")"
