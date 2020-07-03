@@ -68,35 +68,37 @@ def assert_trade_operation(trade0, trade1, operator):
 # --------------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("trade0", params_trade)
-@pytest.mark.parametrize("a", params_a)
-def test_mul(trade0, a):
-    trade1 = a * trade0
-    assert_trade_operation(trade0, trade1, lambda x: a * x)
+class TestOperation:
+
+    @pytest.mark.parametrize("trade0", params_trade)
+    @pytest.mark.parametrize("a", params_a)
+    def test_mul(self, trade0, a):
+        trade1 = a * trade0
+        assert_trade_operation(trade0, trade1, lambda x: a * x)
 
 
-@pytest.mark.parametrize("trade0", params_trade)
-@pytest.mark.parametrize("a", params_a)
-def test_rmul(trade0, a):
-    trade1 = trade0 * a
-    assert_trade_operation(trade0, trade1, lambda x: a * x)
+    @pytest.mark.parametrize("trade0", params_trade)
+    @pytest.mark.parametrize("a", params_a)
+    def test_rmul(self, trade0, a):
+        trade1 = trade0 * a
+        assert_trade_operation(trade0, trade1, lambda x: a * x)
 
 
-@pytest.mark.parametrize("trade0", params_trade)
-def test_neg(trade0):
-    trade1 = -trade0
-    assert_trade_operation(trade0, trade1, lambda x: -x)
+    @pytest.mark.parametrize("trade0", params_trade)
+    def test_neg(self, trade0):
+        trade1 = -trade0
+        assert_trade_operation(trade0, trade1, lambda x: -x)
 
 
-@pytest.mark.parametrize("trade0", params_trade)
-@pytest.mark.parametrize("a", params_a)
-def test_truediv(trade0, a):
-    if a != 0:
-        trade1 = trade0 / a
-        assert_trade_operation(trade0, trade1, lambda x: x / a)
-    else:
-        with pytest.raises(ZeroDivisionError):
+    @pytest.mark.parametrize("trade0", params_trade)
+    @pytest.mark.parametrize("a", params_a)
+    def test_truediv(self, trade0, a):
+        if a != 0:
             trade1 = trade0 / a
+            assert_trade_operation(trade0, trade1, lambda x: x / a)
+        else:
+            with pytest.raises(ZeroDivisionError):
+                trade1 = trade0 / a
 
 
 if __name__ == "__main__":
