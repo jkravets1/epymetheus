@@ -72,6 +72,12 @@ class TestSeriesExposure:
 
         assert np.allclose(trade.series_exposure(universe), value_expected)
 
+    def test_not_executed_error(self):
+        universe = make_randomwalk()
+        trade = Trade(asset='A0')
+        with pytest.raises(ValueError):
+            trade.series_pnl(make_randomwalk())
+
 
 @pytest.mark.parametrize("seed", params_seed)
 def test_execute_0_0(seed):
