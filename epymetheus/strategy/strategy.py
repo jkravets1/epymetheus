@@ -89,8 +89,19 @@ class Strategy(metaclass=ABCMeta):
 
     @property
     def description(self):
-        """Return detailed description of the strategy."""
-        return cleandoc(self.__class__.__doc__)
+        """
+        Return detailed description of the strategy.
+
+        Returns
+        -------
+        description : str or None
+            If strategy class has no docstring, return None.
+        """
+        if self.__class__.__doc__ is None:
+            description = None
+        else:
+            description = cleandoc(self.__class__.__doc__)
+        return description
 
     @property
     def params(self):

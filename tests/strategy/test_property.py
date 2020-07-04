@@ -21,6 +21,15 @@ class SampleStrategy(Strategy):
         yield Trade(asset=["A2", "A3"])
 
 
+class NoDescriptionStrategy(Strategy):
+
+    def __init__(self):
+        pass
+
+    def logic(self, univers):
+        pass
+
+
 class TestName:
     """
     Test `Strategy.name`.
@@ -40,6 +49,10 @@ class TestDescription:
             strategy.description
             == "This is my favorite strategy.\n\nEverybody loves this strategy."
         )
+
+    def test_no_description(self):
+        strategy = NoDescriptionStrategy()
+        assert strategy.description is None
 
 
 class TestIsRun:
