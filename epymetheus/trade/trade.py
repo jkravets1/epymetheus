@@ -156,14 +156,14 @@ class Trade:
         >>> from pandas import DataFrame
         >>> from epymetheus import Universe
         >>> universe = Universe(DataFrame({
-        ...     "A0": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        ...     "A1": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-        ...     "A2": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        ...     "A0": [1, 2, 3, 4, 5, 6, 7]),
+        ...     "A1": [2, 3, 4, 5, 6, 7, 8]),
+        ...     "A2": [3, 4, 5, 6, 7, 8, 9]),
         ... }, dtype=float))
-        >>> trade0 = Trade(asset="A0", lot=1.0, open_bar=1, shut_bar=8)
+        >>> trade0 = Trade(asset="A0", lot=1.0, open_bar=1, shut_bar=6)
         >>> trade0 = trade0.execute(universe)
         >>> trade0.close_bar
-        8
+        6
         >>> trade1 = Trade(asset="A0", lot=1.0, open_bar=1, shut_bar=8, take=2)
         >>> trade1 = trade1.execute(universe)
         >>> trade1.close_bar
@@ -186,11 +186,6 @@ class Trade:
         -------
         net_exposure : numpy.array, shape (n_bars, )
 
-        Raises
-        ------
-        ValueError
-            If self has not been `run`.
-
         Examples
         --------
         >>> from pandas import DataFrame
@@ -205,18 +200,19 @@ class Trade:
         >>> trade.series_pnl(universe)
         array([0., 0., 1., 2., 2.])
         """
-        if not self.is_executed:
-            raise ValueError("Trade has not been executed.")
-
-        open_bar_index = universe.get_bar_indexer(self.open_bar)[0]
-        close_bar_index = universe.get_bar_indexer(self.close_bar)[0]
-
         series_exposure = self.series_exposure(universe)
+        open_bar_index = universe.get_bar_indexer(self.open_bar)[0]
         series_pnl = series_exposure - series_exposure[open_bar_index]
-        series_pnl[:open_bar_index] = 0
-        series_pnl[close_bar_index:] = series_pnl[close_bar_index]
 
         return series_pnl
+
+        # open_bar_index = universe.get_bar_indexer(self.open_bar)[0]
+        # close_bar_index = universe.get_bar_indexer(close_bar)[0]
+
+        # series_exposure = self.series_exposure(universe)
+        # series_pnl = series_exposure - series_exposure[open_bar_index]
+        # series_pnl[:open_bar_index] = 0
+        # series_pnl[close_bar_index:] = series_pnl[close_bar_index]
 
     def final_pnl(self, universe):
         """
@@ -248,11 +244,13 @@ class Trade:
         if not self.is_executed:
             raise ValueError("Trade has not been executed.")
 
-        array_exposure = self.array_exposure(universe)
+        # TODO: make it more efficient
         open_bar_index = universe.get_bar_indexer(self.open_bar)[0]
         close_bar_index = universe.get_bar_indexer(self.close_bar)[0]
+        array_exposure = self.array_exposure(universe)
+        final_pnl = array_exposure[close_bar_index, :] - array_exposure[open_bar_index, :]
 
-        return array_exposure[close_bar_index, :] - array_exposure[open_bar_index, :]
+        return final_pnl
 
     def array_exposure(self, universe):
         """
@@ -280,10 +278,23 @@ class Trade:
                [  8., -18.],
                [ 10., -21.]])
         """
+        if self.is_executed:
+            stop_bar = self.close_bar
+        else:
+            stop_bar = self.__timeout_bar(universe)
+
         asset_index = universe.get_asset_indexer(self.asset)
         array_prices = universe.prices.iloc[:, asset_index].values
         # (n_orders, ) * (n_bars, n_orders) -> (n_bars, n_orders)
-        return self.lot * array_prices
+        array_exposure = self.lot * array_prices
+
+        open_bar_index = universe.get_bar_indexer(self.open_bar)[0]
+        stop_bar_index = universe.get_bar_indexer(stop_bar)[0]
+
+        array_exposure[:open_bar_index] = 0
+        array_exposure[stop_bar_index:] = 0
+
+        return array_exposure
 
     def series_exposure(self, universe, net=True):
         """
@@ -316,43 +327,74 @@ class Trade:
         >>> trade.series_exposure(universe, net=False)
         array([11., 16., 21., 26., 31.])
         """
+        array_exposure = self.array_exposure(universe)
         if net:
-            exposure = self.array_exposure(universe).sum(axis=1)
+            series_exposure = array_exposure.sum(axis=1)
         else:
-            exposure = np.abs(self.array_exposure(universe)).sum(axis=1)
+            series_exposure = np.abs(array_exposure).sum(axis=1)
 
-        return exposure
+        return series_exposure
+
+    # def _array_exposure_whole(self, universe):
+    #     asset_index = universe.get_asset_indexer(self.asset)
+    #     array_prices = universe.prices.iloc[:, asset_index].values
+    #     # (n_orders, ) * (n_bars, n_orders) -> (n_bars, n_orders)
+    #     return self.lot * array_prices
+
+    # def _series_exposure_whole(self, universe, net=True):
+    #     """Not cut by open, close bars"""
+    #     if net:
+    #         exposure = self.array_exposure(universe).sum(axis=1)
+    #     else:
+    #         exposure = np.abs(self.array_exposure(universe)).sum(axis=1)
+
+    #     return exposure
+
+    # def _series_pnl_whole(self, universe):
+    #     series_exposure = self._series_exposure_whole(universe, net=True)
+
+    #     asset_index = universe
+    #     aaa
 
     def __get_close_bar(self, universe):
         """
-        Used in self.execute
+        Used in self.execute.
 
         Returns
         -------
         close_bar
         """
-        if self.shut_bar is not None:
-            timeout_index = universe.get_bar_indexer(self.shut_bar)[0]
-        else:
-            timeout_index = universe.n_bars - 1
+        timeout_bar = self.__timeout_bar(universe)
 
         if self.take is None and self.stop is None:
-            close_bar_index = timeout_index
+            close_bar = timeout_bar
         else:
             open_bar_index = universe.get_bar_indexer(self.open_bar)[0]
 
-            series_exposure = self.series_exposure(universe)
-            profit = series_exposure - series_exposure[open_bar_index]
-            profit[:open_bar_index] = 0
+            # series_exposure = self.series_exposure(universe)
+            # profit = series_exposure - series_exposure[open_bar_index]
+            # profit[:open_bar_index] = 0
+            series_pnl = self.series_pnl(universe)
 
-            signal_take = profit >= (self.take or np.inf)
-            signal_stop = profit <= (self.stop or -np.inf)
+            signal_take = series_pnl >= (self.take or np.inf)
+            signal_stop = series_pnl <= (self.stop or -np.inf)
+
             close_bar_index = catch_first_index(np.logical_or(signal_take, signal_stop))
+            timeout_index = universe.get_bar_indexer(timeout_bar)
 
             if close_bar_index == -1 or close_bar_index > timeout_index:
-                close_bar_index = timeout_index
+                close_bar = timeout_bar
+            else:
+                close_bar = universe.bars[close_bar_index]
 
-        return universe.bars[close_bar_index]
+        return close_bar
+
+    def __timeout_bar(self, universe):
+        if self.shut_bar is not None:
+            timeout_bar = self.shut_bar
+        else:
+            timeout_bar = universe.bars[-1]
+        return timeout_bar
 
     def __mul__(self, num):
         """

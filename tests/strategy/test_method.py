@@ -65,8 +65,11 @@ class TestRun:
         Correctness of execution itself is tested for Trade class.
         """
         strategy = HardCodedStrategy().run(self.universe, verbose=verbose)
+        expected = [
+            trade.execute(self.universe).close_bar
+            for trade in (strategy.trade0, strategy.trade1)
+        ]
         result = [trade.close_bar for trade in strategy.trades]
-        expected = [trade.execute(self.universe).close_bar for trade in strategy.trades]
         assert result == expected
 
     # @pytest.mark.parametrize("verbose", params_verbose)
