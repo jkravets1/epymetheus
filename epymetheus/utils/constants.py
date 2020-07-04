@@ -1,1 +1,1 @@
-# EPSILON = 10 ** -10
+EPSILON = 10 ** -10
