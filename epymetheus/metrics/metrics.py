@@ -29,6 +29,7 @@ def _metric_from_name(name, **kwargs):
     """
     dict_metric = {
         "return": Return,
+        "average_return": AverageReturn,
         "final_wealth": FinalWealth,
         "drawdown": Drawdown,
         "max_drawdown": MaxDrawdown,
@@ -95,6 +96,42 @@ class Return(Metric):
     def result(self, strategy):
         series_wealth = strategy.budget + strategy.wealth.wealth
         return self._result_from_wealth(series_wealth)
+
+
+class AverageReturn(Metric):
+    """
+    Evaluate time-series of return.
+
+    Parameters
+    ----------
+    - rate : bool
+    - n : int
+    """
+    def __init__(self, rate=False, n=1, **kwargs):
+        super().__init__(**kwargs)
+        self.rate = rate
+        self.n = n
+
+    @property
+    def name(self):
+        return "average_return"
+
+    def _result_from_wealth(self, series_wealth):
+        n_bars = series_wealth.size
+
+        if self.rate:
+            total_return = series_wealth[-1] / series_wealth[0] - 1
+            result = np.exp((self.n / (n_bars - 1)) * np.log(1 + total_return)) - 1.0
+        else:
+            total_return = series_wealth[-1] - series_wealth[0]
+            result = (self.n / (n_bars - 1)) * total_return
+
+        return result
+
+    def result(self, strategy):
+        series_wealth = strategy.wealth.wealth + strategy.budget
+        return self._result_from_wealth(series_wealth)
+
 
 
 class FinalWealth(Metric):
@@ -220,18 +257,18 @@ class Volatility(Metric):
     - rate : bool, default False
         If True, volatility is evaluated for profit-loss rate.
         If False, volatility is evaluated for profit-loss.
-    - ddof : int, default 1
-        Delta degrees of freedom. The divisor used in calculations is N - ddof,
-        where N represents the number of elements.
+    - n : int, default 1
+        E.g. n = 365 (calendar days) for average annual return.
 
     Returns
     -------
     volatility : float
     """
 
-    def __init__(self, rate=False, ddof=0, **kwargs):
+    def __init__(self, rate=False, n=1, ddof=0, **kwargs):
         super().__init__(**kwargs)
         self.rate = rate
+        self.n = n
         self.ddof = ddof
 
     @property
@@ -240,13 +277,13 @@ class Volatility(Metric):
 
     def _result_from_wealth(self, series_wealth):
         series_return = Return(rate=self.rate)._result_from_wealth(series_wealth)
-        result = np.std(series_return[1:], ddof=self.ddof)
-        print(series_return)
+        result = np.sqrt(self.n) * np.std(series_return[1:], ddof=self.ddof)
 
         return result
 
     def result(self, strategy):
-        return self._result_from_wealth(strategy.wealth.wealth)
+        series_wealth = strategy.wealth.wealth + strategy.budget
+        return self._result_from_wealth(series_wealth)
 
 
 class SharpeRatio(Metric):
@@ -266,9 +303,10 @@ class SharpeRatio(Metric):
     sharpe_ratio : float
     """
 
-    def __init__(self, rate=False, risk_free_return=0.0, **kwargs):
+    def __init__(self, rate=False, n=1, risk_free_return=0.0, **kwargs):
         super().__init__(**kwargs)
         self.rate = rate
+        self.n = n
         self.risk_free_return = risk_free_return
 
     @property
@@ -276,10 +314,10 @@ class SharpeRatio(Metric):
         return "sharpe_ratio"
 
     def result(self, strategy):
-        avg_return = np.mean(Return(rate=self.rate).result(strategy))
-        std_return = Volatility(rate=self.rate).result(strategy)
-        result = (avg_return - self.risk_free_return) / std_return
-
+        average_return = AverageReturn(rate=self.rate, n=self.n).result(strategy)
+        volatility = Volatility(rate=self.rate, n=self.n).result(strategy)
+        volatility = max(volatility, EPSILON)
+        result =  (average_return - self.risk_free_return) / volatility
         return result
 
 
@@ -332,7 +370,6 @@ class Exposure(Metric):
         return "exposure"
 
     def result(self, strategy):
-        # XXX: NOT CORRECT. exposure doesnt care open and close.
         exposures = (
             trade.series_exposure(strategy.universe, net=self.net)
             for trade in strategy.trades

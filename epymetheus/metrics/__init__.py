@@ -1,6 +1,7 @@
 # flake8: noqa
 
 from .metrics import Return
+from .metrics import AverageReturn
 from .metrics import FinalWealth
 from .metrics import Drawdown
 from .metrics import MaxDrawdown
