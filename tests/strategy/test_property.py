@@ -1,9 +1,11 @@
 import pytest  # noqa: F401
 
-from epymetheus import TradeStrategy
+import pandas as pd
+
+from epymetheus import Strategy, Universe, Trade
 
 
-class SampleStrategy(TradeStrategy):
+class SampleStrategy(Strategy):
     """
     This is my favorite strategy.
 
@@ -15,25 +17,42 @@ class SampleStrategy(TradeStrategy):
         self.param1 = param1
 
     def logic(self, univers):
-        pass
+        yield Trade(asset=["A0", "A1"])
+        yield Trade(asset=["A2", "A3"])
 
 
 # --------------------------------------------------------------------------------
 
 
-def test_name():
-    sample_strategy = SampleStrategy()
-    assert sample_strategy.name == "SampleStrategy"
+class TestProperty:
 
+    universe = Universe(pd.DataFrame({f"A{i}": range(10) for i in range(4)}))
 
-def test_description():
-    sample_strategy = SampleStrategy()
-    assert (
-        sample_strategy.description
-        == "This is my favorite strategy.\n\nEverybody loves this strategy."
-    )
+    def test_name(self):
+        strategy = SampleStrategy()
+        assert strategy.name == "SampleStrategy"
 
+    def test_description(self):
+        strategy = SampleStrategy()
+        assert (
+            strategy.description
+            == "This is my favorite strategy.\n\nEverybody loves this strategy."
+        )
 
-def test_params():
-    sample_strategy = SampleStrategy(param0=0.0, param1=1.0)
-    assert sample_strategy.params == {"param0": 0.0, "param1": 1.0}
+    def test_params(self):
+        strategy = SampleStrategy(param0=0.0, param1=1.0)
+        assert strategy.params == {"param0": 0.0, "param1": 1.0}
+
+    def test_is_run(self):
+        strategy = SampleStrategy()
+        assert strategy.is_run == False
+        strategy.run(self.universe)
+        assert strategy.is_run == True
+
+    def test_n_trades(self):
+        strategy = SampleStrategy().run(self.universe)
+        assert strategy.n_trades == 2
+
+    def test_n_orders(self):
+        strategy = SampleStrategy().run(self.universe)
+        assert strategy.n_orders == 4

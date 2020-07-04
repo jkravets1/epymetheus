@@ -25,7 +25,7 @@ class Wealth(TradeResult):
 
         Parameters
         ----------
-        - strategy : TradeStrategy
+        - strategy : Strategy
         - verbose : bool
         """
         return cls(bars=cls._get_bars(strategy), wealth=cls._get_wealth(strategy),)

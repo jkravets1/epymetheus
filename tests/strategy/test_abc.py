@@ -9,23 +9,23 @@ class StrategyWithoutLogic(TradeStrategy):
     """
 
     def __init__(self, param=None):
-        self.param = None
+        self.param = param
 
 
 # --------------------------------------------------------------------------------
 
 
-def test_abc_abstract():
-    """
-    One cannot instantiate `TradeStrategy` itself.
-    """
-    with pytest.raises(TypeError):
-        strategy = TradeStrategy()  # noqa: F841
+class TestABC:
+    def test_abc_abstract(self):
+        """
+        One cannot instantiate `TradeStrategy` itself.
+        """
+        with pytest.raises(TypeError):
+            TradeStrategy()
 
-
-def test_abc_nologic():
-    """
-    One cannot instantiate strategy without logic.
-    """
-    with pytest.raises(TypeError):
-        strategy = StrategyWithoutLogic()  # noqa: F841
+    def test_abc_nologic(self):
+        """
+        One cannot instantiate strategy without logic.
+        """
+        with pytest.raises(TypeError):
+            StrategyWithoutLogic()

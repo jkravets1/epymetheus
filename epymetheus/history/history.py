@@ -38,7 +38,7 @@ class History(TradeResult):
 
         Parameters
         ----------
-        - strategy : TradeStrategy
+        - strategy : Strategy
 
         Returns
         -------
@@ -276,4 +276,6 @@ class History(TradeResult):
 
     @staticmethod
     def _get_pnl(strategy):
-        return np.concatenate([trade.pnl for trade in strategy.trades])
+        return np.concatenate(
+            [trade.final_pnl(strategy.universe) for trade in strategy.trades]
+        )

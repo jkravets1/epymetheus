@@ -2,14 +2,13 @@ from abc import ABCMeta, abstractmethod
 from inspect import cleandoc
 from time import time
 
-from epymetheus.exceptions import NoTradeError
+from epymetheus.exceptions import NoTradeError, NotRunError
 from epymetheus.history import History
 
-# from epymetheus.transaction import Transaction
 from epymetheus.wealth import Wealth
 
 
-class TradeStrategy(metaclass=ABCMeta):
+class Strategy(metaclass=ABCMeta):
     """
     Represents a strategy to trade.
 
@@ -36,7 +35,7 @@ class TradeStrategy(metaclass=ABCMeta):
     Examples
     --------
     Define strategy by subclassing:
-    >>> class MyTradeStrategy(TradeStrategy):
+    >>> class MyStrategy(Strategy):
     ...     '''
     ...     This is my favorite strategy.
     ...     '''
@@ -48,9 +47,9 @@ class TradeStrategy(metaclass=ABCMeta):
     ...         yield Trade(...)
 
     Initialize:
-    >>> my_strategy = MyTradeStrategy(my_parameter=0.1)
+    >>> my_strategy = MyStrategy(my_parameter=0.1)
     >>> my_strategy.name
-    'MyTradeStrategy'
+    'MyStrategy'
     >>> my_strategy.description
     'This is my favorite strategy.'
     >>> my_strategy.params
@@ -83,7 +82,7 @@ class TradeStrategy(metaclass=ABCMeta):
         trade : Trade
         """
 
-    def run(self, universe, verbose=True):
+    def run(self, universe, metrics=[], budget=0.0, verbose=True):
         """
         Run a backtesting of strategy.
 
@@ -91,13 +90,20 @@ class TradeStrategy(metaclass=ABCMeta):
         ----------
         - universe : Universe
             Universe with which self is run.
+        - metrics : List[metrics]
+            List of metrics to be evaluated for the strategy during running.
+            See epymetheus.metrics.
+        - budget : float, default 0.0
+            Initial budget.
         - verbose : bool, default True
-            Vermose mode.
+            Verbose mode.
 
         Returns
         -------
         self
         """
+        self.__compile(metrics=metrics, budget=budget)
+
         if verbose:
             begin_time = time()
             print("Running ... ")
@@ -113,6 +119,10 @@ class TradeStrategy(metaclass=ABCMeta):
 
         return self
 
+    def __compile(self, metrics, budget):
+        self.metrics = metrics
+        self.budget = budget
+
     def __generate_trades(self, universe, verbose=True):
         """
         Generate trades according to `self.logic`.
@@ -124,7 +134,7 @@ class TradeStrategy(metaclass=ABCMeta):
 
         Returns
         -------
-        self : TradeStrategy
+        self : Strategy
         """
 
         def iter_trades(verbose):
@@ -154,7 +164,7 @@ class TradeStrategy(metaclass=ABCMeta):
 
         Returns
         -------
-        self : TradeStrategy
+        self : Strategy
         """
         if verbose:
             begin_time = time()
@@ -203,6 +213,7 @@ class TradeStrategy(metaclass=ABCMeta):
 
     @property
     def is_run(self):
+        # Don't use "__is_run"; it cannot be accessed by getattr.
         return getattr(self, "_is_run", False)
 
     @property
@@ -221,6 +232,15 @@ class TradeStrategy(metaclass=ABCMeta):
     def wealth(self):
         return Wealth(strategy=self)
 
-    # @property
-    # def transaction(self):
-    #     return Transaction(strategy=self)
+    # def evaluate(self, metric):
+    #     """
+    #     Returns the value of a metric of self.
+
+    #     Parameters
+    #     ----------
+    #     - metric : Metric or str
+    #         Metric to evaluate.
+    #     """
+    #     if not self.is_run:
+    #         raise NotRunError('Strategy has not been run')
+    #     return metric.result(self)
