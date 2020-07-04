@@ -7,20 +7,16 @@ from epymetheus import Trade, Universe
 from epymetheus.datasets import make_randomwalk
 from epymetheus.benchmarks import RandomTrader
 
+# TODO after execution
 
-params_seed = [42, 1, 2, 3]
-params_n_bars = [10, 100, 1000]
-params_const = [-10, 0, 10]
-
-
-def make_random_trade(universe, seed):
-    random_trader = RandomTrader(n_trades=1, seed=seed).run(universe)
-    return random_trader.trades[0]
+# params_seed = [42, 1, 2, 3]
+# params_n_bars = [10, 100, 1000]
+# params_const = [-10, 0, 10]
 
 
-# @pytest.fixture(scope="function", autouse=True)
-# def set_seed():
-#     np.random.seed(42)
+# def make_random_trade(universe, seed):
+#     random_trader = RandomTrader(n_trades=1, seed=seed).run(universe)
+#     return random_trader.trades[0]
 
 
 class TestExecute:
@@ -28,6 +24,10 @@ class TestExecute:
 
 
 class TestArrayValue:
+    """
+    Test `Trade._array_value()`.
+    """
+
     universe_hand = Universe(
         pd.DataFrame(
             {"A0": [3, 1, 4, 1, 5, 9, 2], "A1": [2, 7, 1, 8, 2, 8, 1],},
@@ -47,8 +47,41 @@ class TestArrayValue:
         result = trade._array_value(universe=self.universe_hand)
         assert np.allclose(result, expected)
 
+    def test_value_zero(self):
+        trade = Trade(asset=["A0", "A1"], lot=[0, 0], open_bar=1, shut_bar=3)
+        result = trade._array_value(self.universe_hand)
+        expected = np.zeros((self.universe_hand.n_bars, 2))
+        assert np.allclose(result, expected)
+
+    @pytest.mark.parametrize("seed", range(1))
+    def test_linearity_add(self, seed):
+        np.random.seed(seed)
+        lot0, lot1 = np.random.random(2)
+        trade0 = Trade(asset="A0", lot=lot0, open_bar=1, shut_bar=3)
+        trade1 = Trade(asset="A0", lot=lot1, open_bar=1, shut_bar=3)
+        tradeA = Trade(asset="A0", lot=lot0 + lot1, open_bar=1, shut_bar=3)
+        result0 = trade0._array_value(self.universe_hand)
+        result1 = trade1._array_value(self.universe_hand)
+        resultA = tradeA._array_value(self.universe_hand)
+        assert np.allclose(result0 + result1, resultA)
+
+    @pytest.mark.parametrize("seed", range(1))
+    def test_linearity_mul(self, seed):
+        np.random.seed(seed)
+        lot0 = np.random.random(1)
+        a = np.random.random(1)[0]
+        trade0 = Trade(asset="A0", lot=lot0, open_bar=1, shut_bar=3)
+        tradeA = a * trade0
+        result0 = trade0._array_value(self.universe_hand)
+        resultA = tradeA._array_value(self.universe_hand)
+        assert np.allclose(a * result0, resultA)
+
 
 class TestArrayExposure:
+    """
+    Test `Trade.array_exposure()`.
+    """
+
     universe_hand = Universe(
         pd.DataFrame(
             {"A0": [3, 1, 4, 1, 5, 9, 2], "A1": [2, 7, 1, 8, 2, 8, 1],},
@@ -69,9 +102,41 @@ class TestArrayExposure:
         result = trade.array_exposure(universe=self.universe_hand)
         assert np.allclose(result, expected)
 
+    def test_value_zero(self):
+        trade = Trade(asset=["A0", "A1"], lot=[0, 0], open_bar=1, shut_bar=3)
+        result = trade.array_exposure(self.universe_hand)
+        expected = np.zeros((self.universe_hand.n_bars, 2))
+        assert np.allclose(result, expected)
+
+    @pytest.mark.parametrize("seed", range(1))
+    def test_linearity_add(self, seed):
+        np.random.seed(seed)
+        lot0, lot1 = np.random.random(2)
+        trade0 = Trade(asset="A0", lot=lot0, open_bar=1, shut_bar=3)
+        trade1 = Trade(asset="A0", lot=lot1, open_bar=1, shut_bar=3)
+        tradeA = Trade(asset="A0", lot=lot0 + lot1, open_bar=1, shut_bar=3)
+        result0 = trade0.array_exposure(self.universe_hand)
+        result1 = trade1.array_exposure(self.universe_hand)
+        resultA = tradeA.array_exposure(self.universe_hand)
+        assert np.allclose(result0 + result1, resultA)
+
+    @pytest.mark.parametrize("seed", range(1))
+    def test_linearity_mul(self, seed):
+        np.random.seed(seed)
+        lot0 = np.random.random(1)
+        a = np.random.random(1)[0]
+        trade0 = Trade(asset="A0", lot=lot0, open_bar=1, shut_bar=3)
+        tradeA = a * trade0
+        result0 = trade0.array_exposure(self.universe_hand)
+        resultA = tradeA.array_exposure(self.universe_hand)
+        assert np.allclose(a * result0, resultA)
+
 
 class TestSeriesExposure:
-    # TODO before and after execution
+    """
+    Test `Trade.series_exposure()`.
+    """
+
     universe_hand = Universe(
         pd.DataFrame(
             {"A0": [3, 1, 4, 1, 5, 9, 2], "A1": [2, 7, 1, 8, 2, 8, 1],},
@@ -91,8 +156,53 @@ class TestSeriesExposure:
 
         assert np.allclose(result, expected)
 
+    def test_value_zero(self):
+        trade = Trade(asset=["A0", "A1"], lot=[0, 0], open_bar=1, shut_bar=3)
+        result = trade.series_exposure(self.universe_hand)
+        expected = np.zeros((self.universe_hand.n_bars))
+        assert np.allclose(result, expected)
+
+    @pytest.mark.parametrize(
+        "net", [True]
+    )  # Abs exposure doesn't satisfy linearity add
+    @pytest.mark.parametrize("seed", range(1))
+    def test_linearity_add(self, net, seed):
+        np.random.seed(seed)
+        lot0, lot1 = np.random.random(2)
+        trade0 = Trade(asset="A0", lot=lot0, open_bar=1, shut_bar=3)
+        trade1 = Trade(asset="A0", lot=lot1, open_bar=1, shut_bar=3)
+        tradeA = Trade(asset="A0", lot=lot0 + lot1, open_bar=1, shut_bar=3)
+        result0 = trade0.series_exposure(self.universe_hand, net=net)
+        result1 = trade1.series_exposure(self.universe_hand, net=net)
+        resultA = tradeA.series_exposure(self.universe_hand, net=net)
+        assert np.allclose(result0 + result1, resultA)
+
+    @pytest.mark.parametrize("net", [True, False])
+    @pytest.mark.parametrize("seed", range(1))
+    def test_linearity_mul(self, net, seed):
+        np.random.seed(seed)
+        lot0 = np.random.random(1)
+        a = np.random.random(1)[0]
+        trade0 = Trade(asset="A0", lot=lot0, open_bar=1, shut_bar=3)
+        tradeA = a * trade0
+        result0 = trade0.series_exposure(self.universe_hand, net=net)
+        resultA = tradeA.series_exposure(self.universe_hand, net=net)
+        assert np.allclose(a * result0, resultA)
+
+
+class TestArrayPnl:
+    """
+    Test `Trade.series_pnl()`.
+    """
+
+    # TODO
+
 
 class TestSeriesPnl:
+    """
+    Test `Trade.series_pnl()`.
+    """
+
     universe_hand = Universe(
         pd.DataFrame(
             {"A0": [3, 1, 4, 1, 5, 9, 2], "A1": [2, 7, 1, 8, 2, 8, 1],},
@@ -108,11 +218,22 @@ class TestSeriesPnl:
         result = trade.series_pnl(universe=self.universe_hand)
         assert np.allclose(result, expected)
 
-    pass
+    def test_value_zero(self):
+        trade = Trade(asset=["A0", "A1"], lot=[0, 0], open_bar=1, shut_bar=3)
+        result = trade.series_pnl(self.universe_hand)
+        expected = np.zeros((self.universe_hand.n_bars))
+        assert np.allclose(result, expected)
 
 
 class TestFinalPnl:
-    pass
+    @pytest.mark.parametrize("seed", range(10))
+    def test_random(self, seed):
+        universe = make_randomwalk(n_bars=100, n_assets=10, seed=seed)
+        trade = RandomTrader(n_trades=1, seed=seed).run(universe).trades[0]
+        result = trade.final_pnl(universe)
+        expected = trade.array_pnl(universe)[-1]
+
+        assert np.allclose(result, expected)
 
 
 # @pytest.mark.parametrize("seed", params_seed)
