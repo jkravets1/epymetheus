@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import numpy as np
 
 from epymetheus.utils.array import catch_first_index
@@ -433,8 +435,9 @@ class Trade:
         >>> trade.lot
         array([-0.4, -0.8])
         """
-        self.lot = num * self.array_lot
-        return self
+        self_copy = deepcopy(self)
+        self_copy.lot = num * self_copy.array_lot
+        return self_copy
 
     def __rmul__(self, num):
         """
