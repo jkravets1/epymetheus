@@ -60,7 +60,7 @@ def assert_trade_operation(trade0, trade1, operator):
     assert trade0.asset == trade1.asset
     assert trade0.open_bar == trade1.open_bar
     assert trade0.shut_bar == trade1.shut_bar
-    assert np.all([operator(x) for x in trade0.lot] == trade1.lot)
+    assert np.allclose([operator(x) for x in trade0.array_lot], trade1.array_lot)
     assert trade0.take == trade1.take
     assert trade0.stop == trade1.stop
 
@@ -69,13 +69,12 @@ def assert_trade_operation(trade0, trade1, operator):
 
 
 class TestOperation:
-
     @pytest.mark.parametrize("trade0", params_trade)
     @pytest.mark.parametrize("a", params_a)
     def test_mul(self, trade0, a):
+        print(trade0)
         trade1 = a * trade0
         assert_trade_operation(trade0, trade1, lambda x: a * x)
-
 
     @pytest.mark.parametrize("trade0", params_trade)
     @pytest.mark.parametrize("a", params_a)
@@ -83,12 +82,10 @@ class TestOperation:
         trade1 = trade0 * a
         assert_trade_operation(trade0, trade1, lambda x: a * x)
 
-
     @pytest.mark.parametrize("trade0", params_trade)
     def test_neg(self, trade0):
         trade1 = -trade0
         assert_trade_operation(trade0, trade1, lambda x: -x)
-
 
     @pytest.mark.parametrize("trade0", params_trade)
     @pytest.mark.parametrize("a", params_a)

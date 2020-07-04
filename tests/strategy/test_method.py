@@ -93,3 +93,7 @@ class TestRun:
 
 class TestCompile:
     pass  # TODO
+
+
+class TestEvaluate:
+    pass  # TODO

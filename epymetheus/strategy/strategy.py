@@ -82,6 +82,71 @@ class Strategy(metaclass=ABCMeta):
         trade : Trade
         """
 
+    @property
+    def name(self):
+        """Return name of the strategy."""
+        return self.__class__.__name__
+
+    @property
+    def description(self):
+        """
+        Return detailed description of the strategy.
+
+        Returns
+        -------
+        description : str or None
+            If strategy class has no docstring, return None.
+        """
+        if self.__class__.__doc__ is None:
+            description = None
+        else:
+            description = cleandoc(self.__class__.__doc__)
+        return description
+
+    @property
+    def params(self):
+        """
+        Return parameters of self as `dict`.
+
+        Returns
+        -------
+        parameters : dict
+            Names and values of parameters.
+
+        Examples
+        --------
+        >>> class MyStrategy:
+        ...     def __init__(self, param1, param2):
+        ...         self.param1 = param1
+        ...         self.param2 = param2
+        ...
+        >>> my_strategy = MyStrategy(param1=1.2, param2=3.4)
+        >>> my_strategy.params
+        {'param1': 1.2, 'param2': 3.4}
+        """
+        return self.__dict__
+
+    @property
+    def is_run(self):
+        # Don't use "__is_run"; it cannot be accessed by getattr.
+        return getattr(self, "_is_run", False)
+
+    @property
+    def n_trades(self):
+        return len(self.trades)
+
+    @property
+    def n_orders(self):
+        return sum(trade.n_orders for trade in self.trades)
+
+    @property
+    def history(self):
+        return History(strategy=self)
+
+    @property
+    def wealth(self):
+        return Wealth(strategy=self)
+
     def run(self, universe, metrics=[], budget=0.0, verbose=True):
         """
         Run a backtesting of strategy.
@@ -178,69 +243,15 @@ class Strategy(metaclass=ABCMeta):
 
         return self
 
-    @property
-    def name(self):
-        """Return name of the strategy."""
-        return self.__class__.__name__
-
-    @property
-    def description(self):
-        """Return detailed description of the strategy."""
-        return cleandoc(self.__class__.__doc__)
-
-    @property
-    def params(self):
+    def evaluate(self, metric):
         """
-        Return parameters of self as `dict`.
+        Returns the value of a metric of self.
 
-        Returns
-        -------
-        parameters : dict
-            Names and values of parameters.
-
-        Examples
-        --------
-        >>> class MyStrategy:
-        ...     def __init__(self, param1, param2):
-        ...         self.param1 = param1
-        ...         self.param2 = param2
-        ...
-        >>> my_strategy = MyStrategy(param1=1.2, param2=3.4)
-        >>> my_strategy.params
-        {'param1': 1.2, 'param2': 3.4}
+        Parameters
+        ----------
+        - metric : Metric or str
+            Metric to evaluate.
         """
-        return self.__dict__
-
-    @property
-    def is_run(self):
-        # Don't use "__is_run"; it cannot be accessed by getattr.
-        return getattr(self, "_is_run", False)
-
-    @property
-    def n_trades(self):
-        return len(self.trades)
-
-    @property
-    def n_orders(self):
-        return sum(trade.n_orders for trade in self.trades)
-
-    @property
-    def history(self):
-        return History(strategy=self)
-
-    @property
-    def wealth(self):
-        return Wealth(strategy=self)
-
-    # def evaluate(self, metric):
-    #     """
-    #     Returns the value of a metric of self.
-
-    #     Parameters
-    #     ----------
-    #     - metric : Metric or str
-    #         Metric to evaluate.
-    #     """
-    #     if not self.is_run:
-    #         raise NotRunError('Strategy has not been run')
-    #     return metric.result(self)
+        if not self.is_run:
+            raise NotRunError("Strategy has not been run")
+        return metric.result(self)
