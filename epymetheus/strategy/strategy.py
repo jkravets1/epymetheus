@@ -232,15 +232,15 @@ class Strategy(metaclass=ABCMeta):
     def wealth(self):
         return Wealth(strategy=self)
 
-    def evaluate(self, metric):
-        """
-        Returns the value of a metric of self.
+    # def evaluate(self, metric):
+    #     """
+    #     Returns the value of a metric of self.
 
-        Parameters
-        ----------
-        - metric : Metric or str
-            Metric to evaluate.
-        """
-        if not self.is_run:
-            raise NotRunError('Strategy has not been run')
-        return metric.result(self)
+    #     Parameters
+    #     ----------
+    #     - metric : Metric or str
+    #         Metric to evaluate.
+    #     """
+    #     if not self.is_run:
+    #         raise NotRunError('Strategy has not been run')
+    #     return metric.result(self)

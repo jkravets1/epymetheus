@@ -241,8 +241,8 @@ class Trade:
         >>> trade.pnl(universe)
         array([2., 2.])
         """
-        if not self.is_executed:
-            raise ValueError("Trade has not been executed.")
+        # if not self.is_executed:
+        #     raise ValueError("Trade has not been executed.")
 
         # TODO: make it more efficient
         open_bar_index = universe.get_bar_indexer(self.open_bar)[0]
