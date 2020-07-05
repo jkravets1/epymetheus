@@ -245,7 +245,7 @@ class Trade:
 
         array_exposure = array_value
         array_exposure[:open_bar_index] = 0
-        array_exposure[stop_bar_index + 1:] = 0
+        array_exposure[stop_bar_index + 1 :] = 0
 
         return array_exposure
 
@@ -381,7 +381,9 @@ class Trade:
         open_bar_index = universe.get_bar_indexer(self.open_bar)[0]
         close_bar_index = universe.get_bar_indexer(self.close_bar)[0]
         array_exposure = self.array_exposure(universe)
-        final_pnl = array_exposure[close_bar_index, :] - array_exposure[open_bar_index, :]
+        final_pnl = (
+            array_exposure[close_bar_index, :] - array_exposure[open_bar_index, :]
+        )
 
         return final_pnl
 

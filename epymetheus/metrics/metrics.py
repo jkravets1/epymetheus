@@ -107,6 +107,7 @@ class AverageReturn(Metric):
     - rate : bool
     - n : int
     """
+
     def __init__(self, rate=False, n=1, **kwargs):
         super().__init__(**kwargs)
         self.rate = rate
@@ -131,7 +132,6 @@ class AverageReturn(Metric):
     def result(self, strategy):
         series_wealth = strategy.wealth.wealth + strategy.budget
         return self._result_from_wealth(series_wealth)
-
 
 
 class FinalWealth(Metric):
@@ -198,7 +198,7 @@ class Drawdown(Metric):
         result = series_wealth - cummax
 
         if self.rate:
-            result /= (cummax + EPSILON)
+            result /= cummax + EPSILON
 
         return result
 
@@ -221,15 +221,6 @@ class MaxDrawdown(Metric):
     -------
     max_drawdown : float
         Maximum drop. always non-positive.
-
-    Examples
-    --------
-    >>> strategy.wealth
-    array([0, 1, 2, 1, 0])
-    >>> strategy.drop
-    array([0, 0, 0, -1, -2])
-    >>> strategy.max_drop
-    -2
     """
 
     def __init__(self, rate=False, **kwargs):
@@ -240,12 +231,8 @@ class MaxDrawdown(Metric):
     def name(self):
         return "max_drawdown"
 
-    def _result_from_wealth(self, series_wealth):
-        return Drawdown(rate=self.rate)._result_from_wealth(series_wealth)[-1]
-
     def result(self, strategy):
-        series_wealth = strategy.budget + strategy.wealth.wealth
-        return self._result_from_wealth(series_wealth)
+        return np.min(Drawdown(rate=self.rate).result(strategy))
 
 
 class Volatility(Metric):
@@ -317,7 +304,7 @@ class SharpeRatio(Metric):
         average_return = AverageReturn(rate=self.rate, n=self.n).result(strategy)
         volatility = Volatility(rate=self.rate, n=self.n).result(strategy)
         volatility = max(volatility, EPSILON)
-        result =  (average_return - self.risk_free_return) / volatility
+        result = (average_return - self.risk_free_return) / volatility
         return result
 
 

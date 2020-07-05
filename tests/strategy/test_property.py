@@ -22,7 +22,6 @@ class SampleStrategy(Strategy):
 
 
 class NoDescriptionStrategy(Strategy):
-
     def __init__(self):
         pass
 
@@ -34,6 +33,7 @@ class TestName:
     """
     Test `Strategy.name`.
     """
+
     def test_value(self):
         strategy = SampleStrategy()
         assert strategy.name == "SampleStrategy"
@@ -43,6 +43,7 @@ class TestDescription:
     """
     Test `Strategy.description`.
     """
+
     def test_value(self):
         strategy = SampleStrategy()
         assert (
@@ -59,6 +60,7 @@ class TestIsRun:
     """
     Test `Strategy.is_run`.
     """
+
     universe = Universe(pd.DataFrame({f"A{i}": range(10) for i in range(4)}))
 
     def test_value(self):
@@ -72,6 +74,7 @@ class TestParams:
     """
     Test `Strategy.params`.
     """
+
     def test_value(self):
         strategy = SampleStrategy(param0=0.0, param1=1.0)
         assert strategy.params == {"param0": 0.0, "param1": 1.0}
@@ -81,6 +84,7 @@ class TestNTrades:
     """
     Test `Strategy.n_trades`.
     """
+
     universe = Universe(pd.DataFrame({f"A{i}": range(10) for i in range(4)}))
 
     def test_value(self):
@@ -92,6 +96,7 @@ class TestNOrders:
     """
     Test `Strategy.n_orders`.
     """
+
     universe = Universe(pd.DataFrame({f"A{i}": range(10) for i in range(4)}))
 
     def test_value(self):
@@ -100,14 +105,12 @@ class TestNOrders:
 
 
 class TestHistory:
-
     def test_value(self):
         # TODO: move from tests/history
         pass
 
 
 class TestWealth:
-
     def test_value(self):
         # TODO: move from tests/history
         pass

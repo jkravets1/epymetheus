@@ -263,49 +263,42 @@ class TestDrawdown:
 class TestMaxDrawdown:
     MetricClass = MaxDrawdown
 
+    def test_zero(self):
+        pass  # TODO
+
+    # @pytest.mark.parametrize("rate", [True, False])
+    # @pytest.mark.parametrize("init_wealth", [100.0])
+    # @pytest.mark.parametrize("n_bars", [100])
+    # def test_result_zero(self, rate, init_wealth, n_bars):
+    #     series_wealth = init_wealth + np.zeros(n_bars, dtype=float)
+
+    #     result = self.MetricClass(rate=rate)._result_from_wealth(series_wealth)
+    #     expected = 0
+
+    #     assert result == expected
+
+    # @pytest.mark.parametrize("rate", [True, False])
+    # @pytest.mark.parametrize("init_wealth", [100.0])
+    # @pytest.mark.parametrize("n_bars", [100])
+    # def test_monotonous(self, rate, init_wealth, n_bars):
+    #     """
+    #     Drawdown = 0 for monotonously increasing wealth.
+    #     """
+    #     series_wealth = init_wealth + np.linspace(0.0, 100.0, n_bars)
+    #     result = self.MetricClass(rate=rate)._result_from_wealth(series_wealth)
+    #     expected = 0
+    #     assert np.allclose(result, expected)
+
     @pytest.mark.parametrize("rate", [True, False])
-    @pytest.mark.parametrize("init_wealth", [100.0])
-    @pytest.mark.parametrize("n_bars", [100])
-    def test_result_zero(self, rate, init_wealth, n_bars):
-        series_wealth = init_wealth + np.zeros(n_bars, dtype=float)
-
-        result = self.MetricClass(rate=rate)._result_from_wealth(series_wealth)
-        expected = 0
-
-        assert result == expected
-
-    @pytest.mark.parametrize("rate", [True, False])
-    @pytest.mark.parametrize("init_wealth", [100.0])
-    @pytest.mark.parametrize("n_bars", [100])
-    def test_monotonous(self, rate, init_wealth, n_bars):
-        """
-        Drawdown = 0 for monotonously increasing wealth.
-        """
-        series_wealth = init_wealth + np.linspace(0.0, 100.0, n_bars)
-        result = self.MetricClass(rate=rate)._result_from_wealth(series_wealth)
-        expected = 0
-        assert np.allclose(result, expected)
-
-    @pytest.mark.parametrize("rate", [True, False])
-    def test_result_hand(self, rate):
-        series_wealth = np.array([3, 1, 4, 1, 5, 9, 2], dtype=float)
-        result = self.MetricClass(rate=rate)._result_from_wealth(series_wealth)
-        if rate:
-            expected = -7 / 9
-        else:
-            expected = -7
-        assert np.allclose(result, expected)
-
     @pytest.mark.parametrize("seed", range(1))
-    @pytest.mark.parametrize("rate", [True, False])
-    def test_result(self, seed, rate):
-        m = self.MetricClass(rate=rate)
-        strategy = RandomTrader(seed=seed).run(make_randomwalk(seed=seed))
-
-        result0 = m.result(strategy)
-        result1 = m._result_from_wealth(strategy.wealth.wealth)
-
-        assert np.allclose(result0, result1)
+    @pytest.mark.parametrize("init_wealth", [10000.0])
+    def test_random(self, rate, seed, init_wealth):
+        strategy = RandomTrader(seed=seed).run(
+            make_randomwalk(seed=seed), budget=init_wealth
+        )
+        result = self.MetricClass(rate=rate,).result(strategy)
+        expected = np.min(Drawdown(rate=rate).result(strategy))
+        assert result == expected
 
 
 class TestVolatility:
@@ -391,6 +384,7 @@ class TestExposure:
     """
     Test `Exposure`.
     """
+
     MetricClass = Exposure
 
     universe_hand = Universe(
