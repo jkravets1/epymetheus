@@ -221,15 +221,6 @@ class MaxDrawdown(Metric):
     -------
     max_drawdown : float
         Maximum drop. always non-positive.
-
-    Examples
-    --------
-    >>> strategy.wealth
-    array([0, 1, 2, 1, 0])
-    >>> strategy.drop
-    array([0, 0, 0, -1, -2])
-    >>> strategy.max_drop
-    -2
     """
 
     def __init__(self, rate=False, **kwargs):
@@ -240,12 +231,8 @@ class MaxDrawdown(Metric):
     def name(self):
         return "max_drawdown"
 
-    def _result_from_wealth(self, series_wealth):
-        return Drawdown(rate=self.rate)._result_from_wealth(series_wealth)[-1]
-
     def result(self, strategy):
-        series_wealth = strategy.budget + strategy.wealth.wealth
-        return self._result_from_wealth(series_wealth)
+        return np.min(Drawdown(rate=self.rate).result(strategy))
 
 
 class Volatility(Metric):
