@@ -75,19 +75,19 @@ class MyStrategy(Strategy):
 strategy = MyStrategy(my_parameter=0.1)
 ```
 
-Now your strategy can be applied to any `Universe`.
+Your strategy can readily be backtested with any `Universe`.
 
 ```python
-from epymetheus import Universe
+from epymetheus.datasets import fetch_usstocks
 
-prices = ...  # Fetch historical prices of US equities as pandas.DataFrame
-universe = Universe(prices)
+universe = Universe(df_prices)  # The historical prices that you have, or
+universe = fetch_usstocks(n_assets=10)  # Basic datasets provided by Epymetheus.
 
 strategy.run(universe)
 # Running ...
-# Generating 454 trades (2018-12-31) ... Done. (Runtime : 0.45 sec)
-# Executing 454 trades ... Done. (Runtime : 0.73 sec)
-# Done. (Runtime : 1.17 sec)
+# Generating 478 trades (2019-12-31) ... Done. (Runtime : 0.30 sec)
+# Executing 478 trades ... Done. (Runtime : 0.41 sec)
+# Done. (Runtime : 0.71 sec)
 ```
 
 Now the results can be accessed as the attributes of `strategy`.
@@ -101,35 +101,43 @@ df_wealth.plot()
 
 ![wealth](examples/howto/wealth.png)
 
-You can also inspect the exposure as:
+You can also quickly `evaluate` various metrics of the perfornance.
+
+For example, drawdown, exposure and Sharpe ratio are given by:
 
 ```python
-net_exposure = pd.Series(strategy.net_exposure)
-net_exposure.plot()
+from epymetheus.metrics import Drawdown, MaxDrawdown, Exposure, SharpeRatio
+
+drawdown = strategy.evaluate(Drawdown())
+max_drawdown = strategy.evaluate(MaxDrawdown())
+net_exposure = strategy.evaluate(Exposure(net=True))
+abs_exposure = strategy.evaluate(Exposure(net=False))
+sharpe_ratio = strategy.evaluate(SharpeRatio())
 ```
 
+![drawdown](examples/howto/drawdown.png)
 ![exposure](examples/howto/exposure.png)
-
-Profit-loss distribution can be accessed by:
-
-```python
-plt.hist(strategy.history.pnl)
-```
-
-![pnl](examples/howto/pnl.png)
 
 Detailed trade history can be viewed as:
 
 ```python
 strategy.history.to_dataframe()
-
 # or: pandas.DataFrame(strategy.history)
 ```
 
-|   order_id |   trade_id | asset   |           lot | open_bar    | close_bar   | shut_bar    |   take |   stop |          pnl |
-|-----------:|-----------:|:--------|--------------:|:------------|:------------|:------------|-------:|-------:|-------------:|
-|          0 |          0 | BRK-A   |     0.227273  | 2000-02-29  | 2000-08-29  | 2000-08-29  |   5000 |  -1000 |  3113.64     |
-|          1 |          1 | JNJ     |   471.411     | 2000-02-29  | 2000-08-29  | 2000-08-29  |   5000 |  -1000 |  3097.16     |
-|          2 |          2 | PG      |   657.239     | 2000-03-31  | 2000-09-30  | 2000-09-30  |   5000 |  -1000 |  2061.64     |
-|          3 |          3 | AMZN    |   149.254     | 2000-03-31  | 2000-04-12  | 2000-09-30  |   5000 |  -1000 | -1585.82     |
-|          4 |          4 | MSFT    |   446.908     | 2000-04-28  | 2000-05-25  | 2000-10-28  |   5000 |  -1000 | -1182.8      |
+|   order_id |   trade_id | asset   |         lot | open_bar   | close_bar  | shut_bar   |   take |   stop |      pnl |
+|-----------:|-----------:|:--------|------------:|:-----------|:-----------|:-----------|-------:|-------:|---------:|
+|          0 |          0 | AMZN    | 145.191     | 2000-02-29 | 2000-04-05 | 2000-05-29 |   1000 |  -1000 | -970.962 |
+|          1 |          0 | BRK-A   |  -0.0227273 | 2000-02-29 | 2000-04-05 | 2000-05-29 |   1000 |  -1000 | -288.636 |
+|          2 |          1 | JPM     | 346.101     | 2000-02-29 | 2000-03-16 | 2000-05-29 |   1000 |  -1000 | 1318.68  |
+|          3 |          1 | WMT     | -29.9542    | 2000-02-29 | 2000-03-16 | 2000-05-29 |   1000 |  -1000 | -121.923 |
+|          4 |          2 | BRK-A   |   0.174825  | 2000-03-31 | 2000-06-30 | 2000-06-30 |   1000 |  -1000 | -594.406 |
+
+Profit-loss distribution can be accessed by:
+
+```python
+pnl = strategy.history.groupby('trade_id').aggregate(sum).pnl
+plt.hist(pnl)
+```
+
+![pnl](examples/howto/pnl.png)

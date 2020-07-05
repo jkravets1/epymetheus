@@ -8,7 +8,7 @@ from epymetheus import Trade, TradeStrategy
 from epymetheus.datasets import fetch_usstocks
 
 register_matplotlib_converters()
-seaborn.set_style('whitegrid')
+seaborn.set_style("whitegrid")
 
 
 class SimpleTrendFollower(TradeStrategy):
@@ -25,6 +25,7 @@ class SimpleTrendFollower(TradeStrategy):
     - loolback : DateOffset
     - hold : DateOffset
     """
+
     def __init__(
         self,
         percentile=0.2,
@@ -50,13 +51,15 @@ class SimpleTrendFollower(TradeStrategy):
         -------
         list
         """
-        onemonth_returns = universe.prices.loc[open_date] \
+        onemonth_returns = (
+            universe.prices.loc[open_date]
             / universe.prices.loc[open_date - self.lookback]
+        )
         return list(onemonth_returns.sort_values().index)
 
     def logic(self, universe):
         n_trade = int(universe.n_assets * self.percentile)
-        date_range = pd.date_range(universe.bars[0], universe.bars[-1], freq='BM')
+        date_range = pd.date_range(universe.bars[0], universe.bars[-1], freq="BM")
 
         for open_date in date_range[1:]:
             for asset in self.sorted_assets(universe, open_date)[:n_trade]:
@@ -74,14 +77,14 @@ def plot(strategy):
     plt.figure(figsize=(16, 4))
     df_wealth = strategy.wealth.to_dataframe()
     plt.plot(df_wealth, linewidth=1)
-    plt.title('Wealth / USD')
-    plt.savefig('wealth.png', bbox_inches="tight", pad_inches=0.1)
+    plt.title("Wealth / USD")
+    plt.savefig("wealth.png", bbox_inches="tight", pad_inches=0.1)
 
     plt.figure(figsize=(16, 4))
     plt.hist(strategy.history.pnl, bins=100)
-    plt.axvline(0, ls='--', color='red')
-    plt.title('Gains')
-    plt.savefig('pnl.png', bbox_inches="tight", pad_inches=0.1)
+    plt.axvline(0, ls="--", color="red")
+    plt.title("Gains")
+    plt.savefig("pnl.png", bbox_inches="tight", pad_inches=0.1)
 
     # df_exposure = pd.Series(strategy.net_exposure, index=strategy.universe.bars)
 
@@ -91,7 +94,7 @@ def plot(strategy):
     # plt.title('Net exposure')
     # plt.savefig('exposure.png', bbox_inches="tight", pad_inches=0.1)
 
-    with open('history.md', 'w') as f:
+    with open("history.md", "w") as f:
         f.write(strategy.history.to_dataframe().to_markdown())
 
 
@@ -104,5 +107,5 @@ def main():
     plot(strategy)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
