@@ -254,6 +254,7 @@ class TestFinalPnl:
             dtype=float,
         )
     )
+
     @pytest.mark.parametrize("seed", range(10))
     def test_random(self, seed):
         universe = make_randomwalk(n_bars=100, n_assets=10, seed=seed)
