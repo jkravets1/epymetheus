@@ -13,20 +13,20 @@
 ## Introduction
 
 Epymetheus is a Python library for multi-asset backtesting.
-It provides end-to-end framework that lets analysts build and try out their trade strategy right away.
+It provides an end-to-end framework that lets analysts build and try out their trade strategy right away.
 
 ### Features
 
 1. **Simple and Intuitive API**: The API is minimally organized so that you can focus on your idea. Trade `Strategy` can be readily coded and its backtesting is consistently carried out by its methods `run()` and `evaluate()`.
-2. **Seamless connection to [Pandas](https://github.com/pandas-dev/pandas)**: You can just put in pandas DataFrame as an input historical data. Backtesting results can be quickly converted to Pandas format so that you can view, analyze and plot results by the familliar Pandas methods.
-3. **Extensiblity with Other Frameworks**: Epymetheus only provides a framework. Strategy can be readily built with other libraries for machine learning, econometrics, technical indicators, derivative pricing models and so forth.
-4. **Efficient Computation**: Backtesting engine is boosted by numpy. You can give your own idea a quick try.
-5. **Full Test Coverage**: Library is thoroughly tested with 100% test coverage for multiple Python versions.
+2. **Seamless connection to [Pandas](https://github.com/pandas-dev/pandas)**: You can just put in pandas DataFrame as an input historical data. Backtesting results can be quickly converted to Pandas format so that you can view, analyze and plot results by the familiar Pandas methods.
+3. **Extensibility with Other Frameworks**: Epymetheus only provides a framework. Strategy can be readily built with other libraries for machine learning, econometrics, technical indicators, derivative pricing models and so forth.
+4. **Efficient Computation**: Backtesting engine is boosted by NumPy. You can give your own idea a quick try.
+5. **Full Test Coverage**: Epymetheus is thoroughly tested with 100% test coverage for multiple Python versions.
 
 ### Modules
 
 1. **[Strategy](https://github.com/simaki/epymetheus/tree/master/epymetheus/strategy)**: A strategy encodes your own trading rules. The [`benchmarks`](https://github.com/simaki/epymetheus/tree/master/epymetheus/benchmarks) provide standard strategies to be compared with.
-2. **[Universe](https://github.com/simaki/epymetheus/tree/master/epymetheus/universe)**: A universe stores historical prices of a set of securities. The [`datasets`](https://github.com/simaki/epymetheus/tree/master/epymetheus/datasets) provides sample universe like Brownian stock prices and blue chips in US.
+2. **[Universe](https://github.com/simaki/epymetheus/tree/master/epymetheus/universe)**: A universe stores historical prices of a set of securities. The [`datasets`](https://github.com/simaki/epymetheus/tree/master/epymetheus/datasets) provide sample universe like Brownian stock prices and blue chips in the US.
 3. **[History](https://github.com/simaki/epymetheus/tree/master/epymetheus/history)**: A history stores the assets, lots, profit/loss of each trade yielded. Easily converted into Pandas DataFrame.
 4. **[Metric](https://github.com/simaki/epymetheus/tree/master/epymetheus/metric)**: A metric is a function to assess the performance of your strategy. Available metrics include: final wealth, maximum drawdown, Sharpe ratio and so forth.
 
