@@ -4,6 +4,8 @@ import numpy as np
 
 from epymetheus import Trade, Strategy
 
+# TODO: BuyAndHold rebalance
+
 
 class DeterminedTrader(Strategy):
     """
@@ -65,3 +67,26 @@ class RandomTrader(Strategy):
             open_bar, shut_bar = sorted(random.sample(list(universe.bars), 2))
 
             yield Trade(asset=asset, lot=lot, open_bar=open_bar, shut_bar=shut_bar)
+
+
+class BuyAndHold(Strategy):
+    """
+    Buy-and-Hold Strategy.
+
+    Parameters
+    ----------
+    - weight : dict[str, float]
+        Keys are assets to trade.
+        Values are value-based weights.
+    """
+
+    def __init__(self, weight):
+        self.weight = weight
+
+    def logic(self, universe):
+        asset = np.array(list(self.weight.keys()))
+        lot = (
+            np.array(list(self.weight.values()))
+            / universe.prices.loc[:, self.weight.keys()].iloc[0, :].values
+        )
+        yield Trade(asset=asset, lot=lot, open_bar=universe.bars[0])
