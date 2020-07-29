@@ -4,6 +4,8 @@ import numpy as np
 
 from epymetheus import Trade, Strategy
 
+# TODO: BuyAndHold rebalance
+
 
 class DeterminedTrader(Strategy):
     """
@@ -76,8 +78,6 @@ class BuyAndHold(Strategy):
     - weight : dict[str, float]
         Keys are assets to trade.
         Values are value-based weights.
-    - rebalance : None
-        TODO
     """
 
     def __init__(self, weight):
