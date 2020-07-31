@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "epymetheus"
-version = "0.4.2"
+version = "0.5.0"
 description = "Python framework for multi-asset backtesting."
 authors = ["Shota Imaki <shota.imaki@icloud.com>"]
 license = "BSD-3-Clause"
