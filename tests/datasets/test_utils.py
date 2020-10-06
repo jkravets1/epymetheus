@@ -2,10 +2,10 @@ import pytest  # noqa: F401
 
 import pandas as pd
 
-from epymetheus.datasets._utils import ffill_and_cut
+from epymetheus.datasets._utils import fill_and_cut
 
 
-def test_ffill_and_cut():
+def test_fill_and_cut():
     from pandas.testing import assert_series_equal
 
     series = pd.Series(
@@ -26,4 +26,4 @@ def test_ffill_and_cut():
         }
     )
 
-    assert_series_equal(ffill_and_cut(series, "2000-01-01"), series_expected)
+    assert_series_equal(fill_and_cut(series, "2000-01-01"), series_expected)

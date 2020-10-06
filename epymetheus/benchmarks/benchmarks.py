@@ -2,7 +2,8 @@ import random
 
 import numpy as np
 
-from epymetheus import Trade, Strategy
+from epymetheus import Strategy
+from epymetheus import Trade
 
 # TODO: BuyAndHold rebalance
 

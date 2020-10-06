@@ -25,7 +25,7 @@ class Universe:
 
     Examples
     --------
-    >>> ...
+    >>> # TODO
     """
 
     def __init__(self, prices, name=None):
@@ -99,6 +99,12 @@ class Universe:
 
         Examples
         --------
+        >>> import pandas as pd
+        >>> universe = Universe(pd.DataFrame({
+        ...     "AAPL": [1, 1, 1],
+        ...     "MSFT": [1, 1, 1],
+        ...     "AMZN": [1, 1, 1],
+        ... }, index=["2000-01-01", "2000-01-02", "2000-01-03"]))
         >>> universe.bars
         Index(['2000-01-01', '2000-01-02', '2000-01-03'], dtype='object')
         >>> universe.get_bar_indexer('2000-01-02')
@@ -124,6 +130,12 @@ class Universe:
 
         Examples
         --------
+        >>> import pandas as pd
+        >>> universe = Universe(pd.DataFrame({
+        ...     "AAPL": [1, 1, 1],
+        ...     "MSFT": [1, 1, 1],
+        ...     "AMZN": [1, 1, 1],
+        ... }))
         >>> universe.assets
         Index(['AAPL', 'MSFT', 'AMZN'], dtype='object')
         >>> universe.get_asset_indexer('MSFT')

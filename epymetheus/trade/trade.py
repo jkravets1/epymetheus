@@ -4,7 +4,6 @@ import numpy as np
 
 from epymetheus.utils.array import catch_first_index
 
-
 # TODO: check params
 
 

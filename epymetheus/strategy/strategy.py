@@ -1,10 +1,11 @@
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
+from abc import abstractmethod
 from inspect import cleandoc
 from time import time
 
-from epymetheus.exceptions import NoTradeError, NotRunError
+from epymetheus.exceptions import NoTradeError
+from epymetheus.exceptions import NotRunError
 from epymetheus.history import History
-
 from epymetheus.wealth import Wealth
 
 
@@ -35,6 +36,7 @@ class Strategy(metaclass=ABCMeta):
     Examples
     --------
     Define strategy by subclassing:
+    >>> from epymetheus import Trade
     >>> class MyStrategy(Strategy):
     ...     '''
     ...     This is my favorite strategy.
@@ -52,12 +54,11 @@ class Strategy(metaclass=ABCMeta):
     'MyStrategy'
     >>> my_strategy.description
     'This is my favorite strategy.'
-    >>> my_strategy.params
-    {'my_parameter': 0.1}
 
     Run:
-    >>> universe = Universe(...)
-    >>> my_strategy.run(universe)
+    >>> from epymetheus.datasets import make_randomwalk
+    >>> universe = make_randomwalk()
+    >>> _ = my_strategy.run(universe, verbose=False)
 
     Todo
     ----
@@ -103,28 +104,28 @@ class Strategy(metaclass=ABCMeta):
             description = cleandoc(self.__class__.__doc__)
         return description
 
-    @property
-    def params(self):
-        """
-        Return parameters of self as `dict`.
+    # @property
+    # def params(self):
+    #     """
+    #     Return parameters of self as `dict`.
 
-        Returns
-        -------
-        parameters : dict
-            Names and values of parameters.
+    #     Returns
+    #     -------
+    #     parameters : dict
+    #         Names and values of parameters.
 
-        Examples
-        --------
-        >>> class MyStrategy:
-        ...     def __init__(self, param1, param2):
-        ...         self.param1 = param1
-        ...         self.param2 = param2
-        ...
-        >>> my_strategy = MyStrategy(param1=1.2, param2=3.4)
-        >>> my_strategy.params
-        {'param1': 1.2, 'param2': 3.4}
-        """
-        return self.__dict__
+    #     Examples
+    #     --------
+    #     >>> class MyStrategy:
+    #     ...     def __init__(self, param1, param2):
+    #     ...         self.param1 = param1
+    #     ...         self.param2 = param2
+    #     ...
+    #     >>> my_strategy = MyStrategy(param1=1.2, param2=3.4)
+    #     >>> my_strategy.params
+    #     {'param1': 1.2, 'param2': 3.4}
+    #     """
+    #     return self.__dict__
 
     @property
     def is_run(self):

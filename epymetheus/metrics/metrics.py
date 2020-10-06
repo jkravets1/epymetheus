@@ -1,10 +1,10 @@
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
+from abc import abstractmethod
 from functools import reduce
 
 import numpy as np
 
 from epymetheus.utils.constants import EPSILON
-
 
 # TODO
 # - sortino
@@ -140,10 +140,10 @@ class FinalWealth(Metric):
 
     Examples
     --------
-    >>> strategy.wealth
-    array([0.0, 1.0, 2.0, 1.0, 3.0])
-    >>> FinalWealth().result(strategy)
-    3.0
+    # >>> strategy.wealth
+    # array([0.0, 1.0, 2.0, 1.0, 3.0])
+    # >>> FinalWealth().result(strategy)
+    # 3.0
     """
 
     def __init__(self, **kwargs):
@@ -168,7 +168,8 @@ class Drawdown(Metric):
     Parameters
     ----------
     - rate : bool, default False
-        If True, evaluate drawdown rate, that is, drawdown values divided by maximum values.
+        If True, evaluate drawdown rate, that is, drawdown values
+        divided by maximum values.
         If False, evaluate drawdown values.
 
     Returns
@@ -177,12 +178,12 @@ class Drawdown(Metric):
 
     Examples
     --------
-    >>> strategy.wealth
-    array([0.0, 1.0, 2.0, 1.0, 0.0])
-    >>> Drawdown().result(strategy)
-    array([0.0, 0.0, 0.0, -0.5, -1.0])
-    >>> Drawdown(rate=False).result(strategy)
-    array([0.0, 0.0, 0.0, -1.0, -2.0])
+    # >>> strategy.wealth
+    # array([0.0, 1.0, 2.0, 1.0, 0.0])
+    # >>> Drawdown().result(strategy)
+    # array([0.0, 0.0, 0.0, -0.5, -1.0])
+    # >>> Drawdown(rate=False).result(strategy)
+    # array([0.0, 0.0, 0.0, -1.0, -2.0])
     """
 
     def __init__(self, rate=False, **kwargs):
@@ -214,7 +215,8 @@ class MaxDrawdown(Metric):
     Parameters
     ----------
     - rate : bool, default False
-        If True, evaluate maximum drawdown rate, that is, drawdown values divided by maximum values.
+        If True, evaluate maximum drawdown rate, that is, drawdown values
+        divided by maximum values.
         If False, evaluate maximum drawdown values.
 
     Returns
