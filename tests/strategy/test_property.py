@@ -70,14 +70,14 @@ class TestIsRun:
         assert strategy.is_run == True
 
 
-class TestParams:
-    """
-    Test `Strategy.params`.
-    """
+# class TestParams:
+#     """
+#     Test `Strategy.params`.
+#     """
 
-    def test_value(self):
-        strategy = SampleStrategy(param0=0.0, param1=1.0)
-        assert strategy.params == {"param0": 0.0, "param1": 1.0}
+#     def test_value(self):
+#         strategy = SampleStrategy(param0=0.0, param1=1.0)
+#         assert strategy.params == {"param0": 0.0, "param1": 1.0}
 
 
 class TestNTrades:

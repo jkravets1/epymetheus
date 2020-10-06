@@ -5,7 +5,8 @@ import pandas as pd
 from pandas_datareader import DataReader
 
 from epymetheus import Universe
-from ._utils import ffill_and_cut
+
+from ._utils import fill_and_cut
 
 module_path = Path(dirname(__file__))
 
@@ -41,7 +42,7 @@ def fetch_usstocks(
 
     prices = pd.DataFrame(
         {
-            ticker: ffill_and_cut(
+            ticker: fill_and_cut(
                 DataReader(
                     name=ticker,
                     data_source="yahoo",
