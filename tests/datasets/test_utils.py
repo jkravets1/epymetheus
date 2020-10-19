@@ -17,13 +17,7 @@ def test_fill_and_cut():
         }
     )
     series_expected = pd.Series(
-        {
-            pd.Timestamp("2000-01-01"): 0,
-            pd.Timestamp("2000-01-02"): 1,
-            pd.Timestamp("2000-01-03"): 2,
-            pd.Timestamp("2000-01-04"): 2,
-            pd.Timestamp("2000-01-05"): 3,
-        }
+        [0, 1, 2, 2, 3], index=pd.date_range("2000-01-01", "2000-01-05")
     )
 
     assert_series_equal(fill_and_cut(series, "2000-01-01"), series_expected)
