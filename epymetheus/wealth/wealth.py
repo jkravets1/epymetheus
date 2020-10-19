@@ -28,7 +28,10 @@ class Wealth(TradeResult):
         - strategy : Strategy
         - verbose : bool
         """
-        return cls(bars=cls._get_bars(strategy), wealth=cls._get_wealth(strategy),)
+        return cls(
+            bars=cls._get_bars(strategy),
+            wealth=cls._get_wealth(strategy),
+        )
 
     @staticmethod
     def _get_bars(strategy):

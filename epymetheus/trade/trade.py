@@ -64,7 +64,13 @@ class Trade:
     """
 
     def __init__(
-        self, asset, lot=1.0, open_bar=None, shut_bar=None, take=None, stop=None,
+        self,
+        asset,
+        lot=1.0,
+        open_bar=None,
+        shut_bar=None,
+        take=None,
+        stop=None,
     ):
         self.asset = asset
         self.lot = lot

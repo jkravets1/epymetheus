@@ -45,7 +45,12 @@ class RandomTrader(Strategy):
     """
 
     def __init__(
-        self, n_trades=100, max_n_orders=5, max_lot=100, min_lot=-100, seed=None,
+        self,
+        n_trades=100,
+        max_n_orders=5,
+        max_lot=100,
+        min_lot=-100,
+        seed=None,
     ):
         self.__n_trades = n_trades
         self.max_n_orders = max_n_orders
